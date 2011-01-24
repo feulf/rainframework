@@ -24,12 +24,12 @@ class MySql{
 	 */
 	public static 	$exit_on_error = true;
 
-	private	$result,				// result of the query
-			$link,					// database link
-			$link_name = 'default';	// name of the database link
+	private	$result,		// result of the query
+		$link,			// database link
+		$link_name = 'default';	// name of the database link
 
-	private static 	$nquery = 0,			// count the query executed
-					$link_array = array();	// array of links
+	private static	$nquery = 0,		// count the query executed
+			$link_array = array();	// array of links
 
 
 
@@ -101,8 +101,9 @@ class MySql{
 		if( $result = $this->query( $query ) )
 			return mysql_num_rows( $result );
 	}
-	
-	
+
+
+
 	/**
 	 * Return the selected field. E.g.:
 	 * $name = $db->getField( "name", "SELECT name FROM user LIMIT 1" );
@@ -158,80 +159,80 @@ class MySql{
 	/**
 	 * Return the last inserted id of an insert query
 	 */
-    function getInsertedId( ){
-        return mysql_insert_id( $this->link );
-    }
+	function getInsertedId( ){
+		return mysql_insert_id( $this->link );
+	}
     
 	
     
-    /**
+	/**
 	 * Insert Into
 	 * @param array data The parameter must be an associative array (name=>value)
 	 */
-    function insert( $table, $data ){
-    	if( count( $data ) ){
-    		$fields = $values = "";
-    		foreach( $data as $name => $value ){
-    			$fields .= $fields ? ",`$name`" : "`$name`";
-    			$values .= $values ? ",`$value`" : "`$value`";
-    		}    	
-        	return $this->query( "INSERT INTO $table ($fields) VALUES ($values)" );
-    	}
-    }
+	function insert( $table, $data ){
+		if( count( $data ) ){
+			$fields = $values = "";
+				foreach( $data as $name => $value ){
+					$fields .= $fields ? ",`$name`" : "`$name`";
+					$values .= $values ? ",`$value`" : "`$value`";
+				}
+			return $this->query( "INSERT INTO $table ($fields) VALUES ($values)" );
+		}
+	}
 
 
 
-    /**
+	/**
 	 * Update
 	 * @param array data The parameter must be an associative array (name=>value)
 	 */
-    function update( $table, $data, $where ){
-    	if( count( $data ) ){
-    		$fields = "";
-    		foreach( $data as $name => $value )
-    			$fields .= $fields ? ",`$name`='$value'" : ",`$name`='$value'";
-   			$where = is_string( $where ) ? " WHERE $where" : null;
-        	return $this->query("UPDATE $table SET $fields $where");
-    	}
-    }
+	function update( $table, $data, $where ){
+		if( count( $data ) ){
+			$fields = "";
+			foreach( $data as $name => $value )
+				$fields .= $fields ? ",`$name`='$value'" : ",`$name`='$value'";
+			$where = is_string( $where ) ? " WHERE $where" : null;
+			return $this->query("UPDATE $table SET $fields $where");
+		}
+	}
     
     
     
-    /**
+	/**
 	 * Update
 	 * @param array data The parameter must be an associative array (name=>value)
 	 */
-    function delete( $table, $where ){
-    	return $this->query("DELETE $table where $where");
-    }
+	function delete( $table, $where ){
+		return $this->query("DELETE $table where $where");
+	}
     
 
 
-    /**
-     * Call this method at begining to profile the queries
-     */
-    function setProfiling(){
-    	$this->query("SET profiling=1");
-    }
+	/**
+	* Call this method at begining to profile the queries
+	*/
+	function setProfiling(){
+		$this->query("SET profiling=1");
+	}
 
 
 
-    /**
-     * Call this method at end to get the profile
-     */
-    function showProfile(){
-    	if( $profiles = $this->getArrayRow( "SHOW profiles" ) ){
-    		$html = '<table cellspacing="1" cellpadding="10" bgcolor="#cccccc" style="font:11px Helvetica;"><tr style="font-weight:bold"><td>Query ID</td><td>exec time</td><td width="150">%</td><td>Query</td></tr>';
-    		for( $i=0, $execution_time = 0, $n=count($profiles); $i<$n; $i++ )
-    			$execution_time += $profiles[$i]['Duration'];
+	/**
+	* Call this method at end to get the profile
+	*/
+	function showProfile(){
+		if( $profiles = $this->getArrayRow( "SHOW profiles" ) ){
+			$html = '<table cellspacing="1" cellpadding="10" bgcolor="#cccccc" style="font:11px Helvetica;"><tr style="font-weight:bold"><td>Query ID</td><td>exec time</td><td width="150">%</td><td>Query</td></tr>';
+			for( $i=0, $execution_time = 0, $n=count($profiles); $i<$n; $i++ )
+				$execution_time += $profiles[$i]['Duration'];
 
-	    	foreach($profiles as $i => $p ){
-	    		$perc = round( ( $p['Duration'] / $execution_time ) * 100, 2 );
-	    		$width = ceil( $perc * 2 );
-	    		$html .= '<tr bgcolor="#eeeeee"><td>'.$p['Query_ID'].'</td><td>'.$p['Duration'].'</td><td><div style="float:left;width:50px;">'.$perc.'%</div> <div style="display:inline; margin-top:3px;float:left;background:#ff0000;width:'.$width.'px;height:10px;"></td><td>'.$p['Query'].'</td></tr>';
-	    	}
-	    	return $html .= '</table>';
-    	}
+			foreach($profiles as $i => $p ){
+				$perc = round( ( $p['Duration'] / $execution_time ) * 100, 2 );
+				$width = ceil( $perc * 2 );
+	    			$html .= '<tr bgcolor="#eeeeee"><td>'.$p['Query_ID'].'</td><td>'.$p['Duration'].'</td><td><div style="float:left;width:50px;">'.$perc.'%</div> <div style="display:inline; margin-top:3px;float:left;background:#ff0000;width:'.$width.'px;height:10px;"></td><td>'.$p['Query'].'</td></tr>';
+			}
+			return $html .= '</table>';	
+		}
 	}
 	
 }

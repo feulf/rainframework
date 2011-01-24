@@ -24,11 +24,13 @@
 	define( "TPL_DIR",	"tpl/" );
 	define( "MOD_DIR",	"mod/" );
 	define( "LANG_DIR",	"lang/" );	
-	define( "UPS_DIR", 	"ups/" );	 //uploads
+	define( "UPS_DIR", 	"ups/" );		//uploads
 	define( "LOG_DIR",	"log/" );
-	define( "TMP_DIR",	"tmp/" );	 //temp dir
-	define( "JS_DIR",	"inc/js/" ); //js dir
-	define( "SITE_DIR", substr( dirname( __FILE__ ), 0, strlen(dirname(__FILE__)) - strlen( INC_DIR ) ) . "/" );		// site directory
+	define( "TMP_DIR",	"tmp/" );		//temp dir
+	define( "JS_DIR",	"inc/js/" );	//js dir
+	
+	// website/application absolute directory
+	define( "SITE_DIR", substr( dirname( __FILE__ ), 0, strlen(dirname(__FILE__)) - strlen( INC_DIR ) ) . "/" );
 
 
 //-------------------------------------------------------------
