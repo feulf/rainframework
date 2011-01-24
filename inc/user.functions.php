@@ -44,7 +44,6 @@ function login( $login = null, $password = null, $enable_cookies = false, $logou
 	}
 	else
 		$salt_and_pw = null;
-	
 
 	//check if there's login and pw, or salt_pw
 	if( $login AND ($password OR $salt_and_pw) ){
@@ -53,9 +52,7 @@ function login( $login = null, $password = null, $enable_cookies = false, $logou
 		if( !$salt_and_pw )
 			$salt_and_pw = md5( $db->getField( "salt", "SELECT salt FROM ".DB_PREFIX."user WHERE email = '{$login}'" ) . $password );
 
-		if( $user = $db->getRow( "SELECT * 
-								  FROM ".DB_PREFIX."user
-								  WHERE email = '$login' AND password = '$salt_and_pw'" ) ){
+		if( $user = $db->getRow( "SELECT * FROM ".DB_PREFIX."user WHERE email = '$login' AND password = '$salt_and_pw'" ) ){
 
 			// create new salt and password
 			if( $password ){
@@ -112,6 +109,10 @@ function logout( ){
 }
 
 
+
+/**
+ * get the user_id of the logged user
+ */
 function getUserId( ){
 	if( isset( $_SESSION[ 'user' ] ) )
 		return isset( $_SESSION[ 'user' ]['user_id'] ) ? $_SESSION[ 'user' ]['user_id'] : NULL;
@@ -119,6 +120,9 @@ function getUserId( ){
 
 
 
+/**
+ * Refresh session user. Call this function after you change any info of the logged user
+ */
 function refreshUserInfo( ){
 	$db = new MySql();
 	$GLOBALS['user'] = $_SESSION['user'] = getUser();
@@ -128,6 +132,10 @@ function refreshUserInfo( ){
 
 
 
+/**
+ * Get the array with all user info
+ * @param int $user_id By default is selected the logged user
+ */
 function getUser( $user_id = NULL ){
 	if( $user_id ){
 		$db = new MySql();
@@ -142,14 +150,33 @@ function getUser( $user_id = NULL ){
 		return isset( $_SESSION['user'] ) ? $_SESSION['user'] : null;
 }
 
+
+
+/**
+ * return true if the user is admin
+ * @param int $user_id By default is selected the logged user
+ */
 function isAdmin( $user_id = NULL ){
 	return getUserField( "status", $user_id ) >= USER_ADMIN;
 }
 
+
+
+/**
+ * return true if the user is super admin
+ * @param int $user_id By default is selected the logged user
+ */
 function isSuperAdmin( $user_id = NULL ){
 	return getUserField( "status", $user_id ) >= USER_SUPER_ADMIN;
 }
 
+
+
+/**
+ * Select the field of the user
+ * @param string $field Selected field
+ * @param int $user_id By default is selected the logged user
+ */
 function getUserField( $field, $user_id = NULL ){
 	if( $user = getUser( $user_id ) ){
 		if( isset( $user[$field] ) )
@@ -159,12 +186,11 @@ function getUserField( $field, $user_id = NULL ){
 	}
 }
 
-function getUserById( $user_id ){
-	$db = new MySql();
-	return $db->getRow( "SELECT * FROM ".DB_PREFIX."user WHERE user_id = '$user_id'" );
-}
 
 
+/**
+ * set the language on the selected user
+ */
 function setUserLang( $lang_id ){
 	if( $user_id=getUserId() ){
 		$db = new MySql();
@@ -173,24 +199,40 @@ function setUserLang( $lang_id ){
 	}
 }
 
+
+
+/**
+ * Get the group info
+ */
 function getGroup( $group_id ){
 	$db = new MySql();
 	return $db->getRow( "SELECT * FROM ".DB_PREFIX."usergroup WHERE group_id='{$group_id}'" );
 }
 
+
+
+/**
+ * Get the group list
+ */
 function getGroupList( ){
 	$db = new MySql();
 	return $db->getArrayRow("SELECT * FROM ".DB_PREFIX."usergroup ORDER BY name","group_id" );
 }
 
+
+
+/**
+ * Get the list of user into the group
+ */
 function getUserInGroup( $group_id, $order_by = "name", $order = "asc", $limit = 0 ){
 	$db = new MySql();
 	return $db->getArrayRow( "SELECT * FROM ".DB_PREFIX."usergroup_user INNER JOIN ".DB_PREFIX."user ON ".DB_PREFIX."usergroup_user.user_id = ".DB_PREFIX."user.user_id WHERE ".DB_PREFIX."usergroup_user.group_id = $group_id ORDER BY $order_by $order" . ($limit>0? " LIMIT $limit" : null ) );
 }
 
 
+
 /**
- * User where is
+ * Set the User geolocation and page
  */
 function userWhereIsInit( $id, $link, $online_time = USER_ONLINE_TIME ){
 	$db = new MySql();
@@ -238,6 +280,11 @@ function userWhereIsInit( $id, $link, $online_time = USER_ONLINE_TIME ){
 	$_SESSION['where_is'] = array( 'user_where_is_id' => $user_where_is_id, 'id' => $id, 'guest_id'=>$guest_id, 'name'=>$name, 'time' => TIME, 'file' => $file, 'user_id' => $user_id, 'os' => $os, 'browser' => $browser );
 }
 
+
+
+/**
+ * Refresh all the user info
+ */
 function userWhereIsRefresh(){
 	$db = new MySql();
 	if( isset( $_SESSION['where_is'] ) ){
@@ -246,6 +293,11 @@ function userWhereIsRefresh(){
 	}
 }
 
+
+
+/**
+ * Get the userWhereIs info
+ */
 function getUserWhereIsUser( $user_where_is_id, $online_time = USER_ONLINE_TIME ){
 	$db = new MySql();
 	return $db->getRow( "SELECT ".DB_PREFIX."user.*, ".DB_PREFIX."user_where_is.*
@@ -255,7 +307,11 @@ function getUserWhereIsUser( $user_where_is_id, $online_time = USER_ONLINE_TIME 
 						AND user_where_is_id = $user_where_is_id");
 }
 
-// online time 10 minutes
+
+
+/**
+ * Get the list of all user online
+ */
 function getUserWhereIsList( $id = null, $yourself = true, $online_time = USER_ONLINE_TIME ){
 	$db = new MySql();
 	return $db->getArrayRow( 	"SELECT ".DB_PREFIX."user.*, ".DB_PREFIX."user_where_is.*, IF (".DB_PREFIX."user.user_id > 0, ".DB_PREFIX."user.name, ".DB_PREFIX."user_where_is.name ) AS name
@@ -267,11 +323,20 @@ function getUserWhereIsList( $id = null, $yourself = true, $online_time = USER_O
 								);
 }
 
+
+
+/**
+ * Get the info of the logged user
+ */
 function getUserWhereIs( ){
 	return $where_is = isset( $_SESSION['where_is'] ) ? $_SESSION['where_is'] : null;
 }
 
 
+
+/**
+ * Delete the user where is info
+ */
 function userWhereIsLogout( $user_id ){
 	$db = new MySql();
 	$db->query( "DELETE FROM ".DB_PREFIX."user_where_is WHERE user_id='$user_id'" );

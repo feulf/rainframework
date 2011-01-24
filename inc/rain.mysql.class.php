@@ -19,13 +19,19 @@
 
 class MySql{
 
-	var $result, 					// result of the query
-		$link,						// database link
-		$link_name = 'default';	// name of the database link ( default: default_db )
+	/**
+	 * Set true if you want to exit on Query error
+	 */
+	public static 	$exit_on_error = true;
 
-	static $nquery = 0,				// count the query executed
-		   $link_array = array(),	// link array
-		   $exit_on_error = true;  	// if true, on error exit from the execution
+	private	$result,				// result of the query
+			$link,					// database link
+			$link_name = 'default';	// name of the database link
+
+	private static 	$nquery = 0,			// count the query executed
+					$link_array = array();	// array of links
+
+
 
 	/**
 	 * Initialize the database link
@@ -36,6 +42,8 @@ class MySql{
 	function MySql(){
 		$this->link = isset( mysql::$link_array[$this->link_name] ) ? mysql::$link_array[$this->link_name] : null;
 	}
+
+
 
 	/**
 	 * Connect to the database
@@ -58,9 +66,11 @@ class MySql{
 		return mysql_close( $this->link );
 	}
 	
-	
+
+
 	/**
 	 * Execute query. Use this function for update/delete query, for read query use getField, getRow, getArrayRow ...
+	 * 
 	 * @return bool
 	 */
 	function query( $query ){
@@ -84,6 +94,7 @@ class MySql{
 
 	/**
 	 * Return the number of rows of the query
+	 * 
 	 * @return int
 	 */
 	function numRows( $query = null ){
@@ -96,7 +107,6 @@ class MySql{
 	 * Return the selected field. E.g.:
 	 * $name = $db->getField( "name", "SELECT name FROM user LIMIT 1" );
 	 * 
-	 * @param string field Field you want to select in your query
 	 * @return string/int
 	 */
 	function getField( $field, $query = null ){
@@ -114,7 +124,6 @@ class MySql{
 	 * 
 	 * @return array
 	 */
-	
 	function getRow( $query = null ){
 		return mysql_fetch_array( $this->query( $query ), MYSQL_ASSOC );
 	}
@@ -128,7 +137,6 @@ class MySql{
 	 * 
 	 * @return array
 	 */
-
 	function getArrayRow( $query = null, $key = null, $value = null ){
 		if( $key && $value )
 			while( $row = mysql_fetch_array( $this->query($query), MYSQL_ASSOC ) )
@@ -150,7 +158,6 @@ class MySql{
 	/**
 	 * Return the last inserted id of an insert query
 	 */
-	
     function getInsertedId( ){
         return mysql_insert_id( $this->link );
     }
@@ -161,7 +168,6 @@ class MySql{
 	 * Insert Into
 	 * @param array data The parameter must be an associative array (name=>value)
 	 */
-	
     function insert( $table, $data ){
     	if( count( $data ) ){
     		$fields = $values = "";
@@ -179,7 +185,6 @@ class MySql{
 	 * Update
 	 * @param array data The parameter must be an associative array (name=>value)
 	 */
-
     function update( $table, $data, $where ){
     	if( count( $data ) ){
     		$fields = "";
@@ -196,7 +201,6 @@ class MySql{
 	 * Update
 	 * @param array data The parameter must be an associative array (name=>value)
 	 */
-
     function delete( $table, $where ){
     	return $this->query("DELETE $table where $where");
     }
