@@ -1,0 +1,13 @@
+changes in rainframework 2
+
+Raintpl version2
+
+functions
+ INPUT changed get, getPure with
+ get, post, getPost
+ 
+ TIME, removed date, time_format only format the time, time_passed format the time as passed time (eg 1 minute ago)
+ 
+ FILE 
+ 
+ IMAGE
