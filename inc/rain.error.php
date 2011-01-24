@@ -1,30 +1,16 @@
 <?php
-
- /**
- * Rain.Error, debug and backtrace errors.
- * Just include in your project to make it works.
- *
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation;
- * either version 3 of the License, or any later version.
+ 
+/**
+ *  Rain.Error, debug and backtrace errors.
+ *  Just include in your project to make it works.
  * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
- * See the GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- * 
- *  @author Federico Ulfo <rainelemental@gmail.com>
- *  @copyright 2006 - 2010 Federico Ulfo | www.federicoulfo.it
+ *  @author Federico Ulfo <rainelemental@gmail.com> | www.federicoulfo.it
+ *  @copyright RainFramework is under GNU/LGPL 3 License
  *  @link http://www.rainframework.com
  *  @version 2.0
  *  @package RainFramework
  */
+
 
 
 
