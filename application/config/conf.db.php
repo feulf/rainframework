@@ -5,6 +5,6 @@
 	$db['default']['password'] = "";
 	$db['default']['database'] = "rainframework2";
 
-	define( "DB_PREFIX", "" );
+	define( "DB_PREFIX", "RAIN_" );
 	
 ?>

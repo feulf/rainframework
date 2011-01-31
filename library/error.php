@@ -92,11 +92,11 @@
 	function debug_error( $errstr, $errno, $errfile, $errline ){
 
 			$html = '<div class="ee">'."\n";
-			$html .= $GLOBALS['error_levels'][$errno] .': '.$errstr.' in <b>'.str_replace( $_SERVER[ 'DOCUMENT_ROOT' ], "", $errfile ) .'</b> on line <b>'.$errline.'</b><br/>';
+			$html .= $GLOBALS['error_levels'][$errno] .': '.$errstr.' in <b>'.str_replace( $_SERVER['DOCUMENT_ROOT'], "", $errfile ) .'</b> on line <b>'.$errline.'</b><br/>';
 			if( count( $debug_array = debug_backtrace() )>3 ){
 				$html .= '<div class="ei">'."\n";
 			    for( $i = 3, $n=count( $debug_array ); $i < $n; $i++ )
-				   	$html .= "-" . str_replace( SITE_DIR, "", isset( $debug_array[$i]['file'] ) ? $debug_array[ $i ][ 'file' ] : null ) . " : " . ( isset($debug_array[$i]['line']) ? $debug_array[$i]['line'] : null ). "<br/>\n";
+				   	$html .= "-" . str_replace( SITE_DIR, "", isset( $debug_array[$i]['file'] ) ? $debug_array[ $i ]['file'] : null ) . " : " . ( isset($debug_array[$i]['line']) ? $debug_array[$i]['line'] : null ). "<br/>\n";
 				$html .= "</div>";	   	
 			}			
 			$html .= "</div>";

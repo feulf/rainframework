@@ -12,6 +12,24 @@
 	define( "TIMEZONE", "Europe/Rome" );
 	define( "CHARSET", "utf-8" );
 
+	
+	
+
+//-------------------------------------------------------------
+//
+//					 Application
+//
+//-------------------------------------------------------------
+
+	define( "DEFAULT_CONTROLLER", "content" );
+	define( "DEFAULT_ACTION", "index" );
+	define( "LOAD_AREA_DEFAULT", "" );
+	
+	//BASE URL 
+	define( "URL", "http://localhost/buongiornonewyork/rainphp/rainframework_package/rainframework2/" );
+
+
+
 
 //-------------------------------------------------------------
 //
@@ -19,18 +37,22 @@
 //
 //-------------------------------------------------------------
 
-	define( "CONF_DIR",	"conf/" );
-	define( "INC_DIR",	"inc/" );
-	define( "TPL_DIR",	"tpl/" );
-	define( "MOD_DIR",	"mod/" );
-	define( "LANG_DIR",	"lang/" );	
-	define( "UPS_DIR", 	"ups/" );		//uploads
-	define( "LOG_DIR",	"log/" );
-	define( "TMP_DIR",	"tmp/" );		//temp dir
-	define( "JS_DIR",	"inc/js/" );	//js dir
-	
-	// website/application absolute directory
-	define( "SITE_DIR", substr( dirname( __FILE__ ), 0, strlen(dirname(__FILE__)) - strlen( INC_DIR ) ) . "/" );
+	define( "LIBRARY_DIR",		"library/" );
+	define( "LANGUAGE_DIR",		"language/" );
+	define( "APPLICATION_DIR",	"application/" );
+		
+	define( "CONTROLLERS_DIR",	"application/controllers/" );
+	define( "MODELS_DIR",		"application/models/" );
+	define( "VIEWS_DIR",		"application/views/" );
+
+	define( "CONFIG_DIR",		"application/config/" );
+	define( "LOG_DIR",			"application/log/" );
+	define( "MODULES_DIR",		"application/modules/" );
+	define( "TEMPLATES_DIR",	"application/templates/" );
+	define( "CACHE_DIR",		"application/cache/" );		//temp dir
+	define( "UPLOADS_DIR",		"application/uploads/" );	//uploads
+
+	define( "JAVASCRIPT_DIR",	"library/javascript/" );		//js dir
 
 
 //-------------------------------------------------------------
@@ -39,8 +61,11 @@
 //
 //-------------------------------------------------------------
 
-	// user IP
-	define( "IP", isIp( ( $ip = getenv( "HTTP_X_FORWARDED_FOR" ) ) ? $ip : getenv( "REMOTE_ADDR" ) ) ? $ip : null );
+	// get user IP
+	$ip = getenv( "HTTP_X_FORWARDED_FOR" ) ? getenv( "HTTP_X_FORWARDED_FOR" ) : getenv( "REMOTE_ADDR" );
+	if( !preg_match("^([1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}^", $ip ) )
+		$ip = null;
+	define( "IP", $ip );
 
 	// browser calculation
 	$known = array('msie', 'firefox', 'safari', 'webkit', 'opera', 'netscape', 'konqueror', 'gecko');
@@ -108,7 +133,8 @@
 	define( "YEAR"  	, 31536000 );	// seconds in year
 	define( "LEAP_YEAR" , 31622400 );	// seconds in leap year (every 4 year when february has 29 days)
 
-	//google sitemaps
+	// google sitemaps
+	// use for creating google sitemaps for your application
 	global $changefreq;
 	$changefreq = 	Array(  
 							-1 => "not in sitemaps",			// this content will not added to the sitemaps
@@ -119,8 +145,7 @@
 							4 => "monthly",
 							5 => "yearly",
 							6 => "never",
-							 );
-	
+							 );	
 	
 //-------------------------------------------------------------
 //
@@ -138,7 +163,7 @@
 						3 => "video",
 						4 => "document", 
 						5 => "archive" );
-	
+
 	// File type
 	define( "IMAGE",    1 );
 	define( "AUDIO",    2 );

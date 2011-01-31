@@ -59,7 +59,7 @@
 	 * Get POST input
 	 * If key = null, return array GET + POST
 	 */
-	function getPost( $key = null, $filter = true ){
+	function get_post( $key = null, $filter = true ){
 		return $filter ? ( !$key ? $_GET_POST_FILTER : ( isset( $_GET_POST_FILTER[$key] ) ? $_GET_POST_FILTER[$key] : null ) ) : ( !$key ? $_GET_POST : ( isset( $_GET_POST[$key] ) ? $_GET_POST[$key] : null ) );
 	}
 
@@ -149,7 +149,7 @@
 	/**
 	 * Convert seconds to hh:ii:ss
 	 */
-	function sec2hms($sec) {
+	function sec_to_hms($sec) {
 		$hours = intval(intval($sec) / 3600); 
 		$hms  = str_pad($hours, 2, "0", STR_PAD_LEFT). ':';
 		$minutes = intval(($sec / 60) % 60); 
@@ -164,7 +164,7 @@
 	/**
 	 * Convert seconds to string, eg. "2 minutes", "1 hour", "16 seconds"
 	 */
-	function sec2string($sec) {
+	function sec_to_string($sec) {
 		$str = null;
 		if( $hours = intval(intval($sec) / 3600) )
 			$str .= $hours > 1 ? $hours . " " . _HOURS_ : $hours . " " . _HOUR_;
@@ -299,7 +299,7 @@
 	 * Send an email
 	 * @param $to
 	 */
-	function emailSend( $to, $subject, $body, $from = null, $from_name = null, $attachment = null, $embed_images = false ){
+	function email_send( $to, $subject, $body, $from = null, $from_name = null, $attachment = null, $embed_images = false ){
 
 		require_once INC_DIR . "phpmailer/class.phpmailer.php";
 		require_once CONF_DIR . "mail.conf.php";
@@ -372,7 +372,7 @@
 	/**
 	 * Send an email with selected template
 	 */
-	function emailTPLSend( $template = "generic/email", $to, $subject, $body, $from = null, $from_name = null, $attachment = null){
+	function email_tpl_send( $template = "generic/email", $to, $subject, $body, $from = null, $from_name = null, $attachment = null){
 		$tpl = new RainTPL();
 		$tpl->assign("body", $body );
 		$body = $tpl->draw( $template, true );
@@ -392,18 +392,18 @@
 	 * 
 	 * @param string $d directory
 	 */
-	function dirScan($d){
-		if( is_dir($d) && $dh = opendir($d) ){ $f=array(); while ($fn = readdir($dh)) { if($fn!='.'&&$fn!='..') $f[] = $fn; } return $f; }
+	function dir_scan($dir){
+		if( is_dir($dir) && $dh = opendir($dir) ){ $f=array(); while ($fn = readdir($dh)) { if($fn!='.'&&$fn!='..') $f[] = $fn; } return $f; }
 	}
 	
 	/**
-	 * Get the list of files filtered by extension ($x) 
+	 * Get the list of files filtered by extension ($ext) 
 	 *
 	 * @param string $d directory
-	 * @param string $x extension filter, example ".jpg"
+	 * @param string $ext extension filter, example ".jpg"
 	 */
-	function fileList($d,$x=null){
-		if( $dl=dirScan($d) ){ $l=array(); foreach( $dl as $f ) if( is_file($d.'/'.$f) && ($x?preg_match('/\.'.$x.'$/',$f):1) ) $l[]=$f; return $l; }
+	function file_list($dir,$ext=null){
+		if( $dl=dir_scan($dir) ){ $l=array(); foreach( $dl as $f ) if( is_file($dir.'/'.$f) && ($ext?preg_match('/\.'.$ext.'$/',$f):1) ) $l[]=$f; return $l; }
 	}
 	
 	
@@ -411,10 +411,10 @@
 	/**
 	 * Get the list of directory
 	 *
-	 * @param string $d directory
+	 * @param string $dir directory
 	 */
-	function dirList($d){
-		if( $dl=dirScan($d) ){ $l=array(); foreach($dl as $f)if(is_dir($d.'/'.$f))$l[]=$f; return $l; }
+	function dir_list($dir){
+		if( $dl=dir_scan($dir) ){ $l=array(); foreach($dl as $f)if(is_dir($dir.'/'.$f))$l[]=$f; return $l; }
 	} 
 	
 	
@@ -423,8 +423,8 @@
 	 * 
 	 * @param string $file filename
 	 */
-	function fileExt( $file ){
-		return end( (explode('.', $file)) );
+	function file_ext($filename){
+		return end( (explode('.', $filename)) );
 	}
 
 
@@ -434,20 +434,9 @@
 	 * 
 	 * @param string $f filename
 	 */
-	function fileName( $f ){
-		
-		if( ($f = basename($f) ) && ( $dot_pos = strrpos( $f , "." ) ) )
-			return substr( $f, 0, $dot_pos );
-	}
-
-
-	/**
-	 * Get directory of a filename
-	 * 
-	 * @param string $f filename
-	 */
-	function fileDir( $f ){
-		return substr( $f, 0, strrpos( $f, "/" )+1 );
+	function file_name($filename){
+		if( ($filename = basename($filename) ) && ( $dot_pos = strrpos( $filename , "." ) ) )
+			return substr( $filename, 0, $dot_pos );
 	}
 	
 	
@@ -455,10 +444,10 @@
 	/**
 	 * Delete dir and contents
 	 * 
-	 * @param string $d directory
+	 * @param string $dir directory
 	 */
-	function dirDel($d) {
-		if( $l=dirScan($d) ){ foreach($l as $f) if (is_dir($d."/".$f)) dirDel($d.'/'.$f);	else unlink($d."/".$f);	return rmdir($d); }
+	function dir_del($dir) {
+		if( $l=dir_scan($dir) ){ foreach($l as $f) if (is_dir($dir."/".$f)) dir_del($dir.'/'.$f);	else unlink($dir."/".$f);	return rmdir($dir); }
 	}
 
 	/**
@@ -467,14 +456,14 @@
 	 * @param string $s source directory
 	 * @param string $d destination directory
 	 */
-	function dirCopy( $s, $d) {
-		if (is_file($s)){
-			copy($s, $d);
-			chmod($d, fileperms($s) );
+	function dir_copy( $source, $dest) {
+		if (is_file($source)){
+			copy($source, $dest);
+			chmod($dest, fileperms($source) );
 		}
 		else{
-			mkdir( $d, 0777 );
-			if( $l=dirScan($s) ){ foreach( $l as $f ) dirCopy("$s/$f", "$d/$f"); }
+			mkdir( $dest, 0777 );
+			if( $l=dir_scan($source) ){ foreach( $l as $f ) dir_copy("$source/$f", "$dest/$f"); }
 		}
 	} 
 
@@ -487,9 +476,9 @@
 	 * 
 	 * @return string uploaded filename
 	 */
-	function uploadFile( $file ){
+	function upload_file($file){
 		if( $_FILES[$file]["tmp_name"] ){
-			move_uploaded_file( $_FILES[$file]["tmp_name"], UPS_DIR . ( $filename = md5(time()).".".( strtolower( fileExt($_FILES[$file]['name'] ) ) ) ) );
+			move_uploaded_file( $_FILES[$file]["tmp_name"], UPS_DIR . ( $filename = md5(time()).".".( strtolower( file_ext($_FILES[$file]['name'] ) ) ) ) );
 			return $filename;
 		}
 	}
@@ -506,10 +495,10 @@
 	 * @param bool $square
 	 * @return string Nome del file generato
 	 */
-	function uploadImage( $file, $thumb_prefix = null, $max_width = 128, $max_height = 128, $square = false ){
-		if( $filename = uploadFile( $file ) ){
+	function upload_image( $file, $thumb_prefix = null, $max_width = 128, $max_height = 128, $square = false ){
+		if( $filename = upload_file( $file ) ){
 			//se voglio creare la thumb e $square=true, tento di creare la thumbnails
-			if( $thumb_prefix && !imageResize( UPS_DIR . $filename,  UPS_DIR . $thumb_prefix . $filename, $max_width, $max_height, $square ) ){
+			if( $thumb_prefix && !image_resize( UPS_DIR . $filename,  UPS_DIR . $thumb_prefix . $filename, $max_width, $max_height, $square ) ){
 				unlink( UPS_DIR . $filename );
 				return false;
 			}
@@ -531,9 +520,9 @@
 	/**
 	 * Create thumb from image
 	 */
-	function imageResize( $source, $dest, $maxx = 100, $maxy = 100, $square = false, $quality = 70 ){
+	function image_resize( $source, $dest, $maxx = 100, $maxy = 100, $square = false, $quality = 70 ){
 
-		switch( $ext = fileEXT( $source ) ){
+		switch( $ext = file_eXT( $source ) ){
 			case 'jpg':
 			case 'jpeg':	$source_img = imagecreatefromjpeg( $source );	break;
 			case 'png':		$source_img = imagecreatefrompng( $source );	break;
@@ -596,10 +585,98 @@
 	
 
 	
-	
+
 //-------------------------------------------------------------
 //
-//					UTILITY FUNCTIONS
+//					HOOKS FUNCTIONS
+//
+//-------------------------------------------------------------
+	
+
+	/**
+	 * Hooks allows to load files, execute classes or execute functions,
+	 * defined into globals $hooks variable. You can set the code you want to execute 
+	 * by calling hooks_add_file, hooks_add_function, hooks_add_class
+	 *
+	 * @param unknown_type $name
+	 */
+	function hooks($name){
+		global $hooks;
+		if( isset($hooks[$name]) && is_array( $hooks[$name] ) ){
+			foreach( $hooks[$name] as $hook ){
+
+				$file = $hook['file'];
+				$class = $hook['class'];
+				$function = $hook['function'];
+				$params = $hook['params'];
+				
+				if( $file ){
+					if( file_exists($file) ){
+						if( $class or $function )
+							require_once $file;
+						else
+							require $file;
+					}
+					else
+						trigger_error('HOOKS: FILE NOT FOUND',E_WARNING);
+				}
+
+				if( $class ){
+					if( class_exists($class) ){
+
+						if( !$function or $function==$class )
+							$obj = new $class($params);
+						elseif( is_callable(array($class,$function) ) ){
+							$obj = new $class;
+							$obj->$function($params);
+						}
+						else
+							trigger_error("HOOKS: METHOD NOT FOUND OR NOT CALLABLE",E_WARNING);
+						
+					}
+					else
+						trigger_error('HOOKS: CLASS NOT FOUND',E_WARNING);
+
+				}elseif( $function ){
+					if( function_exists($function) )
+						$function($params);
+					else
+						trigger_error('HOOKS: FUNCTION NOT FOUND',E_WARNING);
+				}
+			}
+		}
+
+	}
+	
+	
+	/**
+	 * You can add a function or a method
+	 */
+	function hooks_add_function($name,$function,$params=null,$file=null){
+		global $hooks;
+		$hooks[$name][] = array( 'file'=>$file,'class'=>null, 'function'=>$function, 'params'=>$params );
+	}
+
+
+	/**
+	 * You can add a method
+	 */
+	function hooks_add_class($name,$class,$function=null,$params=null,$file=null){
+		global $hooks;
+		$hooks[$name][] = array( 'file'=>$file,'class'=>$class,'function'=>$function, 'params'=>$params );
+	}
+
+	/**
+	 * It add a file to hooks, HTML or PHP is ok.
+	 */
+	function hooks_add_file($name,$file){
+		global $hooks;
+		$hooks[$name][] = array( 'file'=>$file,'class'=>null,'function'=>null,'params'=>null );
+	}
+
+//-------------------------------------------------------------
+//
+//					GENERIC FUNCTIONS
 //
 //-------------------------------------------------------------
 	
@@ -607,7 +684,7 @@
 	/**
 	 * Return true if $ip is a valid ip
 	 */
-	function isIp($ip){
+	function is_ip($ip){
 	    return preg_match("^([1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}^", $ip );
 	}
 
@@ -615,7 +692,7 @@
 	 * Return the array with all geolocation info of user selected by IP
 	 */
 	define( "IPINFODB_KEY", "acc71fd652705b79e5ffb586f51733e4ee3a22618ebddd7051a84998ed357cc0" );
-	function ip2location( $ip = IP ){
+	function ip_to_location( $ip = IP ){
 		if( isIp( $ip ) )
 			return json_decode( file_get_contents( "http://api.ipinfodb.com/v2/ip_query.php?key=".IPINFODB_KEY."&ip={$ip}&output=json&timezone=true" ) );
 	}
@@ -624,7 +701,7 @@
 	 * Convert byte to more readable format, like "1 KB" instead of "1024".
 	 * cut_zero, remove the 0 after comma ex:  10,00 => 10      14,30 => 14,3
 	 */
-	function byteFormat( $size ){
+	function byte_format( $size ){
 		if( $size > 0 ){
 		    $unim = array("B","KB","MB","GB","TB","PB");
 		    for( $i=0; $size >= 1024; $i++ )
@@ -637,7 +714,7 @@
 	/**
 	 * Format the money in the current format. If add_currency is true the function add the currency configured into the language
 	 */
-	function moneyFormat( $number, $add_currency = false ){
+	function format_money( $number, $add_currency = false ){
 		return ( $add_currency && CURRENCY_SIDE == 0 ? CURRENCY . " " : "" ) . number_format($number,2,DEC_POINT,THOUSANDS_SEP) . ( $add_currency && CURRENCY_SIDE == 1 ? " " . CURRENCY : "" );
 	}
 

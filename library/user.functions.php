@@ -30,8 +30,8 @@ function login( $login = null, $password = null, $enable_cookies = false, $logou
 		return LOGIN_LOGOUT;
 
 	// true if the user is logged
-	elseif( !$login && !$password && isset( $_SESSION['user'] ) && isset( $_SESSION['user']['check'] ) && $_SESSION[ 'user' ]['check'] == SITE_DIR ){
-		$GLOBALS['user'] = $_SESSION[ 'user' ];
+	elseif( !$login && !$password && isset( $_SESSION['user'] ) && isset( $_SESSION['user']['check'] ) && $_SESSION['user']['check'] == SITE_DIR ){
+		$GLOBALS['user'] = $_SESSION['user'];
 		return LOGIN_LOGGED;
 	}
 	else
@@ -67,7 +67,7 @@ function login( $login = null, $password = null, $enable_cookies = false, $logou
 				setCookie( "password", $salt_and_pw, time( ) + $one_year );
 			}
 			
-			$user['check'] = $_SESSION[ 'user' ]['check'] = SITE_DIR;
+			$user['check'] = $_SESSION['user']['check'] = SITE_DIR;
 
 			//salvo i dati dell'utente
 			$GLOBALS['user'] = $_SESSION['user'] = $user;
@@ -100,8 +100,8 @@ function login( $login = null, $password = null, $enable_cookies = false, $logou
  */
 function logout( ){
 
-	if( $user_id = getUserId() )
-		userWhereIsLogout( $user_id );
+	if( $user_id = get_user_id() )
+		user_where_is_logout( $user_id );
 	unset($GLOBALS['user']);
 	unset($_SESSION['user']);
 	setcookie ("login", "", time() - 3600);
@@ -113,9 +113,9 @@ function logout( ){
 /**
  * get the user_id of the logged user
  */
-function getUserId( ){
-	if( isset( $_SESSION[ 'user' ] ) )
-		return isset( $_SESSION[ 'user' ]['user_id'] ) ? $_SESSION[ 'user' ]['user_id'] : NULL;
+function get_user_id( ){
+	if( isset( $_SESSION['user'] ) )
+		return isset( $_SESSION['user']['user_id'] ) ? $_SESSION['user']['user_id'] : NULL;
 }
 
 
@@ -123,10 +123,10 @@ function getUserId( ){
 /**
  * Refresh session user. Call this function after you change any info of the logged user
  */
-function refreshUserInfo( ){
+function refresh_user_info( ){
 	$db = new MySql();
-	$GLOBALS['user'] = $_SESSION['user'] = getUser();
-	$GLOBALS['user']['check'] = $_SESSION[ 'user' ]['check'] = SITE_DIR;
+	$GLOBALS['user'] = $_SESSION['user'] = get_user();
+	$GLOBALS['user']['check'] = $_SESSION['user']['check'] = SITE_DIR;
 	return $GLOBALS['user'];
 }
 
@@ -136,7 +136,7 @@ function refreshUserInfo( ){
  * Get the array with all user info
  * @param int $user_id By default is selected the logged user
  */
-function getUser( $user_id = NULL ){
+function get_user( $user_id = NULL ){
 	if( $user_id ){
 		$db = new MySql();
 		$user = $db->getRow( "SELECT * FROM ".DB_PREFIX."user WHERE user_id = '{$user_id}'" );
@@ -156,8 +156,8 @@ function getUser( $user_id = NULL ){
  * return true if the user is admin
  * @param int $user_id By default is selected the logged user
  */
-function isAdmin( $user_id = NULL ){
-	return getUserField( "status", $user_id ) >= USER_ADMIN;
+function is_admin( $user_id = NULL ){
+	return get_userField( "status", $user_id ) >= USER_ADMIN;
 }
 
 
@@ -166,8 +166,8 @@ function isAdmin( $user_id = NULL ){
  * return true if the user is super admin
  * @param int $user_id By default is selected the logged user
  */
-function isSuperAdmin( $user_id = NULL ){
-	return getUserField( "status", $user_id ) >= USER_SUPER_ADMIN;
+function is_super_admin( $user_id = NULL ){
+	return get_userField( "status", $user_id ) >= USER_SUPER_ADMIN;
 }
 
 
@@ -177,8 +177,8 @@ function isSuperAdmin( $user_id = NULL ){
  * @param string $field Selected field
  * @param int $user_id By default is selected the logged user
  */
-function getUserField( $field, $user_id = NULL ){
-	if( $user = getUser( $user_id ) ){
+function get_user_field( $field, $user_id = NULL ){
+	if( $user = get_user( $user_id ) ){
 		if( isset( $user[$field] ) )
 			return $user[$field];
 		else
@@ -191,8 +191,8 @@ function getUserField( $field, $user_id = NULL ){
 /**
  * set the language on the selected user
  */
-function setUserLang( $lang_id ){
-	if( $user_id=getUserId() ){
+function set_user_lang( $lang_id ){
+	if( $user_id=get_user_id() ){
 		$db = new MySql();
 		$db->query( "UPDATE ".DB_PREFIX."user SET lang_id='{$lang_id}' WHERE user_id={$user_id}" );
 		$_SESSION['user']['lang_id']=$lang_id;
@@ -204,7 +204,7 @@ function setUserLang( $lang_id ){
 /**
  * Get the group info
  */
-function getGroup( $group_id ){
+function get_group( $group_id ){
 	$db = new MySql();
 	return $db->getRow( "SELECT * FROM ".DB_PREFIX."usergroup WHERE group_id='{$group_id}'" );
 }
@@ -214,7 +214,7 @@ function getGroup( $group_id ){
 /**
  * Get the group list
  */
-function getGroupList( ){
+function get_group_list( ){
 	$db = new MySql();
 	return $db->getArrayRow("SELECT * FROM ".DB_PREFIX."usergroup ORDER BY name","group_id" );
 }
@@ -224,7 +224,7 @@ function getGroupList( ){
 /**
  * Get the list of user into the group
  */
-function getUserInGroup( $group_id, $order_by = "name", $order = "asc", $limit = 0 ){
+function get_user_in_group( $group_id, $order_by = "name", $order = "asc", $limit = 0 ){
 	$db = new MySql();
 	return $db->getArrayRow( "SELECT * FROM ".DB_PREFIX."usergroup_user INNER JOIN ".DB_PREFIX."user ON ".DB_PREFIX."usergroup_user.user_id = ".DB_PREFIX."user.user_id WHERE ".DB_PREFIX."usergroup_user.group_id = $group_id ORDER BY $order_by $order" . ($limit>0? " LIMIT $limit" : null ) );
 }
@@ -234,7 +234,7 @@ function getUserInGroup( $group_id, $order_by = "name", $order = "asc", $limit =
 /**
  * Set the User geolocation and page
  */
-function userWhereIsInit( $id, $link, $online_time = USER_ONLINE_TIME ){
+function user_where_is_init( $id, $link, $online_time = USER_ONLINE_TIME ){
 	$db = new MySql();
 	$file 		= basename( $_SERVER['PHP_SELF'] );
 	$url 		= $_SERVER['REQUEST_URI']; 
@@ -251,9 +251,9 @@ function userWhereIsInit( $id, $link, $online_time = USER_ONLINE_TIME ){
 
 	$user_where_is_id = $where_is ? $_SESSION['where_is']['user_where_is_id'] : $db->getField( "user_where_is_id", "SELECT user_where_is_id FROM ".DB_PREFIX."user_where_is WHERE sid='$sid'" );
 
-	if( $user_id = getUserId() ){
+	if( $user_id = get_user_id() ){
 		$guest_id = 0;
-		$name = getUserField( "name" );
+		$name = get_userField( "name" );
 	}
 	else{
 		$guest_id = isset( $where_is['guest_id'] ) ? $where_is['guest_id'] : ( 1 + $db->getField( "guest_id", "SELECT guest_id FROM ".DB_PREFIX."user_where_is ORDER BY guest_id DESC LIMIT 1;" ) );
@@ -285,7 +285,7 @@ function userWhereIsInit( $id, $link, $online_time = USER_ONLINE_TIME ){
 /**
  * Refresh all the user info
  */
-function userWhereIsRefresh(){
+function user_where_is_refresh(){
 	$db = new MySql();
 	if( isset( $_SESSION['where_is'] ) ){
 		$db->query( "UPDATE ".DB_PREFIX."user_where_is SET time='".TIME."' WHERE user_where_is_id='{$_SESSION['where_is']['user_where_is_id']}'" );
@@ -298,7 +298,7 @@ function userWhereIsRefresh(){
 /**
  * Get the userWhereIs info
  */
-function getUserWhereIsUser( $user_where_is_id, $online_time = USER_ONLINE_TIME ){
+function get_user_where_is_user( $user_where_is_id, $online_time = USER_ONLINE_TIME ){
 	$db = new MySql();
 	return $db->getRow( "SELECT ".DB_PREFIX."user.*, ".DB_PREFIX."user_where_is.*
 						FROM ".DB_PREFIX."user_where_is
@@ -312,7 +312,7 @@ function getUserWhereIsUser( $user_where_is_id, $online_time = USER_ONLINE_TIME 
 /**
  * Get the list of all user online
  */
-function getUserWhereIsList( $id = null, $yourself = true, $online_time = USER_ONLINE_TIME ){
+function get_user_where_is_list( $id = null, $yourself = true, $online_time = USER_ONLINE_TIME ){
 	$db = new MySql();
 	return $db->getArrayRow( 	"SELECT ".DB_PREFIX."user.*, ".DB_PREFIX."user_where_is.*, IF (".DB_PREFIX."user.user_id > 0, ".DB_PREFIX."user.name, ".DB_PREFIX."user_where_is.name ) AS name
 								FROM ".DB_PREFIX."user_where_is
@@ -328,7 +328,7 @@ function getUserWhereIsList( $id = null, $yourself = true, $online_time = USER_O
 /**
  * Get the info of the logged user
  */
-function getUserWhereIs( ){
+function get_user_where_is( ){
 	return $where_is = isset( $_SESSION['where_is'] ) ? $_SESSION['where_is'] : null;
 }
 
@@ -337,7 +337,7 @@ function getUserWhereIs( ){
 /**
  * Delete the user where is info
  */
-function userWhereIsLogout( $user_id ){
+function user_where_is_logout( $user_id ){
 	$db = new MySql();
 	$db->query( "DELETE FROM ".DB_PREFIX."user_where_is WHERE user_id='$user_id'" );
 	unset( $_SESSION['where_is'] );

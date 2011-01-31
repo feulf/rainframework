@@ -1,66 +1,52 @@
 <?php
 
-	session_start();	
+	// start the session
+	session_start();
 
-	//----------------------
-	// Includes
-	//----------------------
-
-	require "inc/functions.php";				// functions	
-	require "inc/constants.php";				// constant	
-	require "inc/rain.error.php";				// error manager
-	require "inc/rain.mysql.class.php";			// mysql
-	require "inc/rain.tpl.class.php";			// template
+	// Load the class
+	require_once "application/config/constants.php";
+	require_once LIBRARY_DIR . "loader.class.php";
+	
 	
 
-
-	//----------------------
-	// Init Database
-	//----------------------
-	
-	// uncomment if you want to use database connection 
-	$db = new MySql();
-	$db->connect();
-
-
-	//----------------------
-	// Init Template RainTPL
-	//----------------------
-	raintpl::$tpl_dir = TPL_DIR;
-	$tpl = new RainTPL();
+	#--------------------------------
+	# Init Loader class
+	#--------------------------------
+	$loader = new Loader;
+	$loader->database_connect();		// Connect the database
+	$loader->set_language('en');		// set the language
+	$loader->login();					// do login ( you must pass login=your_login and password=your_password)
+	$loader->set_theme('default');		// set theme
+	$loader->init_route();				// init the route
 
 
-	//----------------------
-	// Set the timezone
-	//----------------------
-	if( function_exists( "date_default_timezone_set" ) )
-		date_default_timezone_set( TIMEZONE );
-		
-	//----------------------
-	// Set the language
-	//----------------------
-	define( "LANG_ID", "it" );
 
-	// include the generic vocabulary
-	require LANG_DIR . LANG_ID . "/generic.php";
+	#--------------------------------
+	# Auto Load the Controller
+	# init_route set the controller/action/params
+	# to load the controller
+	#--------------------------------
+	$loader->auto_load_controller();
 
-	// set local variables for All but not for numeric and monetary, so that number doesn't have problem in mysql
-	setlocale( LC_ALL  ^ LC_NUMERIC ^ LC_MONETARY, explode(",", LOCALE) );
 
-	//----------------------
-	// Load Contents
-	//---------------------
-	/* here your functions to load contents */
-	
-	// template
-	$title = "Rain Framework";
-	$content = "easy php framework";
 
-	$tpl->assign( "title", $title );
-	$tpl->assign( "content", $content );
-	$tpl->assign( "time", time() );
-	$tpl->assign( "money", "100" );
-	$tpl->draw( "home" );
-	
+	#--------------------------------
+	# Load model
+	# load the model and assign the result
+	# @params model, action, params, assign_to
+	#--------------------------------
+	$loader->load_model( "menu", "load_menu", null, "menu");
+
+
+
+	#--------------------------------
+	# Assign Layout variables
+	#--------------------------------
+	$loader->assign( 'title', 'RainFramework' );
+
+
+
+	// print the layout
+	$loader->draw();
 
 ?>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>{$title}</title>
+	<link rel="stylesheet" href="css/style.css" type="text/css" />
+</head>
+<body>
+	
+	<div id="header" class="doc">
+		<div id="menu"><div><img src="img/logo_mini.png">{loop="menu"}<a href="{$value.link}" {$value.selected?'class="selected"':null}>{$value.name}</a>{/loop}</div>
+	</div>
+
+	<div id="section" class="doc">
+		<div id="section_inside">
+			<div id="section_inside_inside">
+				{$center}
+			</div>
+		</div>
+	</div>
+
+	<div id="footer">
+		<div id="inner_footer">
+			<div class="left">{loop="menu"}{$counter?' | ':''}<a href="{$value.link}" {$value.selected?'class="selected"':null}>{$value.name}</a>{/loop}</div>
+			<div class="center">execution time: {$execution_time}<br/>
+								executed query: {$n_query}<br/>
+			</div>
+			<div class="right">Copyright rain team</div>
+		</div>
+	</div>
+
+</body>
+</html>

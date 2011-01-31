@@ -24,12 +24,12 @@ class MySql{
 	 */
 	public static 	$exit_on_error = true;
 
-	private	$result,		// result of the query
-		$link,			// database link
-		$link_name = 'default';	// name of the database link
+	private	$result,				// result of the query
+			$link,					// database link
+			$link_name = 'default';	// name of the database link
 
-	private static	$nquery = 0,		// count the query executed
-			$link_array = array();	// array of links
+	private static	$nquery = 0,			// count the query executed
+					$link_array = array();	// array of links
 
 
 
@@ -51,7 +51,7 @@ class MySql{
 	function connect( $hostname = null, $username = null, $password = null, $database = null ){
 
 		if( !$hostname && !$username && !$database )
-			require CONF_DIR . "conf.db.php";
+			require CONFIG_DIR . "conf.db.php";
 
 		if( $this->link = mysql::$link_array[$this->link_name] = mysql_connect( $db[$this->link_name]['hostname'], $db[$this->link_name]['username'], $db[$this->link_name]['password'] ) or die( mysql_error() ) )
 	    	return mysql_select_db( $db[$this->link_name]['database'] ) or die ( mysql_error() );
@@ -97,7 +97,7 @@ class MySql{
 	 * 
 	 * @return int
 	 */
-	function numRows( $query = null ){
+	function num_rows( $query = null ){
 		if( $result = $this->query( $query ) )
 			return mysql_num_rows( $result );
 	}
@@ -213,6 +213,15 @@ class MySql{
 	*/
 	function setProfiling(){
 		$this->query("SET profiling=1");
+	}
+	
+	
+	
+	/**
+	 * Return the number of executed query
+	 */
+	function get_executed_query( ){
+		return mysql::$nquery;
 	}
 
 
