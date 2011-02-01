@@ -2,33 +2,6 @@
 	
 
 
-//-------------------------------------------------------------
-//
-//					 Settings
-//
-//-------------------------------------------------------------
-
-	define( "DEBUG", true );
-	define( "TIMEZONE", "Europe/Rome" );
-	define( "CHARSET", "utf-8" );
-
-	
-	
-
-//-------------------------------------------------------------
-//
-//					 Application
-//
-//-------------------------------------------------------------
-
-	define( "DEFAULT_CONTROLLER", "content" );
-	define( "DEFAULT_ACTION", "index" );
-	define( "LOAD_AREA_DEFAULT", "" );
-	
-	//BASE URL 
-	define( "URL", "http://localhost/buongiornonewyork/rainphp/rainframework_package/rainframework2/" );
-
-
 
 
 //-------------------------------------------------------------

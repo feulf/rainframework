@@ -62,6 +62,15 @@
 
 
 		/**
+		 * Load all settings
+		 *
+		 */
+		function load_settings(){
+			require_once CONFIG_DIR . "settings.php";
+		}
+
+
+		/**
 		 * Set the language
 		 *
 		 */

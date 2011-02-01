@@ -25,6 +25,12 @@ class Controller{
 	
 	function load_controller( $controller, $object_name = null ){
 
+		#--------------------------------
+		# Hooks
+		hooks('load_controller');
+		#--------------------------------
+
+
 		// include the file
 		$file = $this->controllers_dir . $controller . ".controller.class.php";
 		if( file_exists($file) )

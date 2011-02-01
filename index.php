@@ -9,11 +9,21 @@
 	
 	
 
+
+	#--------------------------------
+	# Hooks
+	hooks('init');
+	#--------------------------------
+
+	
+	
+
 	#--------------------------------
 	# Init Loader class
-	#--------------------------------
+	#--------------------------------	
 	$loader = new Loader;
 	$loader->database_connect();		// Connect the database
+	$loader->load_settings();			// load the settings
 	$loader->set_language('en');		// set the language
 	$loader->login();					// do login ( you must pass login=your_login and password=your_password)
 	$loader->set_theme('default');		// set theme
@@ -26,6 +36,7 @@
 	# init_route set the controller/action/params
 	# to load the controller
 	#--------------------------------
+
 	$loader->auto_load_controller();
 
 
@@ -44,9 +55,19 @@
 	#--------------------------------
 	$loader->assign( 'title', 'RainFramework' );
 
-
-
-	// print the layout
+	
+	
+	#--------------------------------
+	# Print the layout
+	#--------------------------------
 	$loader->draw();
 
+	
+	
+	#--------------------------------
+	# Hooks
+	hooks('close');
+	#--------------------------------
+
+	
 ?>
