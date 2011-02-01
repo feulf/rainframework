@@ -1,0 +1,36 @@
+-----------------------------------------------------------------
+
+		Welcome to Rain Framework v.2
+
+-----------------------------------------------------------------
+
+
+   INTRODUCTION
+===================
+
+RainFramework is an MVC framework for PHP, it has a strong but easy structure.
+
+The structure is easy too:
+
+application // all regarding your application
+library  // all core library of rainframework
+language // core language files
+
+To create your application you're going to coding all into application.
+
+
+
+
+
+   LOADER CLASS
+===================
+The entire framework is loaded by the Loader Class, which init all the principal settings and functions, it accomplish the database connection, set the language, authenticate the user, loads the controller selected by the user and in the end draw the layout.
+
+
+   MVC
+===================
+Model View Controller, is a design pattern, which divide logic by presentation.
+- Models [application/models], are the interface between the controller and the stored data (database). 
+- Controllers [application/controllers], are the components that get the user input, loads the information with the Models and draw it with the View layer.
+- Views [application/templates], are HTML templates. In RainFramework is the RainTPL class that loads the template.
+

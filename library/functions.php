@@ -691,7 +691,7 @@
 	/**
 	 * Return the array with all geolocation info of user selected by IP
 	 */
-	define( "IPINFODB_KEY", "acc71fd652705b79e5ffb586f51733e4ee3a22618ebddd7051a84998ed357cc0" );
+	define( "IPINFODB_KEY", "YOUR_KEY" );
 	function ip_to_location( $ip = IP ){
 		if( isIp( $ip ) )
 			return json_decode( file_get_contents( "http://api.ipinfodb.com/v2/ip_query.php?key=".IPINFODB_KEY."&ip={$ip}&output=json&timezone=true" ) );
