@@ -28,12 +28,15 @@
 	$_POST_FILTER = $_POST;
 	$_GET_POST = $_GET + $_POST;
 	if( !get_magic_quotes_gpc() ){
-		replace_sql_injection( $_GET_FILTER );
-		replace_sql_injection( $_POST_FILTER );
+		//replace_sql_injection( $_GET_FILTER );
+		//replace_sql_injection( $_POST_FILTER );
+		$_GET_FILTER=replace_sql_injection( $_GET_FILTER );
+		$_POST_FILTER=replace_sql_injection( $_POST_FILTER );
 		$_GET_POST_FILTER = $_GET_FILTER + $_POST_FILTER;
 	}
 	// @access private
-	function replace_sql_injection( &$a ){ if( is_array( $a ) ) foreach( $a as $k => &$v ) if( is_array( $a[$k] ) ) replace_sql_injection($a[$k]); else $a[$k] = addslashes($v); }
+	// function replace_sql_injection( &$a ){ if( is_array( $a ) ) foreach( $a as $k => &$v ) if( is_array( $a[$k] ) ) replace_sql_injection($a[$k]); else $a[$k] = addslashes($v); }
+    function replace_sql_injection( $a ){ return is_array( $a ) ? array_map( 'replace_sql_injection', $a ) : addslashes( $a ); }
 	
 
 
