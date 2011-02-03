@@ -41,10 +41,6 @@
 			// Timer Start to get the execution time
 			timer_start();
 
-			// Set the timezone
-			if( function_exists( "date_default_timezone_set" ) )
-				date_default_timezone_set( TIMEZONE );
-
 		}
 
 
@@ -67,6 +63,10 @@
 		 */
 		function load_settings(){
 			require_once CONFIG_DIR . "settings.php";
+			
+			// Set the timezone
+			if( function_exists( "date_default_timezone_set" ) )
+				date_default_timezone_set( TIMEZONE );
 		}
 
 
