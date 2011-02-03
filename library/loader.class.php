@@ -28,7 +28,7 @@
 	 */
 	class Loader{
 
-		private $var;
+		private $var, $page;
 		private $controller, $action, $params;
 		public $controllers_dir = CONTROLLERS_DIR, $models_dir = MODELS_DIR;
 
@@ -108,6 +108,10 @@
 		}
 		
 		
+		function set_page( $page ){
+			$this->page = $page;
+		}
+		
 		
 		/**
 		 * Set the route from the URI (ex. index.php/blog/list/)
@@ -152,7 +156,8 @@
 					$html = ob_get_contents();
 				ob_end_clean();
 				return $html;
-			}
+			}else
+				$this->page = PAGE_NOT_FOUND;			
 		}
 		
 		
@@ -194,7 +199,7 @@
 		 * Draw the output
 		 *
 		 */
-		function draw( $page = 'index', $return_string = false ){
+		function draw(){
 			$tpl = new RainTPL();
 			$tpl->assign( $this->var );// assign all variable
 			
@@ -203,7 +208,7 @@
 			$tpl->assign( "n_query", $this->db ? $this->db->get_executed_query() : 0 );
 			// --------------
 			
-			return $tpl->draw( $page, $return_string );
+			$tpl->draw( $this->page );
 		}
 		
 
