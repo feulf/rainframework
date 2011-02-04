@@ -61,14 +61,13 @@
 	    E_STRICT => 'Strict'
 	);
 
-	
-	function draw_error_report(){return null;}
-	//------------------------------------------
-	// Functions
-	//------------------------------------------
 
+	/**
+	 * Custom Error Handler
+	 *
+	 */
 	function myErrorHandler ( $errno, $errstr, $errfile, $errline ) {
-		global $error_report_type, $error_reporting, $error_log_file_type, $error_n;
+		global $error_report_type, $error_reporting, $error_log_file_type, $error_n, $error_levels;
 		$error_n++;
 
 		$html = debug_error( $errstr, $errno, $errfile, $errline );
@@ -80,7 +79,8 @@
 			echo $html;	// show error
 		}
 		elseif(  $errno & $error_report_type )
-			$error_reporting[$errstr] = $errno;
+			// save all error information
+			$error_reporting[$errstr] = array( 'errno'=>$errno, 'error'=>$error_levels[$errno], 'html'=>$html );
 			
 		if( $errno & $error_log_file_type  )				
 			log_error( $html );					// log error
@@ -88,7 +88,10 @@
 	}
 
 
-
+	/**
+	 * Debug the error showing files, lines and functions
+	 * 
+	 */
 	function debug_error( $errstr, $errno, $errfile, $errline ){
 
 			$html = '<div class="ee">'."\n";
@@ -106,6 +109,10 @@
 	
 	
 
+	/**
+	 * Log the error
+	 *
+	 */
 	function log_error( $html ){
 
 		// add info about url and post var into error log
@@ -115,6 +122,18 @@
 		error_log( $html, 3, $file );
 	}
 
+
+
+	/**
+	 * Retrive the error list
+	 *
+	 */
+	function get_error_list(){
+		global $error_reporting;
+		return $error_reporting;
+	}
+
+	
 	
 	// set my error handler as default error handler
 	set_error_handler( "myErrorHandler" );

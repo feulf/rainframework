@@ -70,6 +70,7 @@
 		}
 
 
+
 		/**
 		 * Set the language
 		 *
@@ -106,8 +107,12 @@
 				raintpl::$base_url = URL;
 			}
 		}
-		
-		
+
+
+		/**
+		 * Set Page Layout
+		 *
+		 */
 		function set_page( $page ){
 			$this->page = $page;
 		}
@@ -118,16 +123,19 @@
 		 *
 		 */
 		function init_route(){
-			// route the URI
-			$route_array = null;
-			if( $route = substr( $_SERVER['REQUEST_URI'], strlen($_SERVER['SCRIPT_NAME']) ) ){
-				$route = substr($route,-1)=='/'?substr($route,0,-1):$route;
-				$route = substr($route,0,1)=='/'?substr($route,1):$route;
-				$route_array = explode( "/", $route );
-			}
+
+			$directory = dirname($_SERVER['SCRIPT_NAME']) . "/";
+			$script = basename($_SERVER['SCRIPT_NAME']);
+			$route = substr( $_SERVER['REQUEST_URI'], strlen($directory) );
+			if(substr($route,0,strlen($script))==$script)
+				$route = substr($route,strlen($script)+1);
+
+			preg_match_all( "#((?:(\w*?)/))#", $route, $match );
+			$route_array=$match[2];
 			$this->controller	= is_array($route_array) && count($route_array) ? array_shift($route_array) : DEFAULT_CONTROLLER;
 			$this->action 		= is_array($route_array) && count($route_array) ? array_shift($route_array) : DEFAULT_ACTION;
 			$this->params 		= $route_array;
+
 		}
 		
 		
@@ -152,12 +160,16 @@
 			if( $con->load_controller( $controller, "controller_obj" ) ){
 				ob_start();
 					if( $action )
-						$return = $con->controller_obj->$action( $params );
+						if( is_callable( array($con->controller_obj,$action) ))
+							$return = $con->controller_obj->$action( $params );
+						else
+							$this->page = PAGE_NOT_FOUND;				
 					$html = ob_get_contents();
 				ob_end_clean();
 				return $html;
 			}else
-				$this->page = PAGE_NOT_FOUND;			
+				$this->page = PAGE_NOT_FOUND;				
+
 		}
 		
 		
@@ -199,7 +211,7 @@
 		 * Draw the output
 		 *
 		 */
-		function draw(){
+		function draw( $return_string = false ){
 			$tpl = new RainTPL();
 			$tpl->assign( $this->var );// assign all variable
 			
@@ -208,7 +220,7 @@
 			$tpl->assign( "n_query", $this->db ? $this->db->get_executed_query() : 0 );
 			// --------------
 			
-			$tpl->draw( $this->page );
+			return $tpl->draw( $this->page, $return_string );
 		}
 		
 
