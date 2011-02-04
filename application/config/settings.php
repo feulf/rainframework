@@ -25,8 +25,8 @@
 	define( "DEFAULT_ACTION", "index" );
 	define( "PAGE_NOT_FOUND", "not_found" );
 
-	//BASE URL 
-	define( "URL", "http://localhost/buongiornonewyork/rainphp/rainframework_package/rainframework2/" );
+	//BASE URL -- experimental way to get the url automatically
+	define( "URL", str_replace( basename( $_SERVER['PHP_SELF'] ), '', 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF']) );
 
 	
 	
