@@ -160,8 +160,12 @@
 			if( $con->load_controller( $controller, "controller_obj" ) ){
 				ob_start();
 					if( $action )
-						if( is_callable( array($con->controller_obj,$action) ))
-							$return = $con->controller_obj->$action( $params );
+						if( is_callable( array($con->controller_obj,$action) )){
+
+							for($i=0,$n=count($params),$param="";$i<$n;$i++)
+								$param .= $i>0 ? ',$params['.$i.']' : '$params['.$i.']';
+							eval( '$return = $con->controller_obj->$action( ' . $param . ' );' );
+						}
 						else
 							$this->page = PAGE_NOT_FOUND;				
 					$html = ob_get_contents();

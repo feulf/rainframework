@@ -602,7 +602,7 @@
 	 * defined into globals $hooks variable. You can set the code you want to execute 
 	 * by calling hooks_add_file, hooks_add_function, hooks_add_class
 	 *
-	 * @param unknown_type $name
+	 * @param string $name Name of the hooks
 	 */
 	function hooks($name){
 		global $hooks;
@@ -628,14 +628,18 @@
 				if( $class ){
 					if( class_exists($class) ){
 
+						for($i=0,$n=count($params),$param="";$i<$n;$i++)
+							$param .= $i>0 ? ',$params['.$i.']' : '$params['.$i.']';
+						
 						if( !$function or $function==$class )
-							$obj = new $class($params);
-						elseif( is_callable(array($class,$function) ) ){
+							eval( '$obj = new $class('.$param.')' );
+						else{
 							$obj = new $class;
-							$obj->$function($params);
-						}
-						else
-							trigger_error("HOOKS: METHOD NOT FOUND OR NOT CALLABLE",E_WARNING);
+							if( is_callable(array($obj,$function) ) )
+								eval( '$obj->$function( ' . $param . ' );' );	
+							else
+								trigger_error("HOOKS: METHOD NOT FOUND OR NOT CALLABLE",E_WARNING);
+						}	
 						
 					}
 					else
