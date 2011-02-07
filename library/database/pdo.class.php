@@ -17,7 +17,7 @@
  * Class for MySql database management
  */
 
-class MySql{
+class DB_PDO{
 
 	/**
 	 * Set true if you want to exit on Query error
@@ -39,8 +39,8 @@ class MySql{
 	 * @param string $link_name  Set the link_name to use different database link connection
 	 * @return MySql
 	 */
-	function MySql(){
-		$this->link = isset( mysql::$link_array[$this->link_name] ) ? mysql::$link_array[$this->link_name] : null;
+	function DB_PDO(){
+		$this->link = isset( DB_PDO::$link_array[$this->link_name] ) ? DB_PDO::$link_array[$this->link_name] : null;
 	}
 
 
@@ -48,13 +48,35 @@ class MySql{
 	/**
 	 * Connect to the database
 	 */
-	function connect( $hostname = null, $username = null, $password = null, $database = null ){
+	function connect( $hostname = null, $username = null, $password = null, $database = null, $dbserver = 'mysql' ){
 
-		if( !$hostname && !$username && !$database )
+		if( !$hostname && !$username && !$database ){
 			require CONFIG_DIR . "conf.db.php";
+			extract( $db[$this->link_name] );
+		}
+		try{
+			
+			switch( $dbserver ){
+				case 'mysql':
+				case 'pgsql':
+			    	$this->link = DB_PDO::$link_array[$this->link_name] = new PDO( "$dbserver:host=$hostname;dbname=$database", $username, $password );
+			    break;
+				case 'sqlite':
+					$this->link = DB_PDO::$link_array[$this->link_name] = new PDO( "sqlite:$database_path" );
+				break;
+				case 'oracle':
+					$this->link = DB_PDO::$link_array[$this->link_name] = new PDO( "OCI:", $username, $password );
+				break;
+				case 'odbc':
+					$this->link = DB_PDO::$link_array[$this->link_name] = new PDO( "odbc:Driver={Microsoft Access Driver (*.mdb)};Dbq={$database_path};Uid={$username}");
+				break;
+				default:
+					die( "DBMS $dbserver not found" );
+			}
+		} catch (PDOException $e) {
+			die( "Error!: " . $e->getMessage() . "<br/>" );
+		}
 
-		if( $this->link = mysql::$link_array[$this->link_name] = mysql_connect( $db[$this->link_name]['hostname'], $db[$this->link_name]['username'], $db[$this->link_name]['password'] ) or die( mysql_error() ) )
-	    	return mysql_select_db( $db[$this->link_name]['database'] ) or die ( mysql_error() );
 	}
 
 
@@ -63,31 +85,21 @@ class MySql{
 	 * Close mysql connection
 	 */
 	function disconnect( ){
-		return mysql_close( $this->link );
+		unset( DB_PDO::$link_array[$this->link_name] );
 	}
 	
 
 
 	/**
-	 * Execute query. Use this function for update/delete query, for read query use getField, getRow, getArrayRow ...
+	 * Execute a write query (insert/update/delete)
 	 * 
-	 * @return bool
 	 */
 	function query( $query ){
-		
-		if( ( $query || $query=$this->query ) && !isset( $this->result[$query] ) ){
-			if( $this->result[$query] = mysql_query( $query, $this->link ) ){	
-				mysql::$nquery++;
-				return $this->result[ $this->query = $query ];
-			}
-			else{
-        		trigger_error( mysql_error($this->link) . "<br/><font color=\"red\">$query</font><br/>", E_USER_ERROR );
-	        	if( mysql::$exit_on_error )
-		        	exit;
-			}
+		try{
+			$this->link->exec( $query );
+		} catch ( PDOException $e ){
+			error_reporting( "Error!: " . $e->getMessage() . "<br/>", E_USER_ERROR );
 		}
-		else
-			return $this->result[ $query ];
 	}
 
 
@@ -98,8 +110,8 @@ class MySql{
 	 * @return int
 	 */
 	function num_rows( $query = null ){
-		if( $result = $this->query( $query ) )
-			return mysql_num_rows( $result );
+		if( $res = $this->link->query( $query ) )
+			return $res->fetch(PDO::FETCH_ASSOC);
 	}
 
 
@@ -110,10 +122,9 @@ class MySql{
 	 * 
 	 * @return string/int
 	 */
-	function getField( $field, $query = null ){
-		if( $row = $this->getRow( $query ) and isset( $row[$field] ) )
+	function get_field( $field, $query ){
+		if( $row = $this->get_row( $query ) )
 			return $row[$field];
-
 	}
 	
 	
@@ -125,8 +136,8 @@ class MySql{
 	 * 
 	 * @return array
 	 */
-	function getRow( $query = null ){
-		return mysql_fetch_array( $this->query( $query ), MYSQL_ASSOC );
+	function get_row( $query = null ){
+		return $this->link->query( $query )->fetch(PDO::FETCH_ASSOC);
 	}
 
 
@@ -138,20 +149,20 @@ class MySql{
 	 * 
 	 * @return array
 	 */
-	function getArrayRow( $query = null, $key = null, $value = null ){
-		if( $key && $value )
-			while( $row = mysql_fetch_array( $this->query($query), MYSQL_ASSOC ) )
-				$rows[ $row[$key] ] = $row[$value];
+	function get_list( $query = null, $key = null, $value = null ){
 		
-		elseif( $key )
-			while( $row = mysql_fetch_array( $this->query($query), MYSQL_ASSOC ) )
-				$rows[ $row[$key] ] = $row;
-		
-		else
-			while( $row = mysql_fetch_array( $this->query( $query ), MYSQL_ASSOC ) )
-				$rows[ ] = $row;
-		
-		return isset($rows)?$rows:null;
+		if( $res = $this->link->query( $query )->fetchALL(PDO::FETCH_ASSOC ) ){
+			if( !$key )
+				return $res;
+			elseif( !$value )
+				foreach( $res as $row )
+					$rows[ $row[$key] ] = $row;
+			else
+				foreach( $res as $row )
+					$rows[ $row[$key] ] = $row[$value];
+			
+			return $rows;
+		}
 	}
 
 
@@ -160,7 +171,7 @@ class MySql{
 	 * Return the last inserted id of an insert query
 	 */
 	function getInsertedId( ){
-		return mysql_insert_id( $this->link );
+		return $this->link->lastInsertedId();
 	}
     
 	
@@ -205,15 +216,6 @@ class MySql{
 	function delete( $table, $where ){
 		return $this->query("DELETE $table where $where");
 	}
-    
-
-
-	/**
-	* Call this method at begining to profile the queries
-	*/
-	function setProfiling(){
-		$this->query("SET profiling=1");
-	}
 	
 	
 	
@@ -221,29 +223,9 @@ class MySql{
 	 * Return the number of executed query
 	 */
 	function get_executed_query( ){
-		return mysql::$nquery;
+		return DB_PDO::$nquery;
 	}
 
-
-
-	/**
-	* Call this method at end to get the profile
-	*/
-	function showProfile(){
-		if( $profiles = $this->getArrayRow( "SHOW profiles" ) ){
-			$html = '<table cellspacing="1" cellpadding="10" bgcolor="#cccccc" style="font:11px Helvetica;"><tr style="font-weight:bold"><td>Query ID</td><td>exec time</td><td width="150">%</td><td>Query</td></tr>';
-			for( $i=0, $execution_time = 0, $n=count($profiles); $i<$n; $i++ )
-				$execution_time += $profiles[$i]['Duration'];
-
-			foreach($profiles as $i => $p ){
-				$perc = round( ( $p['Duration'] / $execution_time ) * 100, 2 );
-				$width = ceil( $perc * 2 );
-	    			$html .= '<tr bgcolor="#eeeeee"><td>'.$p['Query_ID'].'</td><td>'.$p['Duration'].'</td><td><div style="float:left;width:50px;">'.$perc.'%</div> <div style="display:inline; margin-top:3px;float:left;background:#ff0000;width:'.$width.'px;height:10px;"></td><td>'.$p['Query'].'</td></tr>';
-			}
-			return $html .= '</table>';	
-		}
-	}
-	
 }
 
 ?>
