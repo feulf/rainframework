@@ -18,9 +18,6 @@
 	if( !defined( "LOG_DIR" ) )
 		define( "LOG_DIR", "log/" );
 
-	if( !defined( "SITE_DIR" ) )
-		define( "SITE_DIR", $_SERVER['DOCUMENT_ROOT'] );		// site directory
-
 	global 	$error_n,
 			$error_time,
 			$error_levels,
@@ -103,7 +100,7 @@
 			if( count( $debug_array = debug_backtrace() )>3 ){
 				$html .= '<div class="ei">'."\n";
 			    for( $i = 3, $n=count( $debug_array ); $i < $n; $i++ )
-				   	$html .= "-" . str_replace( SITE_DIR, "", isset( $debug_array[$i]['file'] ) ? $debug_array[ $i ]['file'] : null ) . " : " . ( isset($debug_array[$i]['line']) ? $debug_array[$i]['line'] : null ). "<br/>\n";
+				   	$html .= "-" . str_replace( $_SERVER['DOCUMENT_ROOT'], "", isset( $debug_array[$i]['file'] ) ? $debug_array[ $i ]['file'] : null ) . " : " . ( isset($debug_array[$i]['line']) ? $debug_array[$i]['line'] : null ). "<br/>\n";
 				$html .= "</div>";	   	
 			}			
 			$html .= "</div>";

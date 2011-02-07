@@ -85,7 +85,7 @@
 
 		
 		/**
-		 * Connect to the database
+		 * User authentication
 		 *
 		 */
 		function login(){
