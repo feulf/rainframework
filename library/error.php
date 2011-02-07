@@ -32,6 +32,10 @@
 	// Configuration
 	//------------------------------------------
 
+	// By default debug is true
+	if( isset($GLOBALS['debug']) )
+		$GLOBALS['debug'] = true;
+
 	error_reporting(E_ALL | E_STRICT );					// Error reporting
 	ini_set( "display_errors", 1 );						// If debug is true, display error and display startup errors
 	ini_set( "html_errors", 0 );						// use html in errors
@@ -67,13 +71,13 @@
 	 *
 	 */
 	function myErrorHandler ( $errno, $errstr, $errfile, $errline ) {
-		global $error_report_type, $error_reporting, $error_log_file_type, $error_n, $error_levels;
+		global $error_report_type, $error_reporting, $error_log_file_type, $error_n, $error_levels, $debug;
 		$error_n++;
 
 		$html = debug_error( $errstr, $errno, $errfile, $errline );
 
 		
-		if( DEBUG ){
+		if( $debug ){
 			if( $error_n == 1 )
 				echo "<style>.ee{ border:1px solid #aaaaff;background:#f8f8ff;padding:10px;margin:10px;}</style>";
 			echo $html;	// show error

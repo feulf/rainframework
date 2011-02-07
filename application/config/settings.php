@@ -8,9 +8,9 @@
 //
 //-------------------------------------------------------------
 
-	define( "DEBUG", true );
+	global $debug;
+	$debug = true;	// set true for debug mode on
 	define( "TIMEZONE", "Europe/Rome" );
-	define( "CHARSET", "utf-8" );
 
 	
 	
