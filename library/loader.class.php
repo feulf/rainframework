@@ -12,9 +12,9 @@
  */
 
 
-	require_once LIBRARY_DIR . "functions.php";	// functions	
-	require_once LIBRARY_DIR . "error.php";		// error manager
-	require_once LIBRARY_DIR . "mysql.class.php";	// mysql
+	require_once LIBRARY_DIR . "functions.php";			// functions	
+	require_once LIBRARY_DIR . "error.php";				// error manager
+	require_once LIBRARY_DIR . "db.class.php";			// database
 	require_once LIBRARY_DIR . "rain.tpl.class.php";	// template
 	require_once LIBRARY_DIR . "controller.class.php";	// controller
 	require_once LIBRARY_DIR . "model.class.php";		// model
@@ -50,7 +50,7 @@
 		 *
 		 */
 		function database_connect(){
-			$this->db = new MySql();
+			$this->db = new DB();
 			$this->db->connect();
 		}
 
