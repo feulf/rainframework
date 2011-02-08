@@ -1,7 +1,8 @@
 <?php
-	
 
 
+	// check that we are using rain framework
+	define( "RAIN", true );
 
 
 //-------------------------------------------------------------
