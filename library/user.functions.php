@@ -1,14 +1,19 @@
 <?php
 
 /**
-*  Collection of functions to manage users
-* 
-*  @author Federico Ulfo <rainelemental@gmail.com> | www.federicoulfo.it
-*  @copyright RainFramework is under GNU/LGPL 3 License
-*  @link http://www.rainframework.com
-*  @version 2.0
-*  @package RainFramework
-*/
+ *	Rain Framework > User functions
+ *  -------------------------------
+ * 
+ *	Collection of functions to manage users and groups
+ * 
+ *	@author Federico Ulfo
+ *	@copyright developed and mantained by the Rain Team: http://www.raintm.com
+ *	@license Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
+ *	@link http://www.rainframework.com
+ *	@package RainFramework
+ */
+
+
 
 
 

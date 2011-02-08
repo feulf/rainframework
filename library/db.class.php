@@ -1,23 +1,25 @@
 <?php
 
-
 /**
- *  DB works as interface to the database (MySql, Sqlite or others)
+ *	Rain Framework > DB class
+ *	-------------------------
  * 
- *  @author Federico Ulfo <rainelemental@gmail.com> | www.federicoulfo.it
- *  @copyright RainFramework is under GNU/LGPL 3 License
- *  @link http://www.rainframework.com
- *  @version 2.0
- *  @package RainFramework
+ *	DB class works as interface/alias to the database class: MySql, Sqlite or others
+ * 
+ *	@author Federico Ulfo
+ *	@copyright developed and mantained by the Rain Team: http://www.raintm.com
+ *	@license Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
+ *	@link http://www.rainframework.com
+ *	@package RainFramework
  */
 
 
 
 /**
- * Class for MySql database management
+ * Class for database management
  */
 
-class db{
+class DB{
 
 	private	$db, 					// database object
 			$link_name = 'default';	// name of the database link object (allows multiple db connection)

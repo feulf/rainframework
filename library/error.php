@@ -1,22 +1,24 @@
 <?php
  
 /**
- *  Rain.Error, debug and backtrace errors.
- *  Just include in your project to make it works.
+ *	Rain Framework > Error
+ *	----------------------
  * 
- *  @author Federico Ulfo <rainelemental@gmail.com> | www.federicoulfo.it
- *  @copyright RainFramework is under GNU/LGPL 3 License
- *  @link http://www.rainframework.com
- *  @version 2.0
- *  @package RainFramework
+ *	debug and backtrace errors, just include in your project to make it works.
+ * 
+ *	@author Federico Ulfo
+ *	@copyright developed and mantained by the Rain Team: http://www.raintm.com
+ *	@license Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
+ *	@link http://www.rainframework.com
+ *	@package RainFramework
  */
 
 
 
 
-	// rain.error.php require a log directory chmode 755
+	// If you log the error you need a log/ directory with write permission
 	if( !defined( "LOG_DIR" ) )
-		define( "LOG_DIR", "log/" );
+		define( "LOG_DIR", APPLICATION_DIR . "log/" );
 
 	global 	$error_n,
 			$error_time,
