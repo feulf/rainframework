@@ -26,7 +26,9 @@
 	define( "PAGE_NOT_FOUND", "not_found" );
 
 	//BASE URL -- experimental way to get the url automatically
-	define( "URL", str_replace( basename( $_SERVER['PHP_SELF'] ), '', 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF']) );
+	define( "URL", str_replace( basename( $_SERVER['PHP_SELF'] ), '', 'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME']) . "/" ) );
+
+
 
 	
 	
