@@ -21,8 +21,7 @@ class Controller{
 	static $loaded_controller, $loaded_model;
 	
 	private $models_dir = MODELS_DIR;
-	
-	
+
 	/**
 	 * Load the model class
 	 *

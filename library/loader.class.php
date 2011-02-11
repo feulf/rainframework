@@ -157,24 +157,42 @@ class Loader{
 	 *
 	 */
 	function load_controller( $controller, $action = null, $params = null ){
-		$con = new Controller;
-		$con->set_controllers_dir($this->controllers_dir);
-		if( $con->load_controller( $controller, "controller_obj" ) ){
-			ob_start();
-				if( $action )
-					if( is_callable( array($con->controller_obj,$action) )){
 
+		#--------------------------------
+		# Hooks
+		hooks('load_controller');
+		#--------------------------------
+
+		// include the file
+		if( file_exists($file = $this->controllers_dir . $controller . ".controller.class.php") )
+			require_once $file;
+		else{
+			trigger_error( "CONTROLLER: FILE <b>{$file}</b> NOT FOUND ", E_USER_WARNING );
+			$this->page = PAGE_NOT_FOUND;
+			return false;
+		}
+
+		$class=$controller . "_Controller";
+		if( class_exists($class) )
+			$controller_obj = new $class;			
+		else{
+			trigger_error( "CONTROLLER: CLASS <b>{$controller}</b> NOT FOUND ", E_USER_WARNING );
+			return false;
+		}
+		
+		ob_start();
+			if( $action ){
+				if( is_callable( array($controller_obj,$action) )){
 						for($i=0,$n=count($params),$param="";$i<$n;$i++)
 							$param .= $i>0 ? ',$params['.$i.']' : '$params['.$i.']';
-						eval( '$return = $con->controller_obj->$action( ' . $param . ' );' );
+						eval( '$return = $controller_obj->$action( ' . $param . ' );' );
 					}
 					else
 						$this->page = PAGE_NOT_FOUND;				
 				$html = ob_get_contents();
+			}
 			ob_end_clean();
 			return $html;
-		}else
-			$this->page = PAGE_NOT_FOUND;				
 
 	}
 	
