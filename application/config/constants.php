@@ -70,8 +70,7 @@
 	define( "LOGIN_NOT_LOGGED",  0 );
 	define( "LOGIN_DONE",        1 );
 	define( "LOGIN_LOGGED",      2 );
-
-		
+	
 
 	
 //-------------------------------------------------------------

@@ -89,7 +89,7 @@
 	 * Get the time passed
 	 */
 	function memory_usage( $timeName = "execution_time" ){
-	       return byteFormat( memory_get_usage() - $GLOBALS['memoryCounter'][ $memName ] );
+	       return byte_format( memory_get_usage() - $GLOBALS['memoryCounter'][ $memName ] );
 	}
 	
 	
