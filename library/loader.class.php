@@ -188,8 +188,16 @@ class Loader{
 		$con = new Controller;
 		$con->set_models_dir = $this->models_dir;
 		if( $con->load_model( $model, "model_obj" ) ){
-			if( $action )
-				$return = $con->model_obj->$action( $params );
+			
+			if( is_callable( array($con->model_obj, $action) )){
+
+				for($i=0,$n=count($params),$param="";$i<$n;$i++)
+					$param .= $i>0 ? ',$params['.$i.']' : '$params['.$i.']';
+				eval( '$return = $con->model_obj->$action( ' . $param . ' );' );
+			}
+			else{
+				// model not found
+			} 
 			$this->assign( $assign_to, $return );
 		}
 	}

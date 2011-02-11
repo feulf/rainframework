@@ -3,7 +3,11 @@
 	// start the session
 	session_start();
 
-	// Load the class
+
+	
+	#--------------------------------
+	# Load the class
+	#--------------------------------	
 	require_once "application/config/constants.php";
 	require_once LIBRARY_DIR . "loader.class.php";
 	
@@ -37,8 +41,8 @@
 	# init_route set the controller/action/params
 	# to load the controller
 	#--------------------------------
-
 	$loader->auto_load_controller();
+
 
 
 
@@ -47,7 +51,12 @@
 	# load the model and assign the result
 	# @params model, action, params, assign_to
 	#--------------------------------
-	$loader->load_model( "menu", "load_menu", null, "menu");
+	$model = 'menu';
+	$action = 'load_menu';
+	$params = array( $loader->get_selected_controller() );
+	$assign_to = 'menu'; // the result will be assigned to template layout "menu"
+	$loader->load_model( $model, $action, $params, $assign_to );
+
 
 
 
