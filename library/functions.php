@@ -309,7 +309,7 @@
 	function email_send( $to, $subject, $body, $from = null, $from_name = null, $attachment = null, $embed_images = false ){
 
 		require_once INC_DIR . "phpmailer/class.phpmailer.php";
-		require_once CONF_DIR . "mail.conf.php";
+		require_once CONF_DIR . "conf.mail.php";
 
 		global $mail_type, $mail_host, $mail_username, $mail_password, $mail_charset;
 
