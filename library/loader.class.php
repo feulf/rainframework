@@ -158,11 +158,6 @@ class Loader{
 	 */
 	function load_controller( $controller, $action = null, $params = null ){
 
-		#--------------------------------
-		# Hooks
-		hooks('load_controller');
-		#--------------------------------
-
 		// include the file
 		if( file_exists($file = $this->controllers_dir . $controller . ".controller.class.php") )
 			require_once $file;
