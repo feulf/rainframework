@@ -171,7 +171,7 @@ class DB_PDO{
 	/**
 	 * Return the last inserted id of an insert query
 	 */
-	function getInsertedId( ){
+	function get_inserted_id( ){
 		return $this->link->lastInsertedId();
 	}
     
