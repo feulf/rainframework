@@ -79,14 +79,14 @@
 //-------------------------------------------------------------
 
 	/**
-	 * Start the timer
+	 * Save the memory used at this point
 	 */
 	function memory_usage_start( $memName = "execution_time" ){
         $GLOBALS['memoryCounter'][$memName] = memory_get_usage();
 	}
 
 	/**
-	 * Get the time passed
+	 * Get the memory used
 	 */
 	function memory_usage( $timeName = "execution_time" ){
 	       return byte_format( memory_get_usage() - $GLOBALS['memoryCounter'][ $memName ] );
@@ -128,12 +128,12 @@
 	
 	
 	/**
-	 * Transform timestamp to readable time format as time passed e.g. 3 days ago, or 5 minutes ago to a maximum of a week ago
+	 * Transform timestamp to readable time format as elapsed time e.g. 3 days ago, or 5 minutes ago to a maximum of a week ago
 	 * 
 	 * @param int $time unix timestamp
 	 * @param string format of time (use the constant fdate_format or ftime_format)
 	 */
-	function time_passed( $time = null, $format ){
+	function time_elapsed( $time = null, $format ){
 
 		$diff = TIME - $time;
 		if( $diff < MINUTE )
@@ -298,7 +298,7 @@
 	/**
 	 * Return true if the email is valid
 	 */
-	function isEmail( $string ){
+	function is_email( $string ){
 		return eregi( "^[[:alnum:]][a-z0-9_.-]*@[a-z0-9.-]+\.[a-z]{2,4}$", $string );
 	}
 
