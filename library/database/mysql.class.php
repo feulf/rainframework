@@ -125,7 +125,7 @@ class MySql{
 	 * @return array
 	 */
 	function get_row( $query = null ){
-		return mysql_fetch_array( $this->query( $query ), MYSQL_ASSOC );
+		return mysql_fetch_assoc( $this->query( $query ) );
 	}
 
 
@@ -139,15 +139,15 @@ class MySql{
 	 */
 	function get_list( $query = null, $key = null, $value = null ){
 		if( $key && $value )
-			while( $row = mysql_fetch_array( $this->query($query), MYSQL_ASSOC ) )
+			while( $row = mysql_fetch_assoc( $this->query($query) ) )
 				$rows[ $row[$key] ] = $row[$value];
 		
 		elseif( $key )
-			while( $row = mysql_fetch_array( $this->query($query), MYSQL_ASSOC ) )
+			while( $row = mysql_fetch_assoc( $this->query($query) ) )
 				$rows[ $row[$key] ] = $row;
 		
 		else
-			while( $row = mysql_fetch_array( $this->query( $query ), MYSQL_ASSOC ) )
+			while( $row = mysql_fetch_assoc( $this->query( $query ) ) )
 				$rows[ ] = $row;
 		
 		return isset($rows)?$rows:null;

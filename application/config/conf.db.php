@@ -1,5 +1,7 @@
 <?php
 
+	// default database	
+
 	$db['default']['dbserver'] = "mysql";
 	$db['default']['hostname'] = "localhost";
     $db['default']['username'] = "root";
