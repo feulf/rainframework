@@ -18,7 +18,7 @@
 
 	// If you log the error you need a log/ directory with write permission
 	if( !defined( "LOG_DIR" ) )
-		define( "LOG_DIR", APPLICATION_DIR . "log/" );
+		define( "LOG_DIR", "application/log/" );
 
 	global 	$error_n,
 			$error_time,
