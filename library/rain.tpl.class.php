@@ -37,6 +37,7 @@ define( "RAINTPL_CACHE_EXPIRE_TIME", 3600 );
  * Load and draw templates
  *
  */
+
 class RainTPL{
 
 
@@ -46,8 +47,7 @@ class RainTPL{
 
 		static 	public 	$tpl_dir = "tpl/",		// template directory
 						$cache_dir = "tmp/",	// template cache/compile directory
-						$base_url = null,		// template base url (useful for absolute path eg. http://www.raintpl.com )
-						$tpl_ext = "html";		// template extension. Set "php" to loads View
+						$base_url = null;		// template base url (useful for absolute path eg. http://www.raintpl.com )
 
 		// Path replace is a cool features that replace all relative paths of images (<img src="...">), stylesheet (<link href="...">), script (<script src="...">) and link (<a href="...">)
 		static public $path_replace = true,	// set true if you want to use the path replace
@@ -55,7 +55,7 @@ class RainTPL{
 
 		// Black List - define the black list to disable variables or functions
 		// is advised to leave always '\$this' into the black_list to avoid
-		static public $black_list = array( '\$this', '_SESSION', '_SERVER', '_ENV', 'raintpl::', 'eval', 'exec', 'file_exists' );
+		static public $black_list = array( '\$this', '_SESSION', '_SERVER', '_ENV', 'raintpl::', 'self::', 'eval', 'exec', 'file_exists' );
 
 	// -------------------------
 
@@ -64,7 +64,8 @@ class RainTPL{
 	// 	RAINTPL VARIABLES
 	// -------------------------
 	
-		public  $var = array();				// variables assigned to the templates
+		public  $var = array(),				// variables assigned to the templates
+				$tpl_ext = "html";			// template extension. Set "php" to loads View
 	
 		private $tpl = array(),				// array of raintpl variables
 			   	$static_cache = false;		// static cache enabled / disabled
@@ -188,28 +189,28 @@ class RainTPL{
 			$this->tpl['tpl_has_changed'] 		= false;																		// template has changed
 			$this->tpl['tpl_basename'] 			= basename( $tpl_name );														// template basename
 			$this->tpl['tpl_basedir'] 			= strpos($tpl_name,"/") ? dirname($tpl_name) . '/' : null;						// template basedirectory
-			$this->tpl['tpl_dir'] 				= raintpl::$tpl_dir . $this->tpl['tpl_basedir'];								// template directory
+			$this->tpl['tpl_dir'] 				= self::$tpl_dir . $this->tpl['tpl_basedir'];								// template directory
 
 			// If template extension is php RainTPL loads Views (php templates) and is not necessary to compile the template
-			if( raintpl::$tpl_ext == 'php' )
-				$this->tpl['template_file']			= $this->tpl['tpl_dir'] . $this->tpl['tpl_basename'] . '.' . raintpl::$tpl_ext;		// template filename
+			if( $this->tpl_ext == 'php' )
+				$this->tpl['template_file']			= $this->tpl['tpl_dir'] . $this->tpl['tpl_basename'] . '.' . $this->tpl_ext;		// template filename
 
 			// set the template path and compile if necessary
 			else{
-
-				$this->tpl['tpl_filename'] 			= $this->tpl['tpl_dir'] . $this->tpl['tpl_basename'] . '.' . raintpl::$tpl_ext;		// template filename
-				$this->tpl['cache_dir'] 			= raintpl::$cache_dir . $this->tpl['tpl_dir'];								// cache directory
-				$this->tpl['template_file']			= $this->tpl['cache_filename']		= $this->tpl['cache_dir'] . $this->tpl['tpl_basename'] . '.php';				// cache filename
-				$this->tpl['static_cache_filename'] = $this->tpl['cache_dir'] . $this->tpl['tpl_basename'] . '.s.php';				// static cache filename
+	
+				$this->tpl['tpl_filename'] 			= $this->tpl['tpl_dir'] . $this->tpl['tpl_basename'] . '.' . $this->tpl_ext;							// template filename
+				$this->tpl['cache_dir'] 			= self::$cache_dir . $this->tpl['tpl_dir'];															// cache directory
+				$this->tpl['template_file']			= $this->tpl['cache_filename']		= $this->tpl['cache_dir'] . $this->tpl['tpl_basename'] . '.php';	// cache filename
+				$this->tpl['static_cache_filename'] = $this->tpl['cache_dir'] . $this->tpl['tpl_basename'] . '.s.php';										// static cache filename
 
 				// if the template doesn't exists throw an error
-				if( RAINTPL_CHECK_TEMPLATE_UPDATE && raintpl::$tpl_ext!='php' && !file_exists( $this->tpl['tpl_filename'] ) ){
+				if( RAINTPL_CHECK_TEMPLATE_UPDATE && $this->tpl_ext!='php' && !file_exists( $this->tpl['tpl_filename'] ) ){
 					trigger_error( 'Template '.$this->tpl['tpl_basename'].' not found!' );
 					return '<div style="background:#f8f8ff;border:1px solid #aaaaff;padding:10px;">Template <b>'.$this->tpl['tpl_basename'].'</b> not found</div>';
 				}
 
 				// file doesn't exsist, or the template was updated, Rain will compile the template
-				if( RAINTPL_CHECK_TEMPLATE_UPDATE && raintpl::$tpl_ext!='php' && ( !file_exists( $this->tpl['cache_filename'] ) || filemtime($this->tpl['cache_filename']) < filemtime($this->tpl['tpl_filename']) ) ){
+				if( RAINTPL_CHECK_TEMPLATE_UPDATE && $this->tpl_ext!='php' && ( !file_exists( $this->tpl['cache_filename'] ) || filemtime($this->tpl['cache_filename']) < filemtime($this->tpl['tpl_filename']) ) ){
 					$this->compileFile( $this->tpl['tpl_basedir'], $this->tpl['tpl_filename'], $this->tpl['cache_dir'], $this->tpl['cache_filename'] );
 					$this->tpl['tpl_has_changed'] = true;
 				}
@@ -336,23 +337,23 @@ class RainTPL{
 								 'if( $cache = $tpl->cache( $cache_filename = basename("'.$include_var.'") ) )' .
 								 '	echo $cache;' .
 								 'else{ ' .
-								 '$tpl_dir_temp = raintpl::$tpl_dir;' .
+								 '$tpl_dir_temp = self::$tpl_dir;' .
 								 '$tpl->assign( $this->var );' .
-								 'raintpl::$tpl_dir .= dirname("'.$include_var.'") . ( substr("'.$include_var.'",-1,1) != "/" ? "/" : "" );' .
+								 'self::$tpl_dir .= dirname("'.$include_var.'") . ( substr("'.$include_var.'",-1,1) != "/" ? "/" : "" );' .
 								 ( !$this_loop_name ? null : '$tpl->assign( "key", $key'.$this_loop_name.' ); $tpl->assign( "value", $value'.$this_loop_name.' );' ).
 								 '$tpl->draw( $cache_filename );'.
-								 'raintpl::$tpl_dir = $tpl_dir_temp;' . 
+								 'self::$tpl_dir = $tpl_dir_temp;' . 
 								 '}' .
 								 '?>';
 				else
 					//dynamic include
 					$compiled_code .= '<?php $tpl = new RainTPL;' .
-								 '$tpl_dir_temp = raintpl::$tpl_dir;' .
+								 '$tpl_dir_temp = self::$tpl_dir;' .
 								 '$tpl->assign( $this->var );' .
-								 'raintpl::$tpl_dir .= dirname("'.$include_var.'") . ( substr("'.$include_var.'",-1,1) != "/" ? "/" : "" );' .
+								 'self::$tpl_dir .= dirname("'.$include_var.'") . ( substr("'.$include_var.'",-1,1) != "/" ? "/" : "" );' .
 								 ( !$this_loop_name ? null : '$tpl->assign( "key", $key'.$this_loop_name.' ); $tpl->assign( "value", $value'.$this_loop_name.' );' ).
 								 '$tpl->draw( basename("'.$include_var.'") );'.
-								 'raintpl::$tpl_dir = $tpl_dir_temp;' . 
+								 'self::$tpl_dir = $tpl_dir_temp;' . 
 								 '?>';
 								 
 			}
@@ -500,28 +501,28 @@ class RainTPL{
 	 */
 	private function path_replace( $html, $tpl_basedir ){
 		
-		if( raintpl::$path_replace ){
+		if( self::$path_replace ){
 
 			$exp = $sub = array();
 
-			if( in_array( "img", raintpl::$path_replace_list ) ){
+			if( in_array( "img", self::$path_replace_list ) ){
 				$exp = array( '/<img(.*?)src=(?:")http\:\/\/([^"]+?)(?:")/i', '/<img(.*?)src=(?:")([^"]+?)#(?:")/i', '/<img(.*?)src="(.*?)"/', '/<img(.*?)src=(?:\@)([^"]+?)(?:\@)/i' );
-				$sub = array( '<img$1src=@http://$2@', '<img$1src=@$2@', '<img$1src="' . raintpl::$base_url . raintpl::$tpl_dir . $tpl_basedir . '$2"', '<img$1src="$2"' );
+				$sub = array( '<img$1src=@http://$2@', '<img$1src=@$2@', '<img$1src="' . self::$base_url . self::$tpl_dir . $tpl_basedir . '$2"', '<img$1src="$2"' );
 			}
 			
-			if( in_array( "script", raintpl::$path_replace_list ) ){
+			if( in_array( "script", self::$path_replace_list ) ){
 				$exp = array_merge( $exp , array( '/<script(.*?)src=(?:")http\:\/\/([^"]+?)(?:")/i', '/<script(.*?)src=(?:")([^"]+?)#(?:")/i', '/<script(.*?)src="(.*?)"/', '/<script(.*?)src=(?:\@)([^"]+?)(?:\@)/i' ) );
-				$sub = array_merge( $sub , array( '<script$1src=@http://$2@', '<script$1src=@$2@', '<script$1src="' . raintpl::$base_url . raintpl::$tpl_dir . $tpl_basedir . '$2"', '<script$1src="$2"' ) );
+				$sub = array_merge( $sub , array( '<script$1src=@http://$2@', '<script$1src=@$2@', '<script$1src="' . self::$base_url . self::$tpl_dir . $tpl_basedir . '$2"', '<script$1src="$2"' ) );
 			}
 			
-			if( in_array( "link", raintpl::$path_replace_list ) ){
+			if( in_array( "link", self::$path_replace_list ) ){
 				$exp = array_merge( $exp , array( '/<link(.*?)href=(?:")http\:\/\/([^"]+?)(?:")/i', '/<link(.*?)href=(?:")([^"]+?)#(?:")/i', '/<link(.*?)href="(.*?)"/', '/<link(.*?)href=(?:\@)([^"]+?)(?:\@)/i' ) );
-				$sub = array_merge( $sub , array( '<link$1href=@http://$2@', '<link$1href=@$2@' , '<link$1href="' . raintpl::$base_url . raintpl::$tpl_dir . $tpl_basedir . '$2"', '<link$1href="$2"' ) );
+				$sub = array_merge( $sub , array( '<link$1href=@http://$2@', '<link$1href=@$2@' , '<link$1href="' . self::$base_url . self::$tpl_dir . $tpl_basedir . '$2"', '<link$1href="$2"' ) );
 			}
 			
-			if( in_array( "a", raintpl::$path_replace_list ) ){
+			if( in_array( "a", self::$path_replace_list ) ){
 				$exp = array_merge( $exp , array( '/<a(.*?)href=(?:")http\:\/\/([^"]+?)(?:")/i', '/<a(.*?)href="(.*?)"/' ) );
-				$sub = array_merge( $sub , array( '<a$1href=@http://$2@',  '<a$1href="' . raintpl::$base_url . '$2"' ) );
+				$sub = array_merge( $sub , array( '<a$1href=@http://$2@',  '<a$1href="' . self::$base_url . '$2"' ) );
 			}
 
 			/*
@@ -529,9 +530,9 @@ class RainTPL{
 						  '/<link(.*?)href=(?:")http\:\/\/([^"]+?)(?:")/i', '/<link(.*?)href=(?:")([^"]+?)#(?:")/i', '/<link(.*?)href="(.*?)"/', '/<link(.*?)href=(?:\@)([^"]+?)(?:\@)/i', 
 						  '/<a(.*?)href=(?:")http\:\/\/([^"]+?)(?:")/i', '/<a(.*?)href="(.*?)"/' );
 	
-			$sub = array( 	'<$1$2src=@http://$3@', '<$1$2src=@$3@', '<$1$2src="' . raintpl::$base_url . raintpl::$tpl_dir . $tpl_basedir . '$3"', '<$1$2src="$3"', 
-							'<link$1href=@http://$2@', '<link$1href=@$2@' , '<link$1href="' . raintpl::$base_url . raintpl::$tpl_dir . $tpl_basedir . '$2"', '<link$1href="$2"',
-							'<a$1href=@http://$2@',  '<a$1href="' . raintpl::$base_url . '$2"' );
+			$sub = array( 	'<$1$2src=@http://$3@', '<$1$2src=@$3@', '<$1$2src="' . self::$base_url . self::$tpl_dir . $tpl_basedir . '$3"', '<$1$2src="$3"', 
+							'<link$1href=@http://$2@', '<link$1href=@$2@' , '<link$1href="' . self::$base_url . self::$tpl_dir . $tpl_basedir . '$2"', '<link$1href="$2"',
+							'<a$1href=@http://$2@',  '<a$1href="' . self::$base_url . '$2"' );
 			*/
 			return preg_replace( $exp, $sub, $html );
 			
@@ -665,10 +666,10 @@ class RainTPL{
 	 */
 	private function function_check( $code ){
 
-		$preg = '#(\W|\s)' . implode( '(\W|\s)|(\W|\s)', raintpl::$black_list ) . '(\W|\s)#';
+		$preg = '#(\W|\s)' . implode( '(\W|\s)|(\W|\s)', self::$black_list ) . '(\W|\s)#';
 
 		// check if the function is in the black list (or not in white list)
-		if( count(raintpl::$black_list) && preg_match( $preg, $code, $match ) ){
+		if( count(self::$black_list) && preg_match( $preg, $code, $match ) ){
 
 			// find the line of the error
 			$line = 0;

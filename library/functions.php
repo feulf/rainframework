@@ -380,7 +380,7 @@
 	 * Send an email with selected template
 	 */
 	function email_tpl_send( $template = "generic/email", $to, $subject, $body, $from = null, $from_name = null, $attachment = null){
-		$tpl = new RainTPL();
+		$tpl = new TPL();
 		$tpl->assign("body", $body );
 		$body = $tpl->draw( $template, true );
 		return emailSend( $to, $subject, $body, $from, $from_name, $attachment );

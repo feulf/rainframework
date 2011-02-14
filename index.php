@@ -22,7 +22,7 @@
 	$loader->load_settings();			// load the settings
 	$loader->set_language('en');		// set the language
 	$loader->login();					// do login ( you must pass login=your_login and password=your_password)
-	$loader->set_theme('default');		// set theme
+	$loader->set_theme();				// set theme
 	$loader->set_page('index');			// set page layout
 	$loader->init_route();				// init the route
 
@@ -34,7 +34,6 @@
 	# to load the controller
 	#--------------------------------
 	$loader->auto_load_controller();
-
 
 
 

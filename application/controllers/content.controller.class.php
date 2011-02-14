@@ -9,7 +9,7 @@
 			$content_row = $this->content_obj->get();
 
 			// Load view
-			$tpl = new raintpl;
+			$tpl = new TPL;
 			$tpl->assign( $content_row );
 			$tpl->draw('content/content');
 

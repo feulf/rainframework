@@ -22,7 +22,6 @@
 	define( "CONFIG_DIR",		"application/config/" );
 	define( "LOG_DIR",			"application/log/" );
 	define( "MODULES_DIR",		"application/modules/" );
-	define( "TEMPLATES_DIR",	"application/templates/" );
 	define( "CACHE_DIR",		"application/cache/" );		//temp dir
 	define( "UPLOADS_DIR",		"application/uploads/" );	//uploads
 

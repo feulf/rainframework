@@ -17,9 +17,13 @@
 require_once LIBRARY_DIR . "functions.php";			// functions	
 require_once LIBRARY_DIR . "error.php";				// error manager
 require_once LIBRARY_DIR . "db.class.php";			// database
-require_once LIBRARY_DIR . "rain.tpl.class.php";	// template
-require_once LIBRARY_DIR . "controller.class.php";	// controller
+
 require_once LIBRARY_DIR . "model.class.php";		// model
+require_once LIBRARY_DIR . "view.class.php";		// view
+require_once LIBRARY_DIR . "tpl.class.php";			// view
+require_once LIBRARY_DIR . "controller.class.php";	// controller
+
+
 require_once LIBRARY_DIR . "user.functions.php";	// user
 
 
@@ -101,13 +105,19 @@ class Loader{
 	 * Connect to the database
 	 *
 	 */
-	function set_theme( $theme ){
-		if( is_dir( TEMPLATES_DIR . $theme ) ){
-			define( "THEME_DIR", TEMPLATES_DIR . $theme . "/" );
-			raintpl::$tpl_dir = THEME_DIR;
-			raintpl::$cache_dir = CACHE_DIR;
-			raintpl::$base_url = URL;
+	function set_theme( $theme = null ){
+		if( $theme )
+			$theme .= "/";
+
+		if( is_dir( VIEWS_DIR . $theme ) ){
+			define( "THEME_DIR", VIEWS_DIR . $theme . "/" );
+			tpl::$tpl_dir = THEME_DIR;
+			tpl::$cache_dir = CACHE_DIR;
+			tpl::$base_url = URL;
 		}
+		else
+			trigger_error( "THEME NOT FOUND: $theme", E_USER_WARNING );
+
 	}
 
 
@@ -174,20 +184,21 @@ class Loader{
 			trigger_error( "CONTROLLER: CLASS <b>{$controller}</b> NOT FOUND ", E_USER_WARNING );
 			return false;
 		}
-		
+
 		ob_start();
-			if( $action ){
-				if( is_callable( array($controller_obj,$action) )){
-						for($i=0,$n=count($params),$param="";$i<$n;$i++)
-							$param .= $i>0 ? ',$params['.$i.']' : '$params['.$i.']';
-						eval( '$return = $controller_obj->$action( ' . $param . ' );' );
-					}
-					else
-						$this->page = PAGE_NOT_FOUND;				
-				$html = ob_get_contents();
+		if( $action ){
+
+			if( is_callable( array($controller_obj,$action) )){
+				for($i=0,$n=count($params),$param="";$i<$n;$i++)
+					$param .= $i>0 ? ',$params['.$i.']' : '$params['.$i.']';
+				eval( '$html = $controller_obj->$action( ' . $param . ' );' );
 			}
-			ob_end_clean();
-			return $html;
+			else
+				$this->page = PAGE_NOT_FOUND;
+			$html = ob_get_contents();
+		}
+		ob_end_clean();
+		return $html;
 
 	}
 	
@@ -239,7 +250,7 @@ class Loader{
 	 *
 	 */
 	function draw( $return_string = false ){
-		$tpl = new RainTPL();
+		$tpl = new TPL();
 		$tpl->assign( $this->var );// assign all variable
 		
 		// - DEBUG ------

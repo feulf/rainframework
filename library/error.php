@@ -32,7 +32,7 @@
 	//------------------------------------------
 
 	// By default debug is true
-	if( isset($GLOBALS['debug']) )
+	if( !isset($GLOBALS['debug']) )
 		$GLOBALS['debug'] = true;
 
 	error_reporting(E_ALL | E_STRICT );					// Error reporting
@@ -41,12 +41,15 @@
 
 	$error_time = time();
 
-	// error reported: //E_USER_ERROR | E_COMPILE_WARNING | E_COMPILE_ERROR | E_CORE_WARNING | E_CORE_ERROR | E_ERROR;	// Error type must be reported if DEBUG = false
-	$error_report_type 	  = -1;
+	// error reported by email (only when $debug is false)
+	// E_USER_ERROR | E_COMPILE_WARNING | E_COMPILE_ERROR | E_CORE_WARNING | E_CORE_ERROR | E_ERROR	
+	// set null to disable, -1 to enable all errors
+	$error_report_type = -1;
 
-	// error logged: //E_USER_ERROR | E_COMPILE_WARNING | E_COMPILE_ERROR | E_CORE_WARNING | E_CORE_ERROR | E_ERROR;	// Error type must be reported if DEBUG = false
+	// error logged on file (only when $debug is false)
+	// E_USER_ERROR | E_COMPILE_WARNING | E_COMPILE_ERROR | E_CORE_WARNING | E_CORE_ERROR | E_ERROR	
+	// set null to disable, -1 to enable all errors
 	$error_log_file_type  = null;
-
 
 
 	// errors name
