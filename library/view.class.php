@@ -46,12 +46,30 @@ class View{
 		$this->tpl_obj = new $template_class( self::$tpl_dir, self::$cache_dir, self::$base_url );
 	}
 
+	/**
+	 * Assign variables to the template
+	 *
+	 */
 	function assign( $variable, $value = null ){
 		$this->tpl_obj->assign( $variable, $value );
 	}
 
+
+	/**
+	 * Draw the template
+	 *
+	 */
 	function draw( $template, $return_string = false ){
 		return $this->tpl_obj->draw( $template, $return_string );
+	}
+	
+	
+	/**
+	 * Return true if the template is cached
+	 *
+	 */
+	function is_cached( $template, $expire_time = HOUR ){
+		return $this->tpl_obj->is_cached( $template, $expire_time );
 	}
 	
 }

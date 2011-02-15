@@ -13,16 +13,16 @@
 			raintpl::$base_url = $base_url;
 		}
 
-		function is_cache( $tpl ){
-			if( $this->cache = $this->cache( $tpl ) )
-				return true;
-		}
-
 		function draw( $tpl, $return_string = null ){
 			if( $this->cache )
 				return $this->html;
 			else
 				return parent::draw( $tpl, $return_string );
+		}
+		
+		function is_cached( $tpl, $expire_time = HOUR ){
+			if( $this->cache = $this->cache( $tpl, $expire_time ) )
+				return true;
 		}
 
 	}
