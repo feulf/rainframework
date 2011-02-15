@@ -39,7 +39,6 @@ define( "RAINTPL_CACHE_EXPIRE_TIME", 3600 );
  */
 class RainTPL{
 
-
 	// -------------------------
 	// 	CONFIGURATION 
 	// -------------------------
@@ -195,7 +194,7 @@ class RainTPL{
 				$this->tpl['template_file']			= $this->tpl['tpl_dir'] . $this->tpl['tpl_basename'] . '.' . $this->tpl_ext;		// template filename
 			
 				// if the template doesn't exists throw an error
-				if( !file_exists( $this->tpl['tpl_filename'] ) ){
+				if( !file_exists( $this->tpl['template_file'] ) ){
 					trigger_error( 'Template '.$this->tpl['tpl_basename'].' not found!' );
 					return '<div style="background:#f8f8ff;border:1px solid #aaaaff;padding:10px;">Template <b>'.$this->tpl['tpl_basename'].'</b> not found</div>';
 				}

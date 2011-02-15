@@ -20,7 +20,6 @@ require_once LIBRARY_DIR . "db.class.php";			// database
 
 require_once LIBRARY_DIR . "model.class.php";		// model
 require_once LIBRARY_DIR . "view.class.php";		// view
-require_once LIBRARY_DIR . "tpl.class.php";			// view
 require_once LIBRARY_DIR . "controller.class.php";	// controller
 
 
@@ -111,9 +110,9 @@ class Loader{
 
 		if( is_dir( VIEWS_DIR . $theme ) ){
 			define( "THEME_DIR", VIEWS_DIR . $theme . "/" );
-			tpl::$tpl_dir = THEME_DIR;
-			tpl::$cache_dir = CACHE_DIR;
-			tpl::$base_url = URL;
+			view::$tpl_dir = THEME_DIR;
+			view::$cache_dir = CACHE_DIR;
+			view::$base_url = URL;
 		}
 		else
 			trigger_error( "THEME NOT FOUND: $theme", E_USER_WARNING );
@@ -185,19 +184,19 @@ class Loader{
 			return false;
 		}
 
-		ob_start();
 		if( $action ){
 
 			if( is_callable( array($controller_obj,$action) )){
+				ob_start();
 				for($i=0,$n=count($params),$param="";$i<$n;$i++)
 					$param .= $i>0 ? ',$params['.$i.']' : '$params['.$i.']';
-				eval( '$html = $controller_obj->$action( ' . $param . ' );' );
+				eval( '$controller_obj->$action( ' . $param . ' );' );
+				$html = ob_get_contents();
+				ob_end_clean();
 			}
 			else
 				$this->page = PAGE_NOT_FOUND;
-			$html = ob_get_contents();
 		}
-		ob_end_clean();
 		return $html;
 
 	}
@@ -250,7 +249,7 @@ class Loader{
 	 *
 	 */
 	function draw( $return_string = false ){
-		$tpl = new TPL();
+		$tpl = new View();
 		$tpl->assign( $this->var );// assign all variable
 		
 		// - DEBUG ------

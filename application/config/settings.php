@@ -23,6 +23,11 @@
 
 	define( "DEFAULT_CONTROLLER", "content" );
 	define( "DEFAULT_ACTION", "index" );
+	
+	// you can define your own template engine in library/view
+	// Rain Framework by default implements "raintpl" and "view"
+	// raintpl loads html template, view uses raintpl for loading php templates
+	define( "DEFAULT_VIEW_CLASS", "raintpl" );	
 
 	define( "PAGE_NOT_FOUND", "not_found" );
 
