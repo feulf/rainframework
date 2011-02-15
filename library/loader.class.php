@@ -33,7 +33,7 @@ require_once LIBRARY_DIR . "user.functions.php";	// user
  */
 class Loader{
 
-	private $var, $page;
+	private $var, $page, $page_not_found;
 	private $controller, $action, $params;
 	public $controllers_dir = CONTROLLERS_DIR, $models_dir = MODELS_DIR;
 
@@ -171,8 +171,9 @@ class Loader{
 		if( file_exists($file = $this->controllers_dir . $controller . ".controller.class.php") )
 			require_once $file;
 		else{
+			header("HTTP/1.0 404 Not Found");
 			trigger_error( "CONTROLLER: FILE <b>{$file}</b> NOT FOUND ", E_USER_WARNING );
-			$this->page = PAGE_NOT_FOUND;
+			$this->page_not_found = true;
 			return false;
 		}
 
@@ -180,7 +181,9 @@ class Loader{
 		if( class_exists($class) )
 			$controller_obj = new $class;			
 		else{
+			header("HTTP/1.0 404 Not Found");
 			trigger_error( "CONTROLLER: CLASS <b>{$controller}</b> NOT FOUND ", E_USER_WARNING );
+			$this->page_not_found = true;
 			return false;
 		}
 
@@ -194,8 +197,10 @@ class Loader{
 				$html = ob_get_contents();
 				ob_end_clean();
 			}
-			else
-				$this->page = PAGE_NOT_FOUND;
+			else{
+				header("HTTP/1.0 404 Not Found");
+				$this->page_not_found = true;
+			}
 		}
 		return $html;
 
@@ -249,6 +254,7 @@ class Loader{
 	 *
 	 */
 	function draw( $return_string = false ){
+		
 		$tpl = new View();
 		$tpl->assign( $this->var );// assign all variable
 		
@@ -257,8 +263,12 @@ class Loader{
 		$tpl->assign( "n_query", $this->db ? $this->db->get_executed_query() : 0 );
 		// --------------
 		
+		if( $this->page_not_found )
+			$this->page = PAGE_NOT_FOUND;
+
 		return $tpl->draw( $this->page, $return_string );
 	}
+	
 	
 
 	
