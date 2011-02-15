@@ -37,7 +37,6 @@ define( "RAINTPL_CACHE_EXPIRE_TIME", 3600 );
  * Load and draw templates
  *
  */
-
 class RainTPL{
 
 
@@ -55,7 +54,7 @@ class RainTPL{
 
 		// Black List - define the black list to disable variables or functions
 		// is advised to leave always '\$this' into the black_list to avoid
-		static public $black_list = array( '\$this', '_SESSION', '_SERVER', '_ENV', 'raintpl::', 'self::', 'eval', 'exec', 'file_exists' );
+		static public $black_list = array( '\$this', '_SESSION', '_SERVER', '_ENV', 'self::', 'eval', 'exec', 'file_exists' );
 
 	// -------------------------
 
@@ -160,11 +159,11 @@ class RainTPL{
 		$this->check_template( $tpl_name );
 
 		// check if there's a valid cache
-		if( !$this->tpl['tpl_has_changed'] && file_exists( $this->tpl['static_cache_filename'] ) && ( time() - filemtime( $this->tpl['static_cache_filename'] ) < $expiration_time ) )
+		if( file_exists( $this->tpl['static_cache_filename'] ) && ( time() - filemtime( $this->tpl['static_cache_filename'] ) < $expiration_time ) )
 			return substr( file_get_contents( $this->tpl['static_cache_filename'] ), 43 );
 		else{
 			//delete the cache of the selected template
-			array_map( "unlink", glob( $this->tpl['static_cache_filename'] ) );
+			array_map( "unlink", glob( $this->tpl['cache_dir'] . $this->tpl['tpl_basename'] . ".s.php") );
 			$this->static_cache = true;
 		}
 
@@ -192,25 +191,35 @@ class RainTPL{
 			$this->tpl['tpl_dir'] 				= self::$tpl_dir . $this->tpl['tpl_basedir'];								// template directory
 
 			// If template extension is php RainTPL loads Views (php templates) and is not necessary to compile the template
-			if( $this->tpl_ext == 'php' )
+			if( $this->tpl_ext == 'php' ){
 				$this->tpl['template_file']			= $this->tpl['tpl_dir'] . $this->tpl['tpl_basename'] . '.' . $this->tpl_ext;		// template filename
+			
+				// if the template doesn't exists throw an error
+				if( !file_exists( $this->tpl['tpl_filename'] ) ){
+					trigger_error( 'Template '.$this->tpl['tpl_basename'].' not found!' );
+					return '<div style="background:#f8f8ff;border:1px solid #aaaaff;padding:10px;">Template <b>'.$this->tpl['tpl_basename'].'</b> not found</div>';
+				}
+			}
 
 			// set the template path and compile if necessary
 			else{
+				
+				$this->tpl['md5_base_url'] = substr( md5( self::$base_url ), 0, 5 );
 	
 				$this->tpl['tpl_filename'] 			= $this->tpl['tpl_dir'] . $this->tpl['tpl_basename'] . '.' . $this->tpl_ext;							// template filename
 				$this->tpl['cache_dir'] 			= self::$cache_dir . $this->tpl['tpl_dir'];															// cache directory
-				$this->tpl['template_file']			= $this->tpl['cache_filename']		= $this->tpl['cache_dir'] . $this->tpl['tpl_basename'] . '.php';	// cache filename
-				$this->tpl['static_cache_filename'] = $this->tpl['cache_dir'] . $this->tpl['tpl_basename'] . '.s.php';										// static cache filename
+				$this->tpl['template_file']			= $this->tpl['cache_filename']		= $this->tpl['cache_dir'] . $this->tpl['tpl_basename'] . '.' . $this->tpl['md5_base_url'] . '.php';	// cache filename
+				$this->tpl['static_cache_filename'] = $this->tpl['cache_dir'] . $this->tpl['tpl_basename'] . '.' . $this->tpl['md5_base_url'] . '.s.php';										// static cache filename
+				
 
 				// if the template doesn't exists throw an error
-				if( RAINTPL_CHECK_TEMPLATE_UPDATE && $this->tpl_ext!='php' && !file_exists( $this->tpl['tpl_filename'] ) ){
+				if( RAINTPL_CHECK_TEMPLATE_UPDATE && !file_exists( $this->tpl['tpl_filename'] ) ){
 					trigger_error( 'Template '.$this->tpl['tpl_basename'].' not found!' );
 					return '<div style="background:#f8f8ff;border:1px solid #aaaaff;padding:10px;">Template <b>'.$this->tpl['tpl_basename'].'</b> not found</div>';
 				}
 
 				// file doesn't exsist, or the template was updated, Rain will compile the template
-				if( RAINTPL_CHECK_TEMPLATE_UPDATE && $this->tpl_ext!='php' && ( !file_exists( $this->tpl['cache_filename'] ) || filemtime($this->tpl['cache_filename']) < filemtime($this->tpl['tpl_filename']) ) ){
+				if( RAINTPL_CHECK_TEMPLATE_UPDATE && ( !file_exists( $this->tpl['cache_filename'] ) || filemtime($this->tpl['cache_filename']) < filemtime($this->tpl['tpl_filename']) ) ){
 					$this->compileFile( $this->tpl['tpl_basedir'], $this->tpl['tpl_filename'], $this->tpl['cache_dir'], $this->tpl['cache_filename'] );
 					$this->tpl['tpl_has_changed'] = true;
 				}
@@ -233,6 +242,9 @@ class RainTPL{
 	 */
 
 	private function compileFile( $tpl_basedir, $tpl_filename, $cache_dir, $cache_filename ){
+
+		// delete the old template file
+		array_map( "unlink", glob( $this->tpl['cache_dir'] . $this->tpl['tpl_basename'] . "*" ) );
 
 		//read template file
 		$this->tpl['source'] = $template_code = file_get_contents( $tpl_filename );

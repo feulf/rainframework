@@ -344,7 +344,7 @@
 				$src = $match[2][$i];
 				if( substr( $src, 0, 7 ) != "http://" ){
 					$embed_image[] = $src;
-					$ext = fileExt($src);
+					$ext = file_ext($src);
 					$body = eregi_replace( $tag, $match[1][$i] . 'src="cid:img_'.$i.'"' . $match[3][$i], $body );
 					$mail->AddEmbeddedImage( $src, "img_{$i}", "", "base64", "image/$ext" );	// src, id, name, econding, type
 				}
@@ -431,7 +431,7 @@
 	 * @param string $file filename
 	 */
 	function file_ext($filename){
-		return end( (explode('.', $filename)) );
+		return substr(strrchr($filename, '.'),1);
 	}
 
 
