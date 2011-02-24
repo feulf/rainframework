@@ -241,8 +241,6 @@ class Loader{
 	function assign( $variable, $value = null ){
 		if( is_array( $variable ) )
 			$this->var += $variable;
-		elseif( is_object( $variable ) )
-			$this->var += (array) $variable;
 		else
 			$this->var[ $variable ] = $value;
 	}
@@ -258,11 +256,20 @@ class Loader{
 		$tpl = new View();
 		$tpl->assign( $this->var );// assign all variable
 		
+		// - HEAD ------
+		global $style, $script, $javascript, $javascript_onload;
+		$tpl->assign( "style", $style );
+		$tpl->assign( "script", $script );
+
+		if( $javascript_onload ) $javascript .=  "\n" . "$(function(){" . "\n" . "	$javascript_onload" . "\n" . "});" . "\n";
+		$tpl->assign( "javascript", "<script type=\"text/javascript\">" . "\n" .$javascript . "\n" . "</script>" );
+		// --------------
+
 		// - DEBUG ------
 		$tpl->assign( "execution_time", timer() );
 		$tpl->assign( "n_query", $this->db ? $this->db->get_executed_query() : 0 );
 		// --------------
-		
+
 		if( $this->page_not_found )
 			$this->page = PAGE_NOT_FOUND;
 

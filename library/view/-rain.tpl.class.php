@@ -3,7 +3,7 @@
 /**
  *  RainTPL easy template engine load HTML template.
  * 
- *  @version 2.6.1 beta
+ *  @version 2.6
  *  @author Federico Ulfo <rainelemental@gmail.com> | www.federicoulfo.it
  *  @copyright RainTPL is under GNU/LGPL 3 License
  *  @link http://www.raintpl.com
@@ -33,7 +33,6 @@ define( "RAINTPL_CACHE_EXPIRE_TIME", 3600 );
 
 
 
-
 /**
  * Load and draw templates
  *
@@ -44,62 +43,17 @@ class RainTPL{
 	// 	CONFIGURATION 
 	// -------------------------
 
-		/**
-		 * Template directory
-		 *
-		 * @var string
-		 */
-		static $tpl_dir = "tpl/";
+		static 	public 	$tpl_dir = "tpl/",		// template directory
+						$cache_dir = "tmp/",	// template cache/compile directory
+						$base_url = null;		// template base url (useful for absolute path eg. http://www.raintpl.com )
 
+		// Path replace is a cool features that replace all relative paths of images (<img src="...">), stylesheet (<link href="...">), script (<script src="...">) and link (<a href="...">)
+		static public $path_replace = true,	// set true if you want to use the path replace
+					  $path_replace_list = array( 'a','img','link','script' ); // You can set what the path_replace method will replace - AVAIBLE OPTIONS: a, img, link, script
 
-		/**
-		 * Cache directory. Is the directory where RainTPL will compile the template and save the cache
-		 *
-		 * @var string
-		 */
-		static $cache_dir = "tmp/";
-
-
-		/**
-		 * Template base URL. RainTPL will add this URL to the relative paths of element selected in $path_replace_list.
-		 *
-		 * @var string
-		 */
-		static $base_url = null;
-
-
-		/**
-		 * Template extension.
-		 *
-		 * @var string
-		 */
-		static $tpl_ext = "html";
-
-
-		/**
-		 * Path replace is a cool features that replace all relative paths of images (<img src="...">), stylesheet (<link href="...">), script (<script src="...">) and link (<a href="...">)
-		 * Set true to enable the path replace.
-		 *
-		 * @var unknown_type
-		 */
-		static $path_replace = true;
-
-
-		/**
-		 * You can set what the path_replace method will replace.
-		 * Avaible options: a, img, link, script
-		 *
-		 * @var array
-		 */
-		static $path_replace_list = array( 'a','img','link','script' ); 
-
-
-		/**
-		 * You can define in the black list what string are disabled into the template tags
-		 *
-		 * @var unknown_type
-		 */
-		static $black_list = array( '\$this', '_SESSION', '_SERVER', '_ENV', 'raintpl::', 'self::', 'eval', 'exec', 'unlink', 'rmdir' );
+		// Black List - define the black list to disable variables or functions
+		// is advised to leave always '\$this' into the black_list to avoid
+		static public $black_list = array( '\$this', '_SESSION', '_SERVER', '_ENV', 'self::', 'eval', 'exec', 'file_exists' );
 
 	// -------------------------
 
@@ -107,17 +61,13 @@ class RainTPL{
 	// -------------------------
 	// 	RAINTPL VARIABLES
 	// -------------------------
-
-		/**
-		 * Is the array where RainTPL keep the variables assigned
-		 *
-		 * @var array
-		 */
-		public $var = array();
 	
-		private $tpl = array(),				 // variables to keep the template directories and info
-			   	$static_cache = false;		 // static cache enabled / disabled
-
+		public  $var = array(),				// variables assigned to the templates
+				$tpl_ext = "html";			// template extension. Set "php" to loads View
+	
+		private $tpl = array(),				// array of raintpl variables
+			   	$static_cache = false;		// static cache enabled / disabled
+	
 	// -------------------------
 
 
@@ -130,12 +80,16 @@ class RainTPL{
 	 */
 
 	function assign( $variable, $value = null ){
+
 		if( is_array( $variable ) )
 			$this->var += $variable;
+		elseif( is_object( $variable ) )
+			$this->var += (array) $variable;
 		else
 			$this->var[ $variable ] = $value;
+
 	}
-	
+
 
 
 	/**
@@ -150,19 +104,21 @@ class RainTPL{
 
 	function draw( $tpl_name, $return_string = false ){
 
+		// compile the template if necessary and set the template filepath
 		$this->check_template( $tpl_name );
 
 		//----------------------
 		// load the template
 		//----------------------
-
+	
 			ob_start();
 			extract( $this->var );
-			include $this->tpl['cache_filename'];
+			include $this->tpl['template_file'];
 			$raintpl_contents = ob_get_contents();
 			ob_end_clean();
 		
 		//----------------------
+
 
 
 		//----------------------
@@ -171,11 +127,12 @@ class RainTPL{
 
 			if( $this->static_cache )
 				file_put_contents( $this->tpl['static_cache_filename'], "<?php if(!class_exists('raintpl')){exit;}?>" . $raintpl_contents );
-		
-		//----------------------
-		
+				
 
-		// free memory
+		//----------------------
+
+
+		// unset tpl variable
 		unset( $this->tpl );
 
 		// return or print the template
@@ -183,6 +140,8 @@ class RainTPL{
 
 	}
 	
+
+
 
 
 	/**
@@ -193,61 +152,98 @@ class RainTPL{
 	 * @return string it return the HTML or null if the cache must be recreated
 	 */
 
-	function cache( $tpl_name, $expire_time = RAINTPL_CACHE_EXPIRE_TIME ){
+	function cache( $tpl_name, $expiration_time = RAINTPL_CACHE_EXPIRE_TIME ){
 
-		if( !$this->check_template( $tpl_name ) && file_exists( $this->tpl['static_cache_filename'] ) && ( time() - filemtime( $this->tpl['static_cache_filename'] ) < $expire_time ) )
+		// compile the template if necessary and set the template filepath
+		$this->check_template( $tpl_name );
+
+		// check if there's a valid cache
+		if( file_exists( $this->tpl['static_cache_filename'] ) && ( time() - filemtime( $this->tpl['static_cache_filename'] ) < $expiration_time ) )
 			return substr( file_get_contents( $this->tpl['static_cache_filename'] ), 43 );
 		else{
 			//delete the cache of the selected template
-			array_map( "unlink", glob( $this->tpl['static_cache_filename'] ) );
+			array_map( "unlink", glob( $this->tpl['cache_dir'] . $this->tpl['tpl_basename'] . ".s.php") );
 			$this->static_cache = true;
 		}
+
 	}
 
-
-
-
-	// check if has to compile the template
-	// return true if the template has changed
-	private function check_template( $tpl_name ){
-
-		if( !isset($this->tpl['checked']) ){
-			
-			$tpl_basename = basename( $tpl_name );														// template basename
-			$tpl_basedir = strpos($tpl_name,"/") ? dirname($tpl_name) . '/' : null;						// template basedirectory
-			$tpl_dir = self::$tpl_dir . $tpl_basedir;								// template directory
-			$this->tpl['tpl_filename'] = $tpl_dir . $tpl_basename . '.' . self::$tpl_ext;	// template filename
-			$cache_dir = self::$cache_dir . $tpl_dir;	// cache directory
-			$temp_cache_filename = $cache_dir . $tpl_basename;
-			$this->tpl['cache_filename']		= $temp_cache_filename . '.php';	// cache filename
-			$this->tpl['static_cache_filename'] = $temp_cache_filename . '.s.php';	// static cache filename			
-
-			// if the template doesn't exsist throw an error
-			if( RAINTPL_CHECK_TEMPLATE_UPDATE && !file_exists( $this->tpl['tpl_filename'] ) ){
-				trigger_error( 'Template '.$tpl_basename.' not found!' );
-				return '<div style="background:#f8f8ff;border:1px solid #aaaaff;padding:10px;">Template <b>'.$tpl_basename.'</b> not found</div>';
-			}
-
-			// file doesn't exsist, or the template was updated, Rain will compile the template
-			if( RAINTPL_CHECK_TEMPLATE_UPDATE && ( !file_exists( $this->tpl['cache_filename'] ) || filemtime($this->tpl['cache_filename']) < filemtime( $this->tpl['tpl_filename'] ) ) ){
-				$this->compileFile( $tpl_basename, $tpl_basedir, $this->tpl['tpl_filename'], $cache_dir, $this->tpl['cache_filename'] );
-				return true;
-			}
-			$this->tpl['checked'] = true;
-		}
-	}
 
 
 
 
 	/**
-	 * Compile and write the compiled template file
-	 * @access private
+	 * Check the template and compile it if necessary
+	 * Also set template filepath
+	 *
+	 * @param string $tpl_name name of the template
 	 */
-	private function compileFile( $tpl_basename, $tpl_basedir, $tpl_filename, $cache_dir, $cache_filename ){
+	private function check_template( $tpl_name ){
+
+		// if already checked is not necessary to check again
+		// optimized for avoid double checking when use cache method
+		if( !isset($this->tpl['checked']) ){
+
+			$this->tpl['tpl_has_changed'] 		= false;																		// template has changed
+			$this->tpl['tpl_basename'] 			= basename( $tpl_name );														// template basename
+			$this->tpl['tpl_basedir'] 			= strpos($tpl_name,"/") ? dirname($tpl_name) . '/' : null;						// template basedirectory
+			$this->tpl['tpl_dir'] 				= self::$tpl_dir . $this->tpl['tpl_basedir'];								// template directory
+
+			// If template extension is php RainTPL loads Views (php templates) and is not necessary to compile the template
+			if( $this->tpl_ext == 'php' ){
+				$this->tpl['template_file']			= $this->tpl['tpl_dir'] . $this->tpl['tpl_basename'] . '.' . $this->tpl_ext;		// template filename
+			
+				// if the template doesn't exists throw an error
+				if( !file_exists( $this->tpl['template_file'] ) ){
+					trigger_error( 'Template '.$this->tpl['tpl_basename'].' not found!' );
+					return '<div style="background:#f8f8ff;border:1px solid #aaaaff;padding:10px;">Template <b>'.$this->tpl['tpl_basename'].'</b> not found</div>';
+				}
+			}
+
+			// set the template path and compile if necessary
+			else{
+				
+				$this->tpl['md5_base_url'] = substr( md5( self::$base_url ), 0, 5 );
+	
+				$this->tpl['tpl_filename'] 			= $this->tpl['tpl_dir'] . $this->tpl['tpl_basename'] . '.' . $this->tpl_ext;							// template filename
+				$this->tpl['cache_dir'] 			= self::$cache_dir . $this->tpl['tpl_dir'];															// cache directory
+				$this->tpl['template_file']			= $this->tpl['cache_filename']		= $this->tpl['cache_dir'] . $this->tpl['tpl_basename'] . '.' . $this->tpl['md5_base_url'] . '.php';	// cache filename
+				$this->tpl['static_cache_filename'] = $this->tpl['cache_dir'] . $this->tpl['tpl_basename'] . '.' . $this->tpl['md5_base_url'] . '.s.php';										// static cache filename
+				
+
+				// if the template doesn't exists throw an error
+				if( RAINTPL_CHECK_TEMPLATE_UPDATE && !file_exists( $this->tpl['tpl_filename'] ) ){
+					trigger_error( 'Template '.$this->tpl['tpl_basename'].' not found!' );
+					return '<div style="background:#f8f8ff;border:1px solid #aaaaff;padding:10px;">Template <b>'.$this->tpl['tpl_basename'].'</b> not found</div>';
+				}
+
+				// file doesn't exsist, or the template was updated, Rain will compile the template
+				if( RAINTPL_CHECK_TEMPLATE_UPDATE && ( !file_exists( $this->tpl['cache_filename'] ) || filemtime($this->tpl['cache_filename']) < filemtime($this->tpl['tpl_filename']) ) ){
+					$this->compileFile( $this->tpl['tpl_basedir'], $this->tpl['tpl_filename'], $this->tpl['cache_dir'], $this->tpl['cache_filename'] );
+					$this->tpl['tpl_has_changed'] = true;
+				}
+
+			}
+
+			// template and variable was checked
+			$this->tpl['checked'] = true;
+		}
+	}
+	
+
+	
+
+	
+
+	/**
+	 * Compile and write the compiled template file
+	 *
+	 */
+
+	private function compileFile( $tpl_basedir, $tpl_filename, $cache_dir, $cache_filename ){
 
 		// delete the old template file
-		array_map( "unlink", glob( $cache_dir . $tpl_basename . "*.php" ) );
+		array_map( "unlink", glob( $this->tpl['cache_dir'] . $this->tpl['tpl_basename'] . "*" ) );
 
 		//read template file
 		$this->tpl['source'] = $template_code = file_get_contents( $tpl_filename );
@@ -263,9 +259,6 @@ class RainTPL{
 
 		//compile template
 		$template_compiled = "<?php if(!class_exists('raintpl')){exit;}?>" . $this->compileTemplate( $template_code, $tpl_basedir );
-
-		// fix the php-eating-newline-after-closing-tag-problem
-		$template_compiled = str_replace( "?>\n", "?>\n\n", $template_compiled );
 
 		// create directories
 		if( !is_dir( $cache_dir ) )
@@ -287,7 +280,7 @@ class RainTPL{
 	private function compileTemplate( $template_code, $tpl_basedir ){
 
 		//tag list
-		$tag_regexp = '/(\{loop(?: name){0,1}="\${0,1}(?:.*?)"\})|(\{\/loop\})|(\{if(?: condition){0,1}="(?:.*?)"\})|(\{elseif(?: condition){0,1}="(?:.*?)"\})|(\{else\})|(\{\/if\})|(\{function="(?:.*?)"\})|(\{noparse\})|(\{\/noparse\})|(\{ignore\})|(\{\/ignore\})|(\{include="(?:.*?)"(?: cache="(?:.*?)")?\})/';
+		$tag_regexp = '/(\{loop(?: name){0,1}="(?:\$){0,1}(?:.*?)"\})|(\{\/loop\})|(\{if(?: condition){0,1}="(?:.*?)"\})|(\{elseif(?: condition){0,1}="(?:.*?)"\})|(\{else\})|(\{\/if\})|(\{function="(?:.*?)"\})|(\{noparse\})|(\{\/noparse\})|(\{ignore\})|(\{\/ignore\})|(\{include="(?:.*?)"(?: cache="(?:.*?)")?\})/';
 
 		//split the code with the tags regexp
 		$template_code = preg_split ( $tag_regexp, $template_code, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
@@ -377,7 +370,7 @@ class RainTPL{
 			}
 
 	 		//loop
-	 		elseif( preg_match( '/\{loop(?: name){0,1}="\${0,1}(.*?)"\}/', $html, $code ) ){
+	 		elseif( preg_match( '/\{loop(?: name){0,1}="(?:\$){0,1}(.*?)"\}/', $html, $code ) ){
 	 			
 	 			//increase the loop counter
 	 			$level++;
@@ -417,7 +410,7 @@ class RainTPL{
 				
 				//increase open if counter (for intendation)
 				$open_if++;
-				
+
 				//tag
 				$tag = $code[ 0 ];
 
@@ -437,11 +430,17 @@ class RainTPL{
 			//elseif
 			elseif( preg_match( '/\{elseif(?: condition){0,1}="(.*?)"\}/', $html, $code ) ){
 
+				//increase open if counter (for intendation)
+				$open_if++;
+
 				//tag
 				$tag = $code[ 0 ];
 
 				//condition attribute
 				$condition = $code[ 1 ];
+
+				// check if there's any function disabled by black_list
+				$this->function_check( $tag );
 
 				//variable substitution into condition (no delimiter into the condition)
 				$parsed_condition = $this->var_replace( $condition, $tag_left_delimiter = null, $tag_right_delimiter = null, $php_left_delimiter = null, $php_right_delimiter = null, $parent_loop[ $level ] );				
@@ -477,7 +476,7 @@ class RainTPL{
 
 				//function
 				$function = $code[ 1 ];
-
+				
 				// check if there's any function disabled by black_list
 				$this->function_check( $tag );
 
@@ -492,7 +491,7 @@ class RainTPL{
 			else{
 
 				//variables substitution (es. {$title})
-				$compiled_code .= $this->html_var_replace( $html, $left_delimiter = '\{', $right_delimiter = '\}', $php_left_delimiter = '<?php ', $php_right_delimiter = ';?>', $parent_loop[ $level ], $echo = true );
+				$compiled_code .= $this->var_replace( $html, $left_delimiter = '\{', $right_delimiter = '\}', $php_left_delimiter = '<?php ', $php_right_delimiter = ';?>', $parent_loop[ $level ], $echo = true );
 
 			}
 		}
@@ -537,6 +536,15 @@ class RainTPL{
 				$sub = array_merge( $sub , array( '<a$1href=@http://$2@',  '<a$1href="' . self::$base_url . '$2"' ) );
 			}
 
+			/*
+			$exp = array( '/<(img|script)(.*?)src=(?:")http\:\/\/([^"]+?)(?:")/i', '/<(img|script)(.*?)src=(?:")([^"]+?)#(?:")/i', '/<(img|script)(.*?)src="(.*?)"/', '/<(img|script)(.*?)src=(?:\@)([^"]+?)(?:\@)/i',
+						  '/<link(.*?)href=(?:")http\:\/\/([^"]+?)(?:")/i', '/<link(.*?)href=(?:")([^"]+?)#(?:")/i', '/<link(.*?)href="(.*?)"/', '/<link(.*?)href=(?:\@)([^"]+?)(?:\@)/i', 
+						  '/<a(.*?)href=(?:")http\:\/\/([^"]+?)(?:")/i', '/<a(.*?)href="(.*?)"/' );
+	
+			$sub = array( 	'<$1$2src=@http://$3@', '<$1$2src=@$3@', '<$1$2src="' . self::$base_url . self::$tpl_dir . $tpl_basedir . '$3"', '<$1$2src="$3"', 
+							'<link$1href=@http://$2@', '<link$1href=@$2@' , '<link$1href="' . self::$base_url . self::$tpl_dir . $tpl_basedir . '$2"', '<link$1href="$2"',
+							'<a$1href=@http://$2@',  '<a$1href="' . self::$base_url . '$2"' );
+			*/
 			return preg_replace( $exp, $sub, $html );
 			
 		}
@@ -548,101 +556,34 @@ class RainTPL{
 
 
 	
-	// replace var const and functions
-	function html_var_replace( $html, $tag_left_delimiter, $tag_right_delimiter, $php_left_delimiter = null, $php_right_delimiter = null, $loop_name = null, $echo = null ){
+
+
+
+	
+	/**
+	 * Variable substitution
+	 *
+	 * @param string $html Html code
+	 * @param string $tag_left_delimiter default {
+	 * @param string $tag_right_delimiter default }
+	 * @param string $php_left_delimiter default <?php=
+	 * @param string $php_right_delimiter  default ;?>
+	 * @param string $loop_name Loop name
+	 * @param string $echo if is true make the variable echo
+	 * @return string Replaced code
+	 */
+	function var_replace( $html, $tag_left_delimiter, $tag_right_delimiter, $php_left_delimiter = null, $php_right_delimiter = null, $loop_name = null, $echo = null ){
 
 
 		// const
 		$html = preg_replace( '/\{\#(\w+)\#\}/', $php_left_delimiter . ( $echo ? " echo " : null ) . '\\1' . $php_right_delimiter, $html );
 
 		
-		preg_match_all( '/' . '\{\#{0,1}(\"{0,1}\w*\"{0,1})(\|.*?)\}' . '/', $html, $matches );
-		for( $i=0, $n=count($matches[0]); $i<$n; $i++ ){
-
-			//complete tag ex: {$news.title|substr:0,100}
-			$tag = $matches[ 0 ][ $i ];
-
-			//variable name ex: news.title
-			$var = $matches[ 1 ][ $i ];
-
-			
-			//function and parameters associate to the variable ex: substr:0,100
-			$extra_var = $matches[ 2 ][ $i ];
-			
-			// check if there's any function disabled by black_list
-			$this->function_check( $tag );
-
-			$extra_var = $this->var_replace( $extra_var, null, null, null, null, $loop_name );
-			
-			// check if there's an operator = in the variable tags, if there's this is an initialization so it will not output any value
-			$is_init_variable = preg_match( "/^(\s*?)\=[^=](.*?)$/", $extra_var );
-			
-			//function associate to variable
-			$function_var = ( $extra_var and $extra_var[0] == '|') ? substr( $extra_var, 1 ) : null;
-			
-			//variable path split array (ex. $news.title o $news[title]) or object (ex. $news->title)
-			$temp = preg_split( "/\.|\[|\-\>/", $var );
-			
-			//variable name
-			$var_name = $temp[ 0 ];
-			
-			//variable path
-			$variable_path = substr( $var, strlen( $var_name ) );
-			
-			//parentesis transform [ e ] in [" e in "]
-			$variable_path = str_replace( '[', '["', $variable_path );
-			$variable_path = str_replace( ']', '"]', $variable_path );
-			
-			//transform .$variable in ["$variable"]
-			$variable_path = preg_replace('/\.\$(\w+)/', '["$\\1"]', $variable_path );
-			
-			//transform [variable] in ["variable"]
-			$variable_path = preg_replace('/\.(\w+)/', '["\\1"]', $variable_path );
-
-			//if there's a function
-			if( $function_var ){
-				
-				//split function by function_name and parameters (ex substr:0,100)
-				$function_split = explode( ':', $function_var, 2 );
-				
-				//function name
-				$function = $function_split[ 0 ];
-				
-				//function parameters
-				$params = ( isset( $function_split[ 1 ] ) ) ? $function_split[ 1 ] : null;
-
-			}
-			else
-				$function = $params = null;
-			
-			$php_var = $var_name . $variable_path;
-
-			// compile the variable for php
-			if( isset( $function ) ){
-				if( $php_var )
-					$php_var = $php_left_delimiter . ( !$is_init_variable && $echo ? 'echo ' : null ) . ( $params ? "( $function( $php_var, $params ) )" : "$function( $php_var )" ) . $php_right_delimiter;
-				else
-					$php_var = $php_left_delimiter . ( !$is_init_variable && $echo ? 'echo ' : null ) . ( $params ? "( $function( $params ) )" : "$function()" ) . $php_right_delimiter;
-			}
-			else
-				$php_var = $php_left_delimiter . ( !$is_init_variable && $echo ? 'echo ' : null ) . $php_var . $extra_var . $php_right_delimiter;
-
-			$html = str_replace( $tag, $php_var, $html );
-
-		}
-		
-		$html = $this->var_replace( $html, $tag_left_delimiter, $tag_right_delimiter, $php_left_delimiter, $php_right_delimiter, $loop_name, $echo );
-		return $html;
-
-	}
-	
-	
-	
-	function var_replace( $html, $tag_left_delimiter, $tag_right_delimiter, $php_left_delimiter = null, $php_right_delimiter = null, $loop_name = null, $echo = null ){
-
 		//all variables
 		preg_match_all( '/' . $tag_left_delimiter . '\$(\w+(?:\.\${0,1}(?:\w+))*(?:\[\${0,1}(?:\w+)\])*(?:\-\>\${0,1}(?:\w+))*)(.*?)' . $tag_right_delimiter . '/', $html, $matches );
-		for( $i=0, $n=count($matches[0]); $i<$n; $i++ ){
+
+		$n = sizeof( $matches[ 0 ] );
+		for( $i = 0; $i < $n; $i++ ){
 
 			//complete tag ex: {$news.title|substr:0,100}
 			$tag = $matches[ 0 ][ $i ];
@@ -756,6 +697,7 @@ class RainTPL{
 		}
 		
 	}
+
 
 }
 

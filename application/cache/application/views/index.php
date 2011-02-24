@@ -14,6 +14,7 @@
 		<div id="section_inside">
 			<div id="section_inside_inside">
 				<?php echo $center;?>
+
 			</div>
 		</div>
 	</div>
