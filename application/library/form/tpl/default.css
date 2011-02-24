@@ -1,0 +1,25 @@
+.form{font-size:11px;}
+.form .table{border:1px solid #ccc;margin-bottom:40px;width:600px;}
+.form .table_elastic{border:1px solid #ccc;margin-bottom:40px;width:100%;}
+/* Title */
+.form thead tr{padding:0px;}
+.form th{text-align:left;font:14px"verdana";background:#eee;border-bottom:1px solid #ddd;color:#333;padding:5px;text-shadow:1px 1px #fff;}
+.form .subtitle{text-align:right;}
+.form .subtitle a{color:#999;text-decoration:none;}
+/* Body */
+.form td{padding:5px 10px 5px 5px;border-top:1px solid #fff;border-bottom:1px solid #eee;}
+.form .info{width:40%;}
+.form .r0{background:#fcfcfc;}
+.form .r1{background:#f6f6f6;}
+.form .name{font-size:11px;}
+.form .description{font-size:9px;color:#999;}
+.form input, .form textarea, .form .option{font:12px "Lucida Grande";border:1px solid #aaa;}
+.form input, .form .option{height:18px;line-height:18px;text-indent:5px;}
+.form textarea, .form input[type=text], .form input[type=password] {width:100%;}
+.form .select{border:1px solid #ddd;padding:3px;font-size:12px;}
+.form .select:focus{border-color:#aaa;}
+.form label.error{color:#ff0000;padding:3px;}
+.form input.error{background:#ffeeee;}
+.form .button_div{float:right;}
+.form .button{float:left;padding:8px 13px 8px 13px;border:1px solid #ccc;background-color:#eee;color:#333;margin-left:10px;font-size:12px;}
+.form .button:hover{border-color:#aaa;}
