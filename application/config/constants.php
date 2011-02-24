@@ -24,8 +24,8 @@
 	define( "MODULES_DIR",		"application/modules/" );
 	define( "CACHE_DIR",		"application/cache/" );		//temp dir
 	define( "UPLOADS_DIR",		"application/uploads/" );	//uploads
-
-	define( "JAVASCRIPT_DIR",	"library/javascript/" );		//js dir
+	define( "APPLICATION_LIBRARY_DIR", "application/library/" );
+	define( "JAVASCRIPT_DIR",	"application/library/js/" );		//js dir
 
 
 //-------------------------------------------------------------

@@ -8,6 +8,7 @@
 	define( "DATE_TIME_FORMAT"	, "%D - %I:%M %p" );
 	define( "TIME_FORMAT"		, "%I:%M %p" );
 	define( "MONTH_FORMAT"		, "%b %d" );
+	
 	//Time string
 	define("_SECOND_"			, "second" );
 	define("_SECONDS_"			, "seconds" );
@@ -26,9 +27,17 @@
 	define( "_DAYS_AGO_"		, "days ago" );
 
 	//Money
-	define( "DEC_POINT"		, "." );
-	define( "THOUSANDS_SEP"	, "," );
-	define( "CURRENCY" 		, "$" );
-	define( "CURRENCY_SIDE" , "0" ); //0 => left , 1 => right
+	define( "DEC_POINT"			, "." );
+	define( "THOUSANDS_SEP"		, "," );
+	define( "CURRENCY" 			, "$" );
+	define( "CURRENCY_SIDE" 	, "0" ); //0 => left , 1 => right
+	
+	//Generic
+	define("_YES_"				, "Yes");
+	define("_NO_"				, "No");
+	define("_ENABLED_"			,"Enabled");	
+	define("_DISABLED_"			,"Disabled");	
+	define("_TRUE_"				,"True");
+	define("_FALSE_"			,"False");	
 
 ?>

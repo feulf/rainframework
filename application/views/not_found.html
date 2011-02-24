@@ -3,6 +3,17 @@
 <head>
 	<title>{$title}</title>
 	<link rel="stylesheet" href="css/style.css" type="text/css" />
+	
+	<!-- Style & Script -->
+	{loop name="style"}<link rel="stylesheet" href="{$value}#" type="text/css" />
+	{/loop}
+
+	{loop name="script"}<script src="{$value}#" type="text/javascript"></script>
+	{/loop}
+
+	{$javascript}
+	<!-- // -->
+
 </head>
 <body>
 	

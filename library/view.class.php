@@ -40,10 +40,10 @@ class View{
 	 *
 	 * @param string $template_class The template class that loads the template engine
 	 */
-	function View( $template_class = DEFAULT_VIEW_CLASS ){
-		$template_class .= '_view';
-		require_once LIBRARY_DIR . 'view/' . $template_class . '.class.php';
-		$this->tpl_obj = new $template_class( self::$tpl_dir, self::$cache_dir, self::$base_url );
+	function View( $view_class = DEFAULT_VIEW_CLASS ){
+		$view_class = $view_class . "_View";
+		require_once APPLICATION_LIBRARY_DIR . 'view/' . $view_class . '.class.php';
+		$this->view = new $view_class( self::$tpl_dir, self::$cache_dir, self::$base_url );
 	}
 
 	/**
@@ -51,7 +51,7 @@ class View{
 	 *
 	 */
 	function assign( $variable, $value = null ){
-		$this->tpl_obj->assign( $variable, $value );
+		$this->view->assign( $variable, $value );
 	}
 
 
@@ -60,7 +60,7 @@ class View{
 	 *
 	 */
 	function draw( $template, $return_string = false ){
-		return $this->tpl_obj->draw( $template, $return_string );
+		return $this->view->draw( $template, $return_string );
 	}
 	
 	
@@ -69,7 +69,7 @@ class View{
 	 *
 	 */
 	function is_cached( $template, $expire_time = HOUR ){
-		return $this->tpl_obj->is_cached( $template, $expire_time );
+		return $this->view->is_cached( $template, $expire_time );
 	}
 	
 }

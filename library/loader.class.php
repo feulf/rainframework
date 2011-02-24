@@ -22,7 +22,7 @@ require_once LIBRARY_DIR . "model.class.php";		// model
 require_once LIBRARY_DIR . "view.class.php";		// view
 require_once LIBRARY_DIR . "controller.class.php";	// controller
 
-
+require_once LIBRARY_DIR . "rain.functions.php";	// rain functions
 require_once LIBRARY_DIR . "user.functions.php";	// user
 
 
