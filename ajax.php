@@ -33,7 +33,32 @@
 	# init_route set the controller/action/params
 	# to load the controller
 	#--------------------------------
-	echo $loader->load_controller( $loader->get_selected_controller(), $loader->get_selected_action(), $loader->get_selected_params() );
+	$html = $loader->load_controller( $loader->get_selected_controller(), $loader->get_selected_action(), $loader->get_selected_params() );
+
+	
+	
+	#--------------------------------
+	# Add Style and Script 
+	#--------------------------------
+	global $script, $style, $javascript, $javascript_onload;
+	if( $style )
+		foreach( $style as $s )
+			$html .= '<link rel="stylesheet" href="'.$s.'" type="text/css" />' . "\n";
+
+	if( $script )
+		foreach( $script as $s )
+			$html .= '<script src="'.$s.'" type="text/javascript"></script>' . "\n";
+
+	if( $javascript_onload ) $javascript .=  "\n" . "$(function(){" . "\n" . "	$javascript_onload" . "\n" . "});" . "\n";
+	if( $javascript )
+		$html .= "<script type=\"text/javascript\">" . "\n" .$javascript . "\n" . "</script>;";
+	
+	echo $html;
+	#--------------------------------
+	
+	
+	
+	
 
 
 	

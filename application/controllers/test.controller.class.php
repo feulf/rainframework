@@ -5,7 +5,7 @@
 		function index(){
 
 			//love easy
-			echo 'this is a test';
+			echo draw_msg( 'this is a test' );
 
 		}
 
