@@ -7,7 +7,7 @@
 			$options = array( "a"=>1, "b"=>2 );
 
 			require_once LIBRARY_DIR . "form.class.php";
-			$form = new Form( URL . "test.php" );
+			$form = new Form( URL . "ajax.php/test/" );
 			$form->open_table( "Table title" );
 			$form->add_hidden( 'a', 1 );
 			$form->add_item( 'text', 'name', 'text', 'description', '' );
@@ -22,7 +22,7 @@
 			$form->add_html( 'this is plain html' );
 			$form->add_button();
 			$form->close_table();
-			$form->draw( false, true );
+			$form->draw( $return_string = false, $use_ajax = true );
 
 		}
 
