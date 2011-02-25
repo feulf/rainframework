@@ -49,7 +49,7 @@ class DB_PDO{
 	/**
 	 * Connect to the database
 	 */
-	function connect( $hostname = null, $username = null, $password = null, $database = null, $dbserver = 'mysql' ){
+	function connect( $hostname = null, $username = null, $password = null, $database = null, $dbserver = 'mysql', $database_path = null ){
 
 		if( !$hostname && !$username && !$database ){
 			require CONFIG_DIR . "conf.db.php";
