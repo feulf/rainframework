@@ -10,8 +10,8 @@
 			$form = new Form( URL . "ajax.php/test/" );
 			$form->open_table( "Table title" );
 			$form->add_hidden( 'a', 1 );
-			$form->add_item( 'text', 'name', 'text', 'description', '' );
-			$form->add_item( 'text', 'email', 'email', 'insert your email' );
+			$form->add_item( 'text', 'name', 'text', 'description', null, 'required' );
+			$form->add_item( 'text', 'email', 'email', 'insert your email', null, 'required,email' );
 			$form->add_item( 'password', 'pw', 'password', 'insert your pw' );
 			$form->add_item( 'select', 'sel', 'select', 'make your choice', null, null, array('options'=>$options) );
 			$form->add_item( 'checkbox', 'check', 'select', 'make your choice', null, null, array('options'=>$options) );
