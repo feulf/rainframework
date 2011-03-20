@@ -7,25 +7,46 @@
 
 //-------------------------------------------------------------
 //
-//					 Directories
+//      Directories
 //
 //-------------------------------------------------------------
 
-	define( "LIBRARY_DIR",		"library/" );
-	define( "LANGUAGE_DIR",		"language/" );
-	define( "APPLICATION_DIR",	"application/" );
-		
-	define( "CONTROLLERS_DIR",	"application/controllers/" );
-	define( "MODELS_DIR",		"application/models/" );
-	define( "VIEWS_DIR",		"application/views/" );
+        define( "BASE_DIR",                 dirname( $_SERVER['SCRIPT_NAME'] ) . "/" );
 
-	define( "CONFIG_DIR",		"application/config/" );
-	define( "LOG_DIR",			"application/log/" );
-	define( "MODULES_DIR",		"application/modules/" );
-	define( "CACHE_DIR",		"application/cache/" );		//temp dir
-	define( "UPLOADS_DIR",		"application/uploads/" );	//uploads
-	define( "APPLICATION_LIBRARY_DIR", "application/library/" );
-	define( "JAVASCRIPT_DIR",	"application/library/js/" );		//js dir
+	define( "APPLICATION_DIR",          "application/" );
+	define( "LIBRARY_DIR",              "library/" );
+
+	define( "EXTENSION_DIR",                  "library/extension/" );
+        define( "WEB_DIR",                  "library/web/" );
+	define( "JAVASCRIPT_DIR",           "library/web/js/" );
+	define( "CSS_DIR",                  "library/web/css/" );
+
+	define( "CONTROLLERS_DIR",          "application/controllers/" );
+	define( "MODELS_DIR",               "application/models/" );
+	define( "VIEWS_DIR",                "application/views/" );
+
+	define( "CONFIG_DIR",               "application/config/" );
+	define( "LANGUAGE_DIR",             "application/language/" );
+	define( "LOG_DIR",                  "application/log/" );
+	define( "MODULES_DIR",              "application/modules/" );
+	define( "CACHE_DIR",                "application/cache/" );     //temp dir
+	define( "UPLOADS_DIR",              "application/uploads/" );
+	define( "APPLICATION_LIBRARY_DIR",  "application/library/" );
+
+
+
+
+//-------------------------------------------------------------
+//
+//					 Controller
+//
+//-------------------------------------------------------------
+
+	define( "CONTROLLER_EXTENSION", 	"php" );
+	define( "CONTROLLER_CLASS_NAME", 	"_Controller" );
+	define( "AJAX_CONTROLLER_EXTENSION", 	"Ajax.php" );
+	define( "AJAX_CONTROLLER_CLASS_NAME", 	"_Ajax_Controller" );
+
 
 
 //-------------------------------------------------------------
@@ -35,24 +56,17 @@
 //-------------------------------------------------------------
 
 	// get user IP
-	$ip = getenv( "HTTP_X_FORWARDED_FOR" ) ? getenv( "HTTP_X_FORWARDED_FOR" ) : getenv( "REMOTE_ADDR" );
-	if( !preg_match("^([1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}^", $ip ) )
-		$ip = null;
-	define( "IP", $ip );
-
+	$IP = getenv( "HTTP_X_FORWARDED_FOR" ) ? getenv( "HTTP_X_FORWARDED_FOR" ) : getenv( "REMOTE_ADDR" ); if( !preg_match("^([1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}^", $IP ) ) $IP = null;
 	// browser calculation
-	$known = array('msie', 'firefox', 'safari', 'webkit', 'opera', 'netscape', 'konqueror', 'gecko');
-	preg_match( '#(' . join('|', $known) . ')[/ ]+([0-9]+(?:\.[0-9]+)?)#', strtolower($_SERVER['HTTP_USER_AGENT']), $br );
-	preg_match_all( '#\((.*?);#', $_SERVER['HTTP_USER_AGENT'], $os );
+	$known = array('msie', 'firefox', 'safari', 'webkit', 'opera', 'netscape', 'konqueror', 'gecko'); preg_match( '#(' . join('|', $known) . ')[/ ]+([0-9]+(?:\.[0-9]+)?)#', strtolower($_SERVER['HTTP_USER_AGENT']), $br ); preg_match_all( '#\((.*?);#', $_SERVER['HTTP_USER_AGENT'], $os ); if( isset( $br[1][1] ) )	$browser = $br[1][1]; else $browser = null;  if( isset( $br[2][1] ) ) $version = $br[2][1]; else $version = null;
 
-	if( isset( $br[1][1] ) )	$browser = $br[1][1]; else $browser = null; 
-	if( isset( $br[2][1] ) ) $version = $br[2][1]; else $version = null;
-
+	define( "IP", $IP );
 	define( "BROWSER_LANG_ID", substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) );
 	define( "BROWSER", $browser );
 	define( "BROWSER_VERSION", $version );
 	define( "BROWSER_OS", $os[1][0] );
 	define( "USER_ONLINE_TIME", 150 );	// user is considered online before 3 minutes of inactivity
+
 
 
 //-------------------------------------------------------------
@@ -69,9 +83,27 @@
 	define( "LOGIN_NOT_LOGGED",  0 );
 	define( "LOGIN_DONE",        1 );
 	define( "LOGIN_LOGGED",      2 );
-	
 
-	
+	//user level
+	global $user_level;
+	$user_level = array( 	-3 => "USER_CONTACT",
+							-2 => "USER_REFUSED",
+							-1 => "USER_BANNED",
+							 0 => "USER_UNREGISTERED",
+							 1 => "USER_REGISTERED",
+							 2 => "USER_ADMIN",
+							 3 => "USER_SUPER_ADMIN" );
+
+	// user status
+	define( "USER_CONTACT",     -3 );
+	define( "USER_REFUSED",     -2 );
+	define( "USER_BANNED",      -1 );
+	define( "USER_UNREGISTERED", 0 );
+	define( "USER_REGISTERED",   1 );
+	define( "USER_ADMIN",        2 );
+	define( "USER_SUPER_ADMIN",  3 );
+
+
 //-------------------------------------------------------------
 //
 //					Constants
@@ -87,7 +119,7 @@
 	define( "LOW",      0 );
 	define( "MED",      1 );
 	define( "HIGH",     2 );
-	
+
 	//msg level
 	define( "ERROR",   0 );
 	define( "SUCCESS", 1 );
@@ -99,7 +131,7 @@
 	define( "SECOND"	, 1 );
 	define( "MINUTE"	, 60 );			// seconds in minute
 	define( "HOUR"		, 3600 );		// seconds in hour
-	define( "DAY"		, 86400 );		// seconds in day 
+	define( "DAY"		, 86400 );		// seconds in day
 	define( "WEEK"		, 604800 );		// seconds in week
 	define( "MONTH" 	, 2592000 );	// seconds in month
 	define( "YEAR"  	, 31536000 );	// seconds in year
@@ -108,7 +140,7 @@
 	// google sitemaps
 	// use for creating google sitemaps for your application
 	global $changefreq;
-	$changefreq = 	Array(  
+	$changefreq = 	Array(
 							-1 => "not in sitemaps",			// this content will not added to the sitemaps
 							0 => "always",
 							1 => "hourly",
@@ -117,7 +149,7 @@
 							4 => "monthly",
 							5 => "yearly",
 							6 => "never",
-							 );	
+							 );
 
-							 
+
 ?>

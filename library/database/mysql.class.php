@@ -1,13 +1,10 @@
 <?php
 
 /**
- *  MySql class easily manages MySql queries as array. Useful to use with RainTPL.
- * 
- *  @author Federico Ulfo
- *  @copyright developed and mantained by the Rain Team: http://www.raintm.com
- *  @license Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
- *  @link http://www.rainframework.com
- *  @package RainFramework
+ *  RainFramework
+ *  -------------
+ *	Realized by Federico Ulfo & maintained by the Rain Team
+ *	Distributed under MIT license http://www.opensource.org/licenses/mit-license.php
  */
 
 
@@ -21,12 +18,12 @@ class MySql{
 	/**
 	 * Set true if you want to exit on Query error
 	 */
-	private	$result,				// result of the query
-			$link,					// database link
-			$link_name = 'default';	// name of the database link
+	private	$result,		// result of the query
+		$link,			// database link
+		$link_name = 'default';	// name of the database link
 
-	private static	$nquery = 0,			// count the query executed
-					$link_array = array();	// array of links
+	private static	$nquery = 0,		// count the query executed
+			$link_array = array();	// array of links
 
 
 
@@ -48,6 +45,10 @@ class MySql{
 	 * Connect to the database
 	 */
 	function connect( $hostname = null, $username = null, $password = null, $database = null ){
+		
+		if( $this->link ) // if already connected return true
+			return true;
+			
 		if( !$hostname && !$username && !$database )
 			require CONFIG_DIR . "conf.db.php";
 
@@ -130,6 +131,7 @@ class MySql{
 
 
 
+
 	/**
 	 * Return the selected rows as array. E.g.:
 	 * $user_list = $db->getArrayRow( "SELECT * FROM user LIMIT 5" );
@@ -152,6 +154,40 @@ class MySql{
 		
 		return isset($rows)?$rows:null;
 	}
+
+
+
+
+	/**
+	 * Return the selected row as object. E.g.:
+	 * $user = $db->get_row( "SELECT * FROM user LIMIT 1" );
+	 * // you can access as $user->name
+	 *
+	 * @return array
+	 */
+	function get_object( $query = null ){
+		return mysql_fetch_object( $this->query( $query ) );
+	}
+
+
+
+	/**
+	 * Return the selected rows as object list . E.g.:
+	 * $user_list = $db->getArrayRow( "SELECT * FROM user LIMIT 5" );
+	 * // return: $user_list => array( 0 => obj $user,  )
+	 *
+	 * @return array
+	 */
+	function get_object_list( $query = null, $key = null ){
+		if( $key )
+			while( $row = mysql_fetch_object( $this->query( $query ) ) )
+				$rows[$row->$key] = $row;
+		else
+			while( $row = mysql_fetch_object( $this->query( $query ) ) )
+				$rows[ ] = $row;
+		return isset($rows)?$rows:null;
+	}
+
 
 
 

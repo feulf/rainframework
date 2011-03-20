@@ -1,19 +1,16 @@
 <?php
 
 /**
- *	Rain Framework > Functions
- *	--------------------------
- *  
- *	Functions divided in categories: Input, Time, String, Email, File, Image, Generic
- * 
- *	@author Federico Ulfo
- *	@copyright developed and mantained by the Rain Team: http://www.raintm.com
- *	@license Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
- *	@link http://www.rainframework.com
- *	@package RainFramework
+ *  RainFramework
+ *  -------------
+ *	Realized by Federico Ulfo & maintained by the Rain Team
+ *	Distributed under MIT license http://www.opensource.org/licenses/mit-license.php
  */
 
 
+/**
+ *	Functions divided in categories: Input, Time, String, Email, File, Image, Generic
+ */
 
 
 //-------------------------------------------------------------
@@ -28,6 +25,7 @@
 	if( ini_get( "register_globals" ) && isset( $_REQUEST ) ) foreach ($_REQUEST as $k => $v) unset($GLOBALS[$k]);
 	global $_GET_POST; 
 	$_GET_POST = $_GET + $_POST;
+
 
 	/**
 	 * Get GET input
@@ -137,17 +135,17 @@
 
 		$diff = TIME - $time;
 		if( $diff < MINUTE )
-			return $diff . " " . _SECONDS_AGO_;
+			return $diff . " " . get_msg('seconds_ago');
 		elseif( $diff < HOUR )
-			return ceil($diff/60) . " " . _MINUTES_AGO_;
+			return ceil($diff/60) . " " . get_msg('minutes_ago');
 		elseif( $diff < 12*HOUR )
-			return ceil($diff/3600) . " " . _HOURS_AGO_;
+			return ceil($diff/3600) . " " . get_msg('hours_ago');
 		elseif( $diff < DAY )
-			return _TODAY_ . " " . strftime( TIME_FORMAT, $time );
+			return get_msg('today') . " " . strftime( TIME_FORMAT, $time );
 		elseif( $diff < DAY*2 )
-			return _YESTERDAY_ . " " . strftime( TIME_FORMAT, $time );
+			return get_msg('yesterday') . " " . strftime( TIME_FORMAT, $time );
 		elseif( $diff < WEEK )
-			return ceil($diff/DAY) . " " . _DAYS_AGO_ . " " . strftime( TIME_FORMAT, $time );
+			return ceil($diff/DAY) . " " . get_msg('days_ago') . " " . strftime( TIME_FORMAT, $time );
 		else
 			return strftime( $format, $time );
 	}
@@ -174,11 +172,11 @@
 	function sec_to_string($sec) {
 		$str = null;
 		if( $hours = intval(intval($sec) / 3600) )
-			$str .= $hours > 1 ? $hours . " " . _HOURS_ : $hours . " " . _HOUR_;
+			$str .= $hours > 1 ? $hours . " " . get_msg('hours') : $hours . " " . get_msg('hour');
 		if( $minutes = intval(($sec / 60) % 60) )
-			$str .= $minutes > 1 ? $minutes . " " . _MINUTES_ : $minutes . " " . _MINUTE_;
+			$str .= $minutes > 1 ? $minutes . " " . get_msg('minutes') : $minutes . " " . get_msg('minute');
 		if( $seconds = intval($sec % 60) )
-			$str .= $seconds > 1 ? $seconds . " " . _SECONDS_ : $seconds . " " . _SECOND_;
+			$str .= $seconds > 1 ? $seconds . " " . get_msg('seconds') : $seconds . " " . get_msg('second');
 		return $str;
 	}
 	
@@ -194,7 +192,7 @@
 	/**
 	 * Cut html
 	 * text, length, ending, tag allowed, $remove_image true / false, $exact true=the ending words are not cutted
-	 * Note: I get this functions from web but I don't remember the source, if somebody know please tell me to give credits
+	 * Note: I get this functions from web but I don't remember the source. It should be from cakePHP.
 	 */
 	function cut_html( $text, $length = 100, $ending = '...', $allowed_tags = '<b><i>', $remove_image = true, $exact = false ) {
 
@@ -308,71 +306,8 @@
 	 */
 	function email_send( $to, $subject, $body, $from = null, $from_name = null, $attachment = null, $embed_images = false ){
 
-		require_once INC_DIR . "phpmailer/class.phpmailer.php";
-		require_once CONF_DIR . "conf.mail.php";
+            // TO DO: use the email class
 
-		global $mail_type, $mail_host, $mail_username, $mail_password, $mail_charset;
-
-		$mail = new PHPMailer();
-
-		if( MAIL_TYPE == 'smtp' ){
-			$mail->IsSMTP();					// send via SMTP
-			$mail->Host      =  MAIL_HOST;		// smtp servers
-			$mail->SMTPAuth  =  true;     		// turn on SMTP authentication
-			$mail->Username  =	MAIL_USERNAME;	// SMTP username
-			$mail->Password  =  MAIL_PASSWORD;	// SMTP password
-		}
-		else
-			$mail->isMail();
-
-		$mail->From      =  $from;
-		$mail->FromName  =  $from_name;
-
-		$mail->IsHTML(true);								// send as HTML
-		$mail->CharSet  =  CHARSET;
-		$mail->Subject  =  $subject;
-
-		
-		//---------------------------------------------
-		//  Embed image in email
-		//---------------------------------------------
-		if( $embed_images ){
-			preg_match_all( '#(\<img(?:.*?))src="(.*?)"((?:.*?)\>)#i', $body, $match );		
-			$embed_image = array();
-			for( $i = 0, $n=count($match[0]); $i < $n; $i++ ){
-				$tag = $match[0][$i];
-				$src = $match[2][$i];
-				if( substr( $src, 0, 7 ) != "http://" ){
-					$embed_image[] = $src;
-					$ext = file_ext($src);
-					$body = eregi_replace( $tag, $match[1][$i] . 'src="cid:img_'.$i.'"' . $match[3][$i], $body );
-					$mail->AddEmbeddedImage( $src, "img_{$i}", "", "base64", "image/$ext" );	// src, id, name, econding, type
-				}
-			}
-		}
-		//---------------------------------------------
-
-		$mail->Body     =  $body;
-
-		// get the recipient
-		if( is_string( $to ) && count( $array_to = preg_split( "#,|;#", $to  ) ) > 0 )
-				foreach( $array_to as $to_email )
-					$recipient[$to_email] = $to_email;					
-		elseif( is_array( $to ) )
-			$recipient = $to;
-
-		global $mailer_error_email;
-		$error = false;
-
-		foreach( $recipient as $email => $name ){
-			$mail->AddAddress( $email, $name );
-			if( !$mail->Send() ){
-				$mailer_error_email[] = $email;
-				$error = true;
-			}
-			$mail->ClearAddresses();
-		}
-		return !$error;
 	}
 	
 	
@@ -686,6 +621,107 @@
 	}
 
 	*/
+
+
+
+//-------------------------------------------------------------
+//
+//					Settings
+//
+//-------------------------------------------------------------
+
+	function get_setting( $key = null ){
+		global $settings;
+		if( !$key )
+			return $settings;
+		if( isset( $settings[$key] ) )
+			return $settings[$key];
+	}
+
+
+
+//-------------------------------------------------------------
+//
+//					 Language
+//
+//-------------------------------------------------------------
+
+	/**
+	 * Get the translated string if in language dictionary, return the string if not
+	 *
+	 * @param string $msg Msg to translate
+	 * @param string $modifier You can choose a modifier from: strtoupper, strtolower, ucwords, ucfirst
+	 * @return translated string
+	 */
+	function get_msg( $msg, $modifier = null ){
+		global $lang;
+		if( isset($lang[$msg]))
+			$msg = $lang[$msg];
+		return $modifier ? $modifier($msg) : $msg;
+	}
+
+	function get_lang(){
+		return LANG_ID;
+	}
+
+	function load_lang( $file ){
+		require_once LANGUAGE_DIR . get_lang() . "/" . $file . ".php";
+	}
+
+	// draw a message styled as SUCCESS, WARNING, ERROR or INFO. See .box in style.css for the style
+	function draw_msg( $msg, $type = SUCCESS, $close = false, $autoclose = 0 ){
+		add_script("jquery/jquery.min.js" );
+		add_style( "box.css", WEB_DIR . "css/" );
+		$box_id = rand(0,9999) . "_" . time();
+		if( $close )
+			$close = '<div class="close"><a onclick="$(\'#box_'.$box_id.'\').slideUp();">x</a></div>';
+		if($autoclose)
+			addJavascript( 'setTimeout("$(\'#box_'.$box_id.'\').slideUp();", "'.($autoclose*1000).'")', $onload=true );
+
+		switch( $type ){
+			case SUCCESS: 	$class = 'success'; break;
+			case WARNING: 	$class = 'warning'; break;
+			case ERROR:  	$class = 'error'; break;
+			case INFO: 		$class = 'info'; break;
+		}
+
+		// style defined in style.css as .box
+		return '<div class="box box_'.$class.'" id="box_'.$box_id.'">'.$close.$msg.'</div>';
+	}
+
+
+
+//-------------------------------------------------------------
+//
+//					 Javascript & CSS
+//
+//-------------------------------------------------------------
+
+	//style sheet and javascript
+	global $style, $script, $javascript, $javascript_onload;
+	$style = $script = array();
+	$javascript = $javascript_onload = "";
+
+
+	//add style sheet
+	function add_style( $style_file, $dir = CSS_DIR ){
+		$GLOBALS['style'][$style_file] = URL . $dir . $style_file;
+	}
+
+	//add javascript file
+	function add_script( $script_file, $dir = JAVASCRIPT_DIR ){
+		$GLOBALS['script'][$script_file] = URL . $dir . $script_file;
+	}
+
+	//add javascript code
+	function add_javascript( $javascript, $onload = false ){
+		if( !$onload )
+			$GLOBALS['javascript'] .= "\n".$javascript."\n";
+		else
+			$GLOBALS['javascript_onload'] .= "\n".$javascript."\n";
+	}
+
+
 
 //-------------------------------------------------------------
 //
