@@ -174,7 +174,7 @@ class Loader{
 		$route_array=$match[2];
 		if( $this->controller_dir_in_route )
 			$this->controller_dir	= is_array($route_array) && count($route_array) ? array_shift($route_array) : get_setting("default_controller_dir");
-		$this->controller	= is_array($route_array) && count($route_array) ? array_shift($route_array) : get_setting("default_controller");
+                $this->controller	= is_array($route_array) && count($route_array) ? array_shift($route_array) : get_setting("default_controller");
 		$this->action 		= is_array($route_array) && count($route_array) ? array_shift($route_array) : get_setting("default_action");
 		$this->params 		= $route_array;
 
@@ -196,6 +196,9 @@ class Loader{
 	 *
 	 */
 	function load_controller( $controller, $action = null, $params = null, $controller_dir = null, $assign_to = null ){
+
+                // capitalize first character
+                $controller = ucfirst( strtolower($controller) );
 
 		if( !$controller_dir ) $controller_dir = $controller;
 		$controller_extension = $this->controller_extension ? $this->controller_extension : CONTROLLER_EXTENSION;
