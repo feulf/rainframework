@@ -3,13 +3,13 @@
 /**
  *  RainFramework
  *  -------------
- *	Realized by Federico Ulfo & maintained by the Rain Team
- *	Distributed under MIT license http://www.opensource.org/licenses/mit-license.php
+ *  Realized by Federico Ulfo & maintained by the Rain Team
+ *  Distributed under MIT license http://www.opensource.org/licenses/mit-license.php
  */
 
 
 /**
- *	Functions divided in categories: Input, Time, String, Email, File, Image, Generic
+ *	Functions divided in categories
  */
 
 
@@ -23,23 +23,18 @@
 
 	// disable register globals
 	if( ini_get( "register_globals" ) && isset( $_REQUEST ) ) foreach ($_REQUEST as $k => $v) unset($GLOBALS[$k]);
-	global $_GET_POST; 
-	$_GET_POST = $_GET + $_POST;
-
 
 	/**
 	 * Get GET input
-	 * If key = null, return array GET
 	 */
 	function get( $key = null, $filter = FILTER_SANITIZE_MAGIC_QUOTES ){
-		if( isset($_GET[$key]) )
+                if( isset($_GET[$key]) )
 			return $filter ? filter_input(INPUT_GET, $key, $filter ) : $_GET[$key];
 	}
-	
-	
+
+
 	/**
 	 * Get POST input
-	 * If key = null, return array POST
 	 */
 	function post( $key = null, $filter = FILTER_SANITIZE_MAGIC_QUOTES ){
 		if( isset($_POST[$key]) )
@@ -50,9 +45,10 @@
 
 	/**
 	 * Get GET_POST input
-	 * If key = null, return array GET + POST
 	 */
 	function get_post( $key = null, $filter = FILTER_SANITIZE_MAGIC_QUOTES ){
+                if( !isset($GLOBALS['_GET_POST'] ) )
+                    	$GLOBALS['_GET_POST'] = $_GET + $_POST;
 		if( isset($GLOBALS['_GET_POST'][$key]) )
 			return $filter ? filter_input(INPUT_GET | INPUT_POST, $key, $filter ) : $GLOBALS['_GET_POST'][$key];
 	}
@@ -61,7 +57,6 @@
 
 	/**
 	 * Get COOKIE input
-	 * If key = null, return array COOKIE
 	 */
 	function cookie( $key = null, $filter = FILTER_SANITIZE_MAGIC_QUOTES ){
 		if( isset($_COOKIE[$key]) )
@@ -72,25 +67,39 @@
 	
 //-------------------------------------------------------------
 //
-//					 BENCHMARK
+//	BENCHMARK/DEBUG FUNCTIONS
 //
 //-------------------------------------------------------------
+
+
+	/**
+	 * Useful for debug, print the variable $mixed and die
+	 */
+	function dump( $mixed, $exit = 1 ){
+		echo "<pre>dump \n---------------------- \n\n" . print_r( $mixed, true ) . "\n----------------------<pre>";
+		if( $exit ) exit;
+	}
+
+
 
 	/**
 	 * Save the memory used at this point
 	 */
 	function memory_usage_start( $memName = "execution_time" ){
-        $GLOBALS['memoryCounter'][$memName] = memory_get_usage();
+            return $GLOBALS['memoryCounter'][$memName] = memory_get_usage();
 	}
+
+
 
 	/**
 	 * Get the memory used
 	 */
-	function memory_usage( $timeName = "execution_time" ){
-	       return byte_format( memory_get_usage() - $GLOBALS['memoryCounter'][ $memName ] );
+	function memory_usage( $timeName = "execution_time", $byte_format = true ){
+            $totMem = memory_get_usage() - $GLOBALS['memoryCounter'][ $memName ];
+            return $byte_format ? byte_format($totMem) : $totMem;
 	}
-	
-	
+
+
 //-------------------------------------------------------------
 //
 //					 TIME FUNCTIONS
@@ -285,6 +294,52 @@
 	}
 
 	
+
+
+	/**
+	 * Return a random string
+	 */
+	function rand_str($length = 5, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'){
+	    $chars_length = (strlen($chars) - 1);
+	    $string = $chars{rand(0, $chars_length)};
+	    for ($i = 1; $i < $length; $i = strlen($string)){
+	        $r = $chars{rand(0, $chars_length)};
+	        if ($r != $string{$i - 1}) $string .=  $r;
+	    }
+	    return $string;
+	}
+
+
+
+//-------------------------------------------------------------
+//
+//					NUMBER FUNCTIONS
+//
+//-------------------------------------------------------------
+
+	/**
+	 * Convert byte to more readable format, like "1 KB" instead of "1024".
+	 * cut_zero, remove the 0 after comma ex:  10,00 => 10      14,30 => 14,3
+	 */
+	function byte_format( $size ){
+		if( $size > 0 ){
+		    $unim = array("B","KB","MB","GB","TB","PB");
+		    for( $i=0; $size >= 1024; $i++ )
+		        $size = $size / 1024;
+		    return number_format($size,$i?2:0,DEC_POINT,THOUSANDS_SEP)." ".$unim[$i];
+		}
+	}
+
+
+	/**
+	 * Format the money in the current format. If add_currency is true the function add the currency configured into the language
+	 */
+	function format_money( $number, $add_currency = false ){
+		return ( $add_currency && CURRENCY_SIDE == 0 ? CURRENCY . " " : "" ) . number_format($number,2,DEC_POINT,THOUSANDS_SEP) . ( $add_currency && CURRENCY_SIDE == 1 ? " " . CURRENCY : "" );
+	}
+
+
+
 
 //-------------------------------------------------------------
 //
@@ -725,10 +780,10 @@
 
 //-------------------------------------------------------------
 //
-//					GENERIC FUNCTIONS
+//					LOCALIZATION FUNCTIONS
 //
 //-------------------------------------------------------------
-	
+
 
 	/**
 	 * Return true if $ip is a valid ip
@@ -736,6 +791,8 @@
 	function is_ip($ip){
 	    return preg_match("^([1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}^", $ip );
 	}
+
+
 
 	/**
 	 * Return the array with all geolocation info of user selected by IP
@@ -746,62 +803,6 @@
 			return json_decode( file_get_contents( "http://api.ipinfodb.com/v2/ip_query.php?key=".IPINFODB_KEY."&ip={$ip}&output=json&timezone=true" ) );
 	}
 
-	/**
-	 * Convert byte to more readable format, like "1 KB" instead of "1024".
-	 * cut_zero, remove the 0 after comma ex:  10,00 => 10      14,30 => 14,3
-	 */
-	function byte_format( $size ){
-		if( $size > 0 ){
-		    $unim = array("B","KB","MB","GB","TB","PB");
-		    for( $i=0; $size >= 1024; $i++ )
-		        $size = $size / 1024;
-		    return number_format($size,$i?2:0,DEC_POINT,THOUSANDS_SEP)." ".$unim[$i];
-		}
-	}
 
 
-	/**
-	 * Format the money in the current format. If add_currency is true the function add the currency configured into the language
-	 */
-	function format_money( $number, $add_currency = false ){
-		return ( $add_currency && CURRENCY_SIDE == 0 ? CURRENCY . " " : "" ) . number_format($number,2,DEC_POINT,THOUSANDS_SEP) . ( $add_currency && CURRENCY_SIDE == 1 ? " " . CURRENCY : "" );
-	}
-
-	/**
-	 * Return a random string
-	 */
-	function rand_str($length = 5, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'){
-	    $chars_length = (strlen($chars) - 1);
-	    $string = $chars{rand(0, $chars_length)};
-	    for ($i = 1; $i < $length; $i = strlen($string)){
-	        $r = $chars{rand(0, $chars_length)};
-	        if ($r != $string{$i - 1}) $string .=  $r;
-	    }
-	    return $string;
-	}
-	
-	/**
-	 * Useful for debug, print the variable $mixed and die
-	 */
-	function dump( $mixed, $exit = 1 ){
-		echo "<pre>dump \n---------------------- \n\n" . print_r( $mixed, true ) . "\n----------------------<pre>";
-		if( $exit ) exit;
-	}
-
-	/**
-	 * Transform an object into an array
-	 */
-	function object_to_array($mixed) {
-	    if(is_object($mixed)) $mixed = (array) $mixed;
-	    if(is_array($mixed)) {
-	        $new = array();
-	        foreach($mixed as $key => $val) {
-	            $key = preg_replace("/^\\0(.*)\\0/","",$key);
-	            $new[$key] = object_to_array($val);
-	        }
-	    }
-	    else $new = $mixed;
-	    return $new;       
-	}
-		
 ?>
