@@ -26,19 +26,26 @@ class Loader{
 	private $var, $page, $page_not_found;
 	private $controller, $action, $params, $controller_dir;
 	private $controllers_dir = CONTROLLERS_DIR, $models_dir = MODELS_DIR, $views_dir = VIEWS_DIR;
-	private $controller_extension, $controller_class_name, $controller_dir_in_route;
+	private $controller_dir_in_route;
 	private $ajax_mode = false, $load_javascript = false, $load_style = false;
+        private static $instance;
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 */
 	function __construct(){
 
 		// Timer Start to get the execution time
 		timer_start();
 
+                if( !self::$instance )
+                    self::$instance = $this;
 	}
+
+        static function get_instance(){
+            return self::$instance;
+        }
 
 
 
@@ -81,7 +88,7 @@ class Loader{
 	}
 
 
-	
+
 	/**
 	 * Init the user functions
 	 *
@@ -109,6 +116,21 @@ class Loader{
 
 
 	/**
+	 * Init the user functions
+	 *
+	 */
+	function init_user_localization( $id = null, $link = null ){
+                if( $this->db ){
+                    $this->init_user();
+                    require_once LIBRARY_DIR . "User_Localization.php";    // user
+                    new User_Localization;
+                    User_Localization::init( $id, $link );
+                }
+	}
+
+
+
+	/**
 	 * Set the View class
 	 *
 	 */
@@ -128,6 +150,12 @@ class Loader{
 	}
 
 
+
+        function init_js(){
+            add_javascript( "var url = '" . URL . "';" );
+        }
+
+
 	/**
 	 * Set Page Layout
 	 *
@@ -135,27 +163,6 @@ class Loader{
 	function set_page( $page ){
 		$this->page = $page;
 	}
-	
-
-
-	/**
-	 * Set the controller extension
-	 *
-	 */
-	function set_controller_extension( $controller_extension ){
-		$this->controller_extension = $controller_extension;
-	}
-	
-	
-
-	/**
-	 * Set the controller class name
-	 *
-	 */
-	function set_controller_class_name( $controller_class_name ){
-		$this->controller_class_name = $controller_class_name;
-	}
-
 
 
 	/**
@@ -169,7 +176,7 @@ class Loader{
 		$route = substr( $_SERVER['REQUEST_URI'], strlen($directory) );
 		if(substr($route,0,strlen($script))==$script)
 			$route = substr($route,strlen($script)+1);
-			
+
 		preg_match_all( "#((?:(\w*?)/))#", $route, $match );
 		$route_array=$match[2];
 		if( $this->controller_dir_in_route )
@@ -179,14 +186,14 @@ class Loader{
 		$this->params 		= $route_array;
 
 	}
-	
-	
-	
+
+
+
 	/**
 	 * load the controller selected by the route
 	 */
-	function auto_load_controller(){
-		$this->load_controller( $this->controller, $this->action, $this->params, $this->controller_dir, $assign_to = "center" );
+	function auto_load_controller( $controller_extension = null, $controller_class_name = null ){
+		$this->load_controller( $this->controller, $this->action, $this->params, $this->controller_dir, $assign_to = "center", $controller_extension, $controller_class_name );
 	}
 
 
@@ -195,51 +202,32 @@ class Loader{
 	 * load a controller and return the html
 	 *
 	 */
-	function load_controller( $controller, $action = null, $params = null, $controller_dir = null, $assign_to = null ){
+	function load_controller( $controller, $action = null, $params = null, $controller_dir = null, $assign_to = null, $controller_extension = null, $controller_class_name = null ){
 
-                // capitalize first character
-                $controller = ucfirst( strtolower($controller) );
+                $controller_obj = new Controller;
+                if( !$controller_obj->load_controller( $controller, "controller_obj", $controller_extension, $controller_class_name ) ){
+                    header("HTTP/1.0 404 Not Found");
+                    $this->page_not_found = true;
+                }
 
-		if( !$controller_dir ) $controller_dir = $controller;
-		$controller_extension = $this->controller_extension ? $this->controller_extension : CONTROLLER_EXTENSION;
-		$controller_class_name = $this->controller_class_name ? $this->controller_class_name : CONTROLLER_CLASS_NAME;
-
-		// include the file
-		if( file_exists( $controller_file = $this->controllers_dir . "$controller_dir/$controller." . $controller_extension ) )
-			require_once $controller_file;
-		else{
-			header("HTTP/1.0 404 Not Found");
-			trigger_error( "CONTROLLER: FILE <b>{$controller_file}</b> NOT FOUND ", E_USER_WARNING );
-			$this->page_not_found = true;
-			return false;
-		}
-
-		$html = "";
-		$class = $controller . $controller_class_name;
-		if( class_exists($class) )
-			$controller_obj = new $class( $this );
-		else{
-			header("HTTP/1.0 404 Not Found");
-			trigger_error( "CONTROLLER: CLASS <b>{$controller}</b> NOT FOUND ", E_USER_WARNING );
-			$this->page_not_found = true;
-			return false;
-		}
-
+                $html = null;
 		if( $action ){
-			if( is_callable( array($controller_obj,$action) )){
+			if( is_callable( array($controller_obj->controller_obj,$action) )){
+
 				ob_start();
 				for($i=0,$n=count($params),$param="";$i<$n;$i++)
 					$param .= $i>0 ? ',$params['.$i.']' : '$params['.$i.']';
-				eval( '$controller_obj->$action( ' . $param . ' );' );
+				eval( '$controller_obj->controller_obj->$action( ' . $param . ' );' );
 				$html = ob_get_contents();
 				ob_end_clean();
+
 			}
 			else{
 				header("HTTP/1.0 404 Not Found");
 				$this->page_not_found = true;
 			}
 		}
-		
+
 		if( $assign_to )
 			$this->assign( $assign_to, $html );
 
@@ -257,7 +245,7 @@ class Loader{
 		$con = new Controller($this);
 		$con->set_models_dir = $this->models_dir;
 		if( $con->load_model( $model, "model_obj" ) ){
-			
+
 			if( is_callable( array($con->model_obj, $action) )){
 
 				for($i=0,$n=count($params),$param="";$i<$n;$i++)
@@ -266,11 +254,11 @@ class Loader{
 			}
 			else{
 				// model not found
-			} 
+			}
 			$this->assign( $assign_to, $return );
 		}
 	}
-	
+
 
 
 	/**
@@ -299,7 +287,7 @@ class Loader{
 
 		$tpl = new View();
 		$tpl->assign( $this->var );// assign all variable
-		
+
 		// - HEAD ------
 		$head = $this->_get_javascript() . $this->_get_style();
 		$tpl->assign( "head", $head );
@@ -316,9 +304,9 @@ class Loader{
 		return $tpl->draw( $this->page, $return_string );
 
 	}
-	
 
-	
+
+
 	/**
 	 * Return the selected controller
 	 *
@@ -326,8 +314,8 @@ class Loader{
 	function get_selected_controller(){
 		return $this->controller;
 	}
-	
-	
+
+
 
 	/**
 	 * Return the selected controller
@@ -352,16 +340,16 @@ class Loader{
 	/**
 	 * This function can be called by the Controller.
 	 * It disable the loading of layout and optionally can enables/disables the loading of javascript and style
-	 * 
+	 *
 	 */
 	function ajax_mode( $load_javascript = false, $load_style = false ){
 		$this->ajax_mode = true;
 		$this->load_javascript = $load_javascript;
 		$this->load_style = $load_style;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * ajax call
 	 */
@@ -374,8 +362,9 @@ class Loader{
 		$html .= $this->var['center'];
 
 		// print the controller auto loaded
-		if( $return_string ) return $html; else echo $html; 
+		if( $return_string ) return $html; else echo $html;
 	}
+
 
 
 	/**
@@ -386,15 +375,16 @@ class Loader{
 		$html = "";
 		if( $script )
 			foreach( $script as $s )
-				$html .= '	<script src="'.$s.'" type="text/javascript"></script>' . "\n";
+				$html .= '<script src="'.$s.'" type="text/javascript"></script>' . "\n";
 		if( $javascript_onload ) $javascript .=  "\n" . "$(function(){" . "\n" . "	$javascript_onload" . "\n" . "});" . "\n";
 		if( $javascript )
 			$html .= "<script type=\"text/javascript\">" . "\n" .$javascript . "\n" . "</script>";
+
 		return $html;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * get the style
 	 */
@@ -406,7 +396,7 @@ class Loader{
 				$html .= '	<link rel="stylesheet" href="'.$s.'" type="text/css" />' . "\n";
 		return $html;
 	}
-	
+
 
 
 	/**

@@ -55,13 +55,13 @@ class DB{
 
                 $dbserver = ucfirst(strtolower($dbserver));
 
-		if( file_exists( self::$database_class_dir . $dbserver . ".class.php" ) ){
-			require_once self::$database_class_dir . $dbserver . ".class.php";
+		if( file_exists( self::$database_class_dir . $dbserver . ".php" ) ){
+			require_once self::$database_class_dir . $dbserver . ".php";
 			$this->db = db::$db_list[$this->link_name] = new $dbserver( $this->link_name );
 			$this->db->connect( $hostname, $username, $password, $database, $dbserver, $path );
 		}
 		else{
-			require_once self::$database_class_dir . "pdo.class.php";
+			require_once self::$database_class_dir . "PDO.php";
 			$this->db = db::$db_list[$this->link_name] = new DB_PDO;
 			$this->db->connect( $hostname, $username, $password, $database, $dbserver, $path );
 		}

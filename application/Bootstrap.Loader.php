@@ -66,19 +66,16 @@
 
 
 	#--------------------------------
-	# Enable the Ajax Mode and set the ajax controller
+	# Enable the Ajax Mode
 	#--------------------------------
 	$this->ajax_mode();
-	$this->set_controller_extension( AJAX_CONTROLLER_EXTENSION );
-	$this->set_controller_class_name( AJAX_CONTROLLER_CLASS_NAME );
-
 
 	#--------------------------------
 	# Auto Load the Controller
 	# init_route set the controller/action/params
 	# to load the controller
 	#--------------------------------
-	$this->auto_load_controller();
+	$this->auto_load_controller( AJAX_CONTROLLER_EXTENSION, AJAX_CONTROLLER_CLASS_NAME );
 
 
 

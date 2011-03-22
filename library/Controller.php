@@ -14,14 +14,44 @@
  */
 class Controller{
 
-	static $loaded_controller, $loaded_model;
-	private $models_dir = MODELS_DIR, $library_dir = LIBRARY_DIR, $loader;
-	
-	function __construct( $loader ){
-		$this->loader = $loader;
+	static private $loaded_controller, $loaded_model;
+	static private $models_dir = MODELS_DIR, $library_dir = LIBRARY_DIR;
+        static private $controllers_dir = CONTROLLERS_DIR, $controller_extension = CONTROLLER_EXTENSION, $controller_class_name = CONTROLLER_CLASS_NAME;
+        static private $loader;
+
+	/**
+	 * load a controller and return the html
+	 *
+	 */
+	function load_controller( $controller, $object_name = null, $controller_extension = null, $controller_class_name = null ){
+
+                if( !$controller_extension )
+                        $controller_extension = self::$controller_extension;
+
+                if( !$controller_class_name )
+                        $controller_class_name = self::$controller_class_name;
+
+		// include the file
+		if( file_exists( $controller_file = self::$controllers_dir . "$controller/$controller." . $controller_extension ) )
+			require_once $controller_file;
+		else
+                     return trigger_error( "CONTROLLER: FILE <b>{$controller_file}</b> NOT FOUND ", E_USER_WARNING );
+
+		$class = $controller . $controller_class_name;
+
+		if(!$object_name)
+			$object_name = $controller;
+
+		if( class_exists($class) )
+			$this->$object_name = new $class( $this );
+		else
+			return trigger_error( "CONTROLLER: CLASS <b>{$controller}</b> NOT FOUND ", E_USER_WARNING );
+
+                return true;
 	}
 
-	
+
+
 	/**
 	 * Load the model class
 	 *
@@ -31,10 +61,8 @@ class Controller{
 	 */
 	function load_model($model,$object_name=null){
 
-                $model = ucfirst(strtolower($model)); // first char of model must be uppercase
-
 		// include the file
-		if( file_exists($file = $this->models_dir . $model . ".php") )
+		if( file_exists($file = self::$models_dir . $model . ".php") )
 			require_once $file;
 		else{
 			trigger_error( "MODEL: FILE <b>{$file}</b> NOT FOUND ", E_USER_WARNING );
@@ -44,17 +72,17 @@ class Controller{
 		if(!$object_name)
 			$object_name = $model;
 
-		$class=$model . "_Model";
+		$class = $model . "_Model";
 		if( class_exists($class) )
-			$this->$object_name = new $class;			
+			$this->$object_name = new $class;
 		else{
 			trigger_error( "MODEL: CLASS <b>{$model}</b> NOT FOUND", E_USER_WARNING );
 			return false;
 		}
 		return true;
 	}
-	
-	
+
+
 	/**
 	 * Load the library
 	 *
@@ -63,37 +91,25 @@ class Controller{
 
                 $library = ucfirst(strtolower($library));
 
-		if( file_exists($file = $this->library_dir . $library . ".php") )
+		if( file_exists($file = self::$library_dir . $library . ".php") )
 			require_once $file;
 		else{
 			trigger_error( "LIBRARY: FILE <b>{$file}</b> NOT FOUND ", E_USER_WARNING );
 			return false;
 		}
-		
+
 		if(!$object_name)
 			$object_name = $library;
 
 		$class = $library;
 		if( class_exists($class) )
-			$this->$object_name = new $class;			
+			$this->$object_name = new $class;
 		else{
 			trigger_error( "LIBRARY: CLASS <b>{$library}</b> NOT FOUND", E_USER_WARNING );
 			return false;
 		}
 		return true;
 
-	}
-	
-	function set_library_dir( $library_dir ){
-		$this->library_dir = $library_dir;
-	}	
-	
-	function set_controllers_dir( $controllers_dir ){
-		$this->controllers_dir = $controllers_dir;
-	}
-
-	function set_models_dir( $models_dir ){
-		$this->models_dir = $models_dir;
 	}
 
 	/**
@@ -103,10 +119,24 @@ class Controller{
 	 *
 	 */
 	function ajax_mode( $load_javascript = false, $load_style = false, $load_layout = false){
-		$this->loader->ajax_mode( $load_javascript, $load_style, $load_layout );
+                $loader = Loader::get_instance();
+                $loader->ajax_mode( $load_javascript, $load_style, $load_layout );
 	}
 
-	
+
+	/**
+	 * Configure the settings
+	 *
+	 */
+	static function configure( $setting, $value ){
+		if( is_array( $setting ) )
+			foreach( $setting as $key => $value )
+				$this->configure( $key, $value );
+		else if( property_exists( "Controller", $setting ) )
+			self::$$setting = $value;
+	}
+
+
 }
 
 
