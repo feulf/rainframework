@@ -799,7 +799,7 @@
 	 */
 	define( "IPINFODB_KEY", "YOUR_KEY" );
 	function ip_to_location( $ip = IP ){
-		if( isIp( $ip ) )
+		if( is_ip( $ip ) )
 			return json_decode( file_get_contents( "http://api.ipinfodb.com/v2/ip_query.php?key=".IPINFODB_KEY."&ip={$ip}&output=json&timezone=true" ) );
 	}
 

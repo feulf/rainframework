@@ -17,7 +17,7 @@ class DB{
 	private static $default_link_name = 'default',
                        $config_file   = 'db.php',
                        $config_dir    = CONFIG_DIR,
-                       $database_class_dir = "Database/";
+                       $database_class_dir;
 
 	private	$db,                    // database object
 		$link_name = 'default'; // name of the database link object (allows multiple db connection)
@@ -48,6 +48,12 @@ class DB{
 			require self::$config_dir . self::$config_file;
 			extract( $db[$this->link_name] );
 		}
+
+                // set the directory
+                if( !self::$database_class_dir )
+                        self::$database_class_dir = LIBRARY_DIR . "Database/";
+
+                $dbserver = ucfirst(strtolower($dbserver));
 
 		if( file_exists( self::$database_class_dir . $dbserver . ".class.php" ) ){
 			require_once self::$database_class_dir . $dbserver . ".class.php";

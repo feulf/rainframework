@@ -203,7 +203,7 @@ class Rain_User{
 			$db->query( "UPDATE ".DB_PREFIX."user_where_is SET ip='$ip', user_id='$user_id', name='$name', url='$url', id='$id', file='$file', time='".TIME."', sid='$sid' WHERE user_where_is_id='$user_where_is_id'" );
 		else{
 	
-			if( !($location = $this->ip_to_location( $ip, $type = 'array' )) )
+			if( !($location = ip_to_location( $ip, $type = 'array' )) )
 				$location = array( 'CountryCode'=>null, 'CountryName'=>null, 'RegionCode'=>null, 'RegionName'=>null, 'City'=>null, 'ZipPostalCode'=>null, 'Latitude'=>null, 'Longitude'=>null, 'TimezoneName'=>null, 'Gmtoffset'=>null );
 	
 			//replace_sql_injection( $location );
