@@ -171,19 +171,13 @@ class Loader{
 	 */
 	function init_route(){
 
-		$directory = dirname($_SERVER['SCRIPT_NAME']) . "/";
-		$script = basename($_SERVER['SCRIPT_NAME']);
-		$route = substr( $_SERVER['REQUEST_URI'], strlen($directory) );
-		if(substr($route,0,strlen($script))==$script)
-			$route = substr($route,strlen($script)+1);
+                require_once LIBRARY_DIR . "Router.php";
+                $router = new Router;
 
-		preg_match_all( "#((?:(\w*?)/))#", $route, $match );
-		$route_array=$match[2];
-		if( $this->controller_dir_in_route )
-			$this->controller_dir	= is_array($route_array) && count($route_array) ? array_shift($route_array) : get_setting("default_controller_dir");
-                $this->controller	= is_array($route_array) && count($route_array) ? array_shift($route_array) : get_setting("default_controller");
-		$this->action 		= is_array($route_array) && count($route_array) ? array_shift($route_array) : get_setting("default_action");
-		$this->params 		= $route_array;
+                $this->controller_dir = $router->get_controller_dir();
+                $this->controller = $router->get_controller();
+                $this->action = $router->get_action();
+                $this->params = $router->get_params();
 
 	}
 
@@ -193,7 +187,7 @@ class Loader{
 	 * load the controller selected by the route
 	 */
 	function auto_load_controller( $controller_extension = null, $controller_class_name = null ){
-		$this->load_controller( $this->controller, $this->action, $this->params, $this->controller_dir, $assign_to = "center", $controller_extension, $controller_class_name );
+		$this->load_controller( $this->controller, $this->action, $this->params, $this->controller_dir, $assign_to = "center" );
 	}
 
 
