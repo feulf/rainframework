@@ -31,6 +31,8 @@ class Controller{
                 if( !$controller_class_name )
                         $controller_class_name = self::$controller_class_name;
 
+                $controller = ucfirst($controller);
+
 		// include the file
 		if( file_exists( $controller_file = self::$controllers_dir . "$controller/$controller." . $controller_extension ) )
 			require_once $controller_file;
@@ -61,6 +63,8 @@ class Controller{
 	 */
 	function load_model($model,$object_name=null){
 
+                $model = ucfirst($model);
+
 		// include the file
 		if( file_exists($file = self::$models_dir . $model . ".php") )
 			require_once $file;
@@ -89,7 +93,7 @@ class Controller{
 	 */
 	function load_library( $library, $object_name = null ){
 
-                $library = ucfirst(strtolower($library));
+                $library = ucfirst($library);
 
 		if( file_exists($file = self::$library_dir . $library . ".php") )
 			require_once $file;
