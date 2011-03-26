@@ -50,7 +50,7 @@ class MySql{
 			return true;
 			
 		if( !$hostname && !$username && !$database )
-			require CONFIG_DIR . "conf.db.php";
+			require CONFIG_DIR . "db.php";
 
 		if( $this->link = mysql::$link_array[$this->link_name] = mysql_connect( $hostname, $username, $password ) or die( mysql_error() ) )
 	    	return mysql_select_db( $database ) or die ( mysql_error() );

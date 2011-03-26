@@ -49,7 +49,7 @@ class DB_PDO{
 			return true;
 
 		if( !$hostname && !$username && !$database ){
-			require CONFIG_DIR . "conf.db.php";
+			require CONFIG_DIR . "db.php";
 			extract( $db[$this->link_name] );
 		}
 		try{
