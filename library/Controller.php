@@ -31,7 +31,8 @@ class Controller{
                 if( !$controller_class_name )
                         $controller_class_name = self::$controller_class_name;
 
-                $controller = ucfirst($controller);
+                // transform the controller string to capitalized. e.g. user => User, news_list => News_List
+                $controller = implode( "_", array_map( "ucfirst", array_map( "strtolower", explode( "_", $controller ) ) ) );
 
 		// include the file
 		if( file_exists( $controller_file = self::$controllers_dir . "$controller/$controller." . $controller_extension ) )
@@ -63,7 +64,9 @@ class Controller{
 	 */
 	function load_model($model,$object_name=null){
 
-                $model = ucfirst($model);
+                // transform the model string to capitalized. e.g. user => User, news_list => News_List
+                $model = implode( "_", array_map( "ucfirst", array_map( "strtolower", explode( "_", $model ) ) ) );
+
 
 		// include the file
 		if( file_exists($file = self::$models_dir . $model . ".php") )
@@ -93,7 +96,9 @@ class Controller{
 	 */
 	function load_library( $library, $object_name = null ){
 
-                $library = ucfirst($library);
+                // transform the library string to capitalized. e.g. user => User, news_list => News_List
+                $library = implode( "_", array_map( "ucfirst", array_map( "strtolower", explode( "_", $library ) ) ) );
+
 
 		if( file_exists($file = self::$library_dir . $library . ".php") )
 			require_once $file;
