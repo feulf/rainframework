@@ -18,7 +18,7 @@
 			raintpl::$base_url = $base_url;
 		}
 
-		function is_cache( $tpl ){
+		function is_cached( $tpl ){
 			if( $this->cache = $this->cache( $tpl ) )
 				return true;
 		}
