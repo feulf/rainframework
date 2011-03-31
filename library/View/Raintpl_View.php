@@ -25,7 +25,7 @@
 
 		function draw( $tpl, $return_string = null ){
 			if( $this->cache )
-				return $this->html;
+                                if( $return_string ) return $this->cache; else echo $this->cache;
 			else
 				return parent::draw( $tpl, $return_string );
 		}
