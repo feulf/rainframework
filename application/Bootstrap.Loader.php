@@ -8,6 +8,7 @@
     function init(){
 
 	$this->database_connect();	// Connect the database
+	$this->init_session();          // init the session
 	$this->load_settings();		// load the settings
 	$this->set_language('en');	// set the language
 	$this->login();			// do login ( you must pass login=your_login and password=your_password)
@@ -57,6 +58,7 @@ echo 	$this->auto_load_controller();
     function init_ajax(){
 
         $this->database_connect();	// Connect the database
+	$this->init_session();          // init the session
 	$this->load_settings();		// load the settings
 	$this->set_language('en');	// set the language
 	$this->login();				// do login ( you must pass login=your_login and password=your_password)

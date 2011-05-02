@@ -61,6 +61,16 @@ class Loader{
 
 
 
+	/**
+	 * Connect to the database
+	 *
+	 */
+	function init_session(){
+                require_once LIBRARY_DIR . "Session.php";
+                Session::get_instance();
+	}
+
+
 
 	/**
 	 * Load all settings
