@@ -1,33 +1,24 @@
 <?php
 
+
+        // include the Loader class
         require_once LIBRARY_DIR . "Loader.php";
 
-        $loader = new Loader;
-        $loader->database_connect();	// Connect the database
-	$loader->init_session();          // init the session
-	$loader->load_settings();		// load the settings
-	$loader->set_language('en');	// set the language
-	$loader->login();				// do login ( you must pass login=your_login and password=your_password)
-	$loader->init_route();			// init the route
-	$loader->set_theme();			// set theme
+        // start the loader
+        $loader = Loader::get_instance();
 
+        Loader::configure("controller_extension", AJAX_CONTROLLER_EXTENSION );
+        Loader::configure("controller_class_name", AJAX_CONTROLLER_CLASS_NAME );
 
+        // enable the ajax mode
+        $loader->ajax_mode();
 
-	#--------------------------------
-	# Enable the Ajax Mode
-	#--------------------------------
-	$loader->ajax_mode();
+        $loader->init_settings();
+        $loader->init_language('en');
+        $loader->init_db();
+        $loader->auth_user();
+        $loader->init_session();
+        $loader->load_controller();
+        $loader->draw();
 
-	#--------------------------------
-	# Auto Load the Controller
-	# init_route set the controller/action/params
-	# to load the controller
-	#--------------------------------
-	$loader->auto_load_controller( AJAX_CONTROLLER_EXTENSION, AJAX_CONTROLLER_CLASS_NAME );
-
-
-
-	#--------------------------------
-	# Print the layout
-	#--------------------------------
-	$loader->draw();
+// -- end

@@ -28,6 +28,8 @@
 	 * Get GET input
 	 */
 	function get( $key = null, $filter = FILTER_SANITIZE_MAGIC_QUOTES ){
+                if( !$key )
+                    return $filter ? filter_input_array( INPUT_GET, $filter ) : $_GET;
                 if( isset($_GET[$key]) )
 			return $filter ? filter_input(INPUT_GET, $key, $filter ) : $_GET[$key];
 	}
@@ -37,6 +39,8 @@
 	 * Get POST input
 	 */
 	function post( $key = null, $filter = FILTER_SANITIZE_MAGIC_QUOTES ){
+                if( !$key )
+                    return $filter ? filter_input_array( INPUT_POST, $filter ) : $_POST;
 		if( isset($_POST[$key]) )
 			return $filter ? filter_input(INPUT_POST, $key, $filter ) : $_POST[$key];
 	}
@@ -49,8 +53,10 @@
 	function get_post( $key = null, $filter = FILTER_SANITIZE_MAGIC_QUOTES ){
                 if( !isset($GLOBALS['_GET_POST'] ) )
                     	$GLOBALS['_GET_POST'] = $_GET + $_POST;
-		if( isset($GLOBALS['_GET_POST'][$key]) )
-			return $filter ? filter_input(INPUT_GET | INPUT_POST, $key, $filter ) : $GLOBALS['_GET_POST'][$key];
+                if( !$key )
+                    return $filter ? filter_input_array( $GLOBALS['_GET_POST'], $filter ) : $GLOBALS['_GET_POST'];
+		if( isset($GLOBALS['_GET_POST'][$key] ) )
+			return $filter ? filter_input(INPUT_GET & INPUT_POST, $key, $filter ) : $GLOBALS['_GET_POST'][$key];
 	}
 
 
@@ -63,8 +69,8 @@
 			return $filter ? filter_input(INPUT_COOKIE, $key, $filter ) : $_COOKIE[$key];
 	}
 
-		
-	
+
+
 //-------------------------------------------------------------
 //
 //	BENCHMARK/DEBUG FUNCTIONS
@@ -94,7 +100,7 @@
 	/**
 	 * Get the memory used
 	 */
-	function memory_usage( $timeName = "execution_time", $byte_format = true ){
+	function memory_usage( $memName = "execution_time", $byte_format = true ){
             $totMem = memory_get_usage() - $GLOBALS['memoryCounter'][ $memName ];
             return $byte_format ? byte_format($totMem) : $totMem;
 	}
@@ -111,7 +117,7 @@
 	 */
 	function timer_start( $timeName = "execution_time" ){
 		$stimer = explode( ' ', microtime( ) );
-        $GLOBALS['timeCounter'][$timeName] = $stimer[ 1 ] + $stimer[ 0 ];
+                $GLOBALS['timeCounter'][$timeName] = $stimer[ 1 ] + $stimer[ 0 ];
 	}
 
 	/**
@@ -125,18 +131,18 @@
 
 	/**
 	 * Transform timestamp to readable time format
-	 * 
+	 *
 	 * @param int $time unix timestamp
 	 * @param string format of time (use the constant fdate_format or ftime_format)
 	 */
 	function time_format( $time=null, $format=DATE_FORMAT ){
 		return strftime( $format, $time );
 	}
-	
-	
+
+
 	/**
 	 * Transform timestamp to readable time format as elapsed time e.g. 3 days ago, or 5 minutes ago to a maximum of a week ago
-	 * 
+	 *
 	 * @param int $time unix timestamp
 	 * @param string format of time (use the constant fdate_format or ftime_format)
 	 */
@@ -158,23 +164,23 @@
 		else
 			return strftime( $format, $time );
 	}
-	
+
 
 	/**
 	 * Convert seconds to hh:ii:ss
 	 */
 	function sec_to_hms($sec) {
-		$hours = intval(intval($sec) / 3600); 
+		$hours = intval(intval($sec) / 3600);
 		$hms  = str_pad($hours, 2, "0", STR_PAD_LEFT). ':';
-		$minutes = intval(($sec / 60) % 60); 
+		$minutes = intval(($sec / 60) % 60);
 		$hms .= str_pad($minutes, 2, "0", STR_PAD_LEFT). ':';
-		$seconds = intval($sec % 60); 
+		$seconds = intval($sec % 60);
 		$hms .= str_pad($seconds, 2, "0", STR_PAD_LEFT);
 		return $hms;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Convert seconds to string, eg. "2 minutes", "1 hour", "16 seconds"
 	 */
@@ -188,8 +194,8 @@
 			$str .= $seconds > 1 ? $seconds . " " . get_msg('seconds') : $seconds . " " . get_msg('second');
 		return $str;
 	}
-	
-	
+
+
 //-------------------------------------------------------------
 //
 //					 STRING FUNCTIONS
@@ -197,7 +203,7 @@
 //-------------------------------------------------------------
 
 
-	
+
 	/**
 	 * Cut html
 	 * text, length, ending, tag allowed, $remove_image true / false, $exact true=the ending words are not cutted
@@ -211,7 +217,7 @@
 		$text = strip_tags($text, $allowed_tags );
 		if (strlen(preg_replace('/<.*?>/', '', $text)) <= $length)
 			return $text;
-		
+
 		// splits all html-tags to scanable lines
 		preg_match_all('/(<.+?>)?([^<>]*)/s', $text, $lines, PREG_SET_ORDER);
 		$total_length = strlen($ending);
@@ -265,7 +271,7 @@
 				$total_length += $content_length;
 			}
 			// if the maximum length is reached, get off the loop
-			if($total_length>= $length) 
+			if($total_length>= $length)
 				break;
 		}
 
@@ -280,7 +286,7 @@
 		return $truncate;
 	}
 
-	
+
 
 	/**
 	 * Cut string and add ... at the end
@@ -293,7 +299,7 @@
 			return $string = substr( $string, 0, $length );
 	}
 
-	
+
 
 
 	/**
@@ -364,8 +370,8 @@
             // TO DO: use the email class
 
 	}
-	
-	
+
+
 	/**
 	 * Send an email with selected template
 	 */
@@ -376,7 +382,7 @@
 		return emailSend( $to, $subject, $body, $from, $from_name, $attachment );
 	}
 
-	
+
 
 //-------------------------------------------------------------
 //
@@ -386,15 +392,15 @@
 
 	/**
 	 * Return list of dir and files without . ..
-	 * 
+	 *
 	 * @param string $d directory
 	 */
 	function dir_scan($dir){
 		if( is_dir($dir) && $dh = opendir($dir) ){ $f=array(); while ($fn = readdir($dh)) { if($fn!='.'&&$fn!='..') $f[] = $fn; } return $f; }
 	}
-	
+
 	/**
-	 * Get the list of files filtered by extension ($ext) 
+	 * Get the list of files filtered by extension ($ext)
 	 *
 	 * @param string $d directory
 	 * @param string $ext extension filter, example ".jpg"
@@ -402,8 +408,8 @@
 	function file_list($dir,$ext=null){
 		if( $dl=dir_scan($dir) ){ $l=array(); foreach( $dl as $f ) if( is_file($dir.'/'.$f) && ($ext?preg_match('/\.'.$ext.'$/',$f):1) ) $l[]=$f; return $l; }
 	}
-	
-	
+
+
 
 	/**
 	 * Get the list of directory
@@ -412,12 +418,12 @@
 	 */
 	function dir_list($dir){
 		if( $dl=dir_scan($dir) ){ $l=array(); foreach($dl as $f)if(is_dir($dir.'/'.$f))$l[]=$f; return $l; }
-	} 
-	
-	
+	}
+
+
 	/**
 	 * File extension
-	 * 
+	 *
 	 * @param string $file filename
 	 */
 	function file_ext($filename){
@@ -428,19 +434,19 @@
 
 	/**
 	 * Get the name without extension
-	 * 
+	 *
 	 * @param string $f filename
 	 */
 	function file_name($filename){
 		if( ($filename = basename($filename) ) && ( $dot_pos = strrpos( $filename , "." ) ) )
 			return substr( $filename, 0, $dot_pos );
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Delete dir and contents
-	 * 
+	 *
 	 * @param string $dir directory
 	 */
 	function dir_del($dir) {
@@ -449,7 +455,7 @@
 
 	/**
 	 * Copy all the content of a directory
-	 * 
+	 *
 	 * @param string $s source directory
 	 * @param string $d destination directory
 	 */
@@ -462,15 +468,15 @@
 			mkdir( $dest, 0777 );
 			if( $l=dir_scan($source) ){ foreach( $l as $f ) dir_copy("$source/$f", "$dest/$f"); }
 		}
-	} 
+	}
 
 
-	
+
 	/**
 	 * Upload one file selected with $file. Use it when you pass only one file with a form.
 	 * The file is saved into UPS_DIR, the name created as "md5(time()) . file_extension"
 	 * it return the filename
-	 * 
+	 *
 	 * @return string uploaded filename
 	 */
 	function upload_file($file){
@@ -480,13 +486,13 @@
 		}
 	}
 
-	
+
 	/**
 	 * Upload an image file and create a thumbnail
 	 *
 	 * @param string $file
 	 * @param string $upload_dir
-	 * @param string $thumb_prefix Prefisso della thumbnail 
+	 * @param string $thumb_prefix Prefisso della thumbnail
 	 * @param int $max_width
 	 * @param int $max_height
 	 * @param bool $square
@@ -511,7 +517,7 @@
 //					IMAGE FUNCTIONS
 //
 //-------------------------------------------------------------
-	
+
 
 
 	/**
@@ -526,7 +532,7 @@
 			case 'gif':		$source_img = imagecreatefromgif( $source );	break;
 			default:		return false;
 		}
-			
+
 		list($width, $height) = getimagesize( $source );
 		if( $square ){
 			$new_width = $new_height = $maxx;
@@ -558,7 +564,7 @@
 				if( $width > $maxx ){
 					$new_width = $maxx;
 					$new_height = $height * ( $maxx / $width );
-				}			
+				}
 			}
 		}
 
@@ -566,7 +572,7 @@
 			$new_width = $width;
 		if( !isset($new_height) or !$new_height )
 			$new_height = $height;
-			
+
 		$dest_img = ImageCreateTrueColor($new_width, $new_height);
 		imageCopyResampled( $dest_img, $source_img, 0, 0, 0, 0, $new_width, $new_height, $width, $height );
 
@@ -575,24 +581,24 @@
 			case 'gif': imagegif( $dest_img, $dest, $quality ); break;
 			default:	imagejpeg( $dest_img, $dest, $quality );
 		}
-		
+
 		imagedestroy( $source_img );
 		imagedestroy( $dest_img );
 	}
-	
 
-	
+
+
 
 //-------------------------------------------------------------
 //
 //					HOOKS FUNCTIONS
 //
 //-------------------------------------------------------------
-	
+
 
 	/**
 	 * Hooks allows to load files, execute classes or execute functions,
-	 * defined into globals $hooks variable. You can set the code you want to execute 
+	 * defined into globals $hooks variable. You can set the code you want to execute
 	 * by calling hooks_add_file, hooks_add_function, hooks_add_class
 	 *
 	 * @param string $name Name of the hooks
@@ -606,7 +612,7 @@
 				$class = $hook['class'];
 				$function = $hook['function'];
 				$params = $hook['params'];
-				
+
 				if( $file ){
 					if( file_exists($file) ){
 						if( $class or $function )
@@ -623,17 +629,17 @@
 
 						for($i=0,$n=count($params),$param="";$i<$n;$i++)
 							$param .= $i>0 ? ',$params['.$i.']' : '$params['.$i.']';
-						
+
 						if( !$function or $function==$class )
 							eval( '$obj = new $class('.$param.')' );
 						else{
 							$obj = new $class;
 							if( is_callable(array($obj,$function) ) )
-								eval( '$obj->$function( ' . $param . ' );' );	
+								eval( '$obj->$function( ' . $param . ' );' );
 							else
 								trigger_error("HOOKS: METHOD NOT FOUND OR NOT CALLABLE",E_WARNING);
-						}	
-						
+						}
+
 					}
 					else
 						trigger_error('HOOKS: CLASS NOT FOUND',E_WARNING);
@@ -648,8 +654,8 @@
 		}
 
 	}
-	
-	
+
+
 	/**
 	 * You can add a function or a method
 	 *
@@ -731,13 +737,13 @@
 		if( $close )
 			$close = '<div class="close"><a onclick="$(\'#box_'.$box_id.'\').slideUp();">x</a></div>';
 		if($autoclose)
-			addJavascript( 'setTimeout("$(\'#box_'.$box_id.'\').slideUp();", "'.($autoclose*1000).'")', $onload=true );
+			add_javascript( 'setTimeout("$(\'#box_'.$box_id.'\').slideUp();", "'.($autoclose*1000).'")', $onload=true );
 
 		switch( $type ){
 			case SUCCESS: 	$class = 'success'; break;
 			case WARNING: 	$class = 'warning'; break;
 			case ERROR:  	$class = 'error'; break;
-			case INFO: 		$class = 'info'; break;
+			case INFO: 	$class = 'info'; break;
 		}
 
 		// style defined in style.css as .box
@@ -760,12 +766,12 @@
 
 	//add style sheet
 	function add_style( $style_file, $dir = CSS_DIR ){
-		$GLOBALS['style'][$style_file] = URL . $dir . $style_file;
+		$GLOBALS['style'][$dir . $style_file] = URL . $dir . $style_file;
 	}
 
 	//add javascript file
 	function add_script( $script_file, $dir = JAVASCRIPT_DIR ){
-		$GLOBALS['script'][$script_file] = URL . $dir . $script_file;
+		$GLOBALS['script'][$dir . $script_file] = URL . $dir . $script_file;
 	}
 
 	//add javascript code
@@ -776,6 +782,31 @@
 			$GLOBALS['javascript_onload'] .= "\n".$javascript."\n";
 	}
 
+	/**
+	 * get javascript
+	 */
+	function get_javascript( $compress = false ){
+                global $script, $javascript, $javascript_onload;
+		$html = "";
+		if( $script )
+			foreach( $script as $s )
+				$html .= '<script src="'.$s.'" type="text/javascript"></script>' . "\n";
+		if( $javascript_onload ) $javascript .=  "\n" . "$(function(){" . "\n" . "	$javascript_onload" . "\n" . "});" . "\n";
+		if( $javascript ) $html .= "<script type=\"text/javascript\">" . "\n" .$javascript . "\n" . "</script>";
+		return $html;
+	}
+
+	/**
+	 * get the style
+	 */
+	function get_style(){
+		global $style;
+		$html = "";
+		if( $style )
+			foreach( $style as $s )
+				$html .= '	<link rel="stylesheet" href="'.$s.'" type="text/css" />' . "\n";
+		return $html;
+	}
 
 
 //-------------------------------------------------------------
@@ -783,6 +814,16 @@
 //					LOCALIZATION FUNCTIONS
 //
 //-------------------------------------------------------------
+
+        function get_ip(){
+            if( !defined("IP") ){
+                $ip = getenv( "HTTP_X_FORWARDED_FOR" ) ? getenv( "HTTP_X_FORWARDED_FOR" ) : getenv( "REMOTE_ADDR" );
+                if( !preg_match("^([1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}^", $ip ) ) $ip = null;
+                define( "IP", $ip );
+            }
+            return IP;
+        }
+
 
 
 	/**
@@ -804,5 +845,28 @@
 	}
 
 
+        /**
+         * Return the browser information of the logged user
+         */
+        function get_browser_info(){
 
-?>
+            if( !isset( $GLOBALS['rain_browser_info'] ) ){
+                $known = array('msie', 'firefox', 'safari', 'webkit', 'opera', 'netscape', 'konqueror', 'gecko');
+                preg_match( '#(' . join('|', $known) . ')[/ ]+([0-9]+(?:\.[0-9]+)?)#', strtolower($_SERVER['HTTP_USER_AGENT']), $br );
+                preg_match_all( '#\((.*?);#', $_SERVER['HTTP_USER_AGENT'], $os );
+
+                global $rain_browser_info;
+                $rain_browser_info['lang_id'] = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
+                $rain_browser_info['browser'] = isset( $br[1][1] ) ? $br[1][1] : null;
+                $rain_browser_info['version'] = isset( $br[2][1] ) ? $br[2][1] : null;
+                $rain_browser_info['os'] = $od[1][0];
+
+            }
+            return $GLOBALS['rain_browser_info'];
+
+
+        }
+
+
+
+// -- end

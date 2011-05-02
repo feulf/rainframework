@@ -2,22 +2,24 @@
 
         require_once LIBRARY_DIR . "Loader.php";
 
-        $loader = new Loader;
-	$loader->database_connect();	// Connect the database
-	$loader->init_session();          // init the session
-	$loader->load_settings();		// load the settings
-	$loader->set_language('en');	// set the language
-	$loader->login();			// do login ( you must pass login=your_login and password=your_password)
-	$loader->init_route();		// init the route
-	$loader->set_theme();		// set theme
-        $loader->set_page('index');		// set page layout
+        $loader = Loader::get_instance();
+        $loader->init_settings();           // load the settings
+        $loader->init_db();
+        $loader->init_session();
+        $loader->init_language();           // set the language
+        $loader->auth_user();
+        $loader->init_theme();              // set theme
+        $loader->init_js();
+
+        
+
 
 	#--------------------------------
 	# Auto Load the Controller
 	# init_route set the controller/action/params
 	# to load the controller
 	#--------------------------------
-        $loader->auto_load_controller();
+        $loader->load_controller();
 
 
 
