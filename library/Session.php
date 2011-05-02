@@ -53,7 +53,7 @@
         }
 
         function gc($maxlifetime){
-            foreach (glob("$sess_save_path/sess_*") as $filename) {
+            foreach (glob("$this->sess_save_path/sess_*") as $filename) {
                 if ( file_exists($filename) && filemtime($filename) + $maxlifetime < time())
                     unlink($filename);
             }
