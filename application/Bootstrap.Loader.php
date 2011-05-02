@@ -20,7 +20,7 @@
 	# init_route set the controller/action/params
 	# to load the controller
 	#--------------------------------
-	$this->auto_load_controller();
+echo 	$this->auto_load_controller();
 
 
 

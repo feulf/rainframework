@@ -8,6 +8,7 @@
  */
 
 
+require_once CONSTANTS_DIR . "constants.php";         // constants
 require_once LIBRARY_DIR . "functions.php";         // functions
 require_once LIBRARY_DIR . "error.functions.php";   // error manager
 
