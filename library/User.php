@@ -12,11 +12,12 @@
 class User{
 
         private static  $user_obj,
+                        $library_dir = LIBRARY_DIR,
                         $user_class_dir = "User/",
                         $user_class = "Rain_User";
 
         function  __construct(){
-		require_once self::$user_class_dir . self::$user_class . '.php';
+		require_once self::$library_dir . self::$user_class_dir . self::$user_class . '.php';
                 self::$user_obj = new self::$user_class;
         }
 
@@ -109,11 +110,11 @@ class User{
 		if( is_array( $setting ) )
 			foreach( $setting as $key => $value )
 				$this->configure( $key, $value );
-		else if( property_exists( "User", $setting ) )
+		else if( property_exists( __CLASS__, $setting ) )
 			self::$$setting = $value;
 	}
 }
 
 
 
-?>
+// -- end
