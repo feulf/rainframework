@@ -43,7 +43,7 @@ class Rain_User{
 		//check if there's login and pw, or salt_pw
 		if( $login AND ($password OR $salt_and_pw) ){
 	
-			$db = new DB;
+			$db = DB::get_instance();
 			if( !$salt_and_pw )
 				$salt_and_pw = md5( $db->get_field( "salt", "SELECT salt FROM ".DB_PREFIX."user WHERE email = '{$login}'" ) . $password );
 	
@@ -107,7 +107,7 @@ class Rain_User{
 	
 	
 	function refresh_user_info(){
-		$db = new DB;
+		$db = DB::get_instance();
 		self::$user = $_SESSION['user'] = $this->get_user();
 		self::$user['check'] = $_SESSION['user']['check'] = BASE_DIR;
 		return self::$user;
@@ -115,7 +115,7 @@ class Rain_User{
 	
 	function get_user($user_id=null){
 		if( $user_id ){
-			$db = new DB;
+			$db = DB::get_instance();
 			$user = $db->get_row( "SELECT * FROM ".DB_PREFIX."user WHERE user_id = '{$user_id}'" );
 			$user['level'] = get_msg($GLOBALS['user_level'][$user['status']]);
 			return $user;
@@ -162,7 +162,7 @@ class Rain_User{
 	 */
 	function set_user_lang( $lang_id ){
 		if( $user_id=$this->get_user_id() ){
-			$db = new DB;
+			$db = DB::get_instance();
 			$db->query( "UPDATE ".DB_PREFIX."user SET lang_id='{$lang_id}' WHERE user_id={$user_id}" );
 			$_SESSION['user']['lang_id']=$lang_id;
 		}
@@ -174,7 +174,7 @@ class Rain_User{
 	 * Set the User geolocation and page
 	 */
 	function user_where_is_init( $id, $link, $online_time = USER_ONLINE_TIME ){
-		$db = new DB;
+		$db = DB::get_instance();
 		$file 		= basename( $_SERVER['PHP_SELF'] );
 		$url 		= $_SERVER['REQUEST_URI']; 
 		$where_is 	= isset( $_SESSION['where_is'] ) ? $_SESSION['where_is'] : null;
@@ -224,7 +224,7 @@ class Rain_User{
 	 * Refresh all the user info
 	 */
 	function user_where_is_refresh(){
-		$db = new DB;
+		$db = DB::get_instance();
 		if( isset( $_SESSION['where_is'] ) ){
 			$db->query( "UPDATE ".DB_PREFIX."user_where_is SET time='".TIME."' WHERE user_where_is_id='{$_SESSION['where_is']['user_where_is_id']}'" );
 			$_SESSION['where_is']['time'] = TIME;
@@ -237,7 +237,7 @@ class Rain_User{
 	 * Get the userWhereIs info
 	 */
 	function get_user_where_is_user( $user_where_is_id, $online_time = USER_ONLINE_TIME ){
-		$db = new DB;
+		$db = DB::get_instance();
 		return $db->get_row( "SELECT ".DB_PREFIX."user.*, ".DB_PREFIX."user_where_is.*
 							FROM ".DB_PREFIX."user_where_is
 							LEFT JOIN ".DB_PREFIX."user ON ".DB_PREFIX."user_where_is.user_id = ".DB_PREFIX."user.user_id
@@ -251,7 +251,7 @@ class Rain_User{
 	 * Get the list of all user online
 	 */
 	function get_user_where_is_list( $id = null, $yourself = true, $online_time = USER_ONLINE_TIME ){
-		$db = new DB;
+		$db = DB::get_instance();
 		return $db->get_list( 	"SELECT ".DB_PREFIX."user.*, ".DB_PREFIX."user_where_is.*, IF (".DB_PREFIX."user.user_id > 0, ".DB_PREFIX."user.name, ".DB_PREFIX."user_where_is.name ) AS name
 									FROM ".DB_PREFIX."user_where_is
 									LEFT JOIN ".DB_PREFIX."user ON ".DB_PREFIX."user_where_is.user_id = ".DB_PREFIX."user.user_id
@@ -276,7 +276,7 @@ class Rain_User{
 	 * Delete the user where is info
 	 */
 	function user_where_is_logout( $user_id ){
-		$db = new DB;
+		$db = DB::get_instance();
 		$db->query( "DELETE FROM ".DB_PREFIX."user_where_is WHERE user_id='$user_id'" );
 		unset( $_SESSION['where_is'] );
 	}
@@ -286,7 +286,7 @@ class Rain_User{
 	 */
 	function get_user_group_list(){
                 if( $user_id = $this->get_user_id() ){
-                    $db = new DB;
+                    $db = DB::get_instance();
                     return $db->get_list(   "SELECT *
                                             FROM ".DB_PREFIX."usergroup AS g
                                             JOIN ".DB_PREFIX."usergroup_user AS gu ON g.group_id=gu.group_id

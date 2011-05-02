@@ -24,7 +24,7 @@ class Rain_User_Localization{
         function init( $id = null, $link, $online_time = USER_ONLINE_TIME ){
 
 
-                $db = new DB;
+                $db = DB::get_instance();
 		$file 		= basename( $_SERVER['PHP_SELF'] );
 		$url 		= $_SERVER['REQUEST_URI'];
 		$user_localization = isset( $_SESSION['user_localization'] ) ? $_SESSION['user_localization'] : null;
@@ -74,7 +74,7 @@ class Rain_User_Localization{
 	 * Refresh all the user info
 	 */
 	function refresh(){
-		$db = new DB;
+		$db = DB::get_instance();
 		if( isset( $_SESSION['user_localization'] ) ){
 			$db->query( "UPDATE ".DB_PREFIX."user_location SET time='".TIME."' WHERE user_localization_id='{$_SESSION['user_localization']['user_localization_id']}'" );
 			$_SESSION['user_localization']['time'] = TIME;
@@ -87,7 +87,7 @@ class Rain_User_Localization{
 	 * Get the userWhereIs info
 	 */
 	function get_user( $user_localization_id, $online_time = USER_ONLINE_TIME ){
-		$db = new DB;
+		$db = DB::get_instance();
 		return $db->get_row( "SELECT ".DB_PREFIX."user.*, ".DB_PREFIX."user_location.*
 							FROM ".DB_PREFIX."user_location
 							LEFT JOIN ".DB_PREFIX."user ON ".DB_PREFIX."user_location.user_id = ".DB_PREFIX."user.user_id
@@ -101,7 +101,7 @@ class Rain_User_Localization{
 	 * Get the list of all user online
 	 */
 	function get_user_list( $id = null, $yourself = true, $online_time = USER_ONLINE_TIME ){
-		$db = new DB;
+		$db = DB::get_instance();
 		return $db->get_list( 	"SELECT ".DB_PREFIX."user.*, ".DB_PREFIX."user_location.*, IF (".DB_PREFIX."user.user_id > 0, ".DB_PREFIX."user.name, ".DB_PREFIX."user_location.name ) AS name
 									FROM ".DB_PREFIX."user_location
 									LEFT JOIN ".DB_PREFIX."user ON ".DB_PREFIX."user_location.user_id = ".DB_PREFIX."user.user_id
@@ -117,7 +117,7 @@ class Rain_User_Localization{
 	 * Delete the user where is info
 	 */
 	function localization_logout( $user_id ){
-		$db = new DB;
+		$db = DB::get_instance();
 		$db->query( "DELETE FROM ".DB_PREFIX."user_location WHERE user_id='$user_id'" );
 		unset( $_SESSION['user_localization'] );
 	}

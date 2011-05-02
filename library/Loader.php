@@ -56,8 +56,7 @@ class Loader{
 	 */
 	function database_connect(){
                 require_once LIBRARY_DIR . "DB.php";
-		$this->db = new DB;
-		$this->db->connect();
+		$this->db = DB::get_instance();
 	}
 
 
