@@ -18,11 +18,11 @@ class Rain_User{
 	private static $user;
 
 	// do login
-	function login( $login = null, $password = null, $enable_cookies = false, $logout = null, $errorWait = 5 ){
+	function login( $login = null, $password = null, $enable_cookies = false, $logout = null, $errorWait = 1 ){
 
 		if( $logout )
 			return LOGIN_LOGOUT;
-	
+
 		// true if the user is logged
 		// In shared server could happen that your login is shared in all website, user.check verify that the login is only on this application
 		elseif( !$login && !$password && isset( $_SESSION['user'] ) && isset( $_SESSION['user']['check'] ) && $_SESSION['user']['check'] == BASE_DIR ){
@@ -39,22 +39,22 @@ class Rain_User{
 		}
 		else
 			$salt_and_pw = null;
-	
+
 		//check if there's login and pw, or salt_pw
 		if( $login AND ($password OR $salt_and_pw) ){
-	
+
 			$db = DB::get_instance();
 			if( !$salt_and_pw )
-				$salt_and_pw = md5( $db->get_field( "salt", "SELECT salt FROM ".DB_PREFIX."user WHERE email = '{$login}'" ) . $password );
-	
+				$salt_and_pw = md5( $db->get_field( "SELECT salt FROM ".DB_PREFIX."user WHERE email = '{$login}'" ) . $password );
+
 			if( $user = $db->get_row( "SELECT * FROM ".DB_PREFIX."user WHERE email = '$login' AND password = '$salt_and_pw'" ) ){
-	
+
 				// create new salt and password
 				if( $password ){
 					$user_id = $user['user_id'];
 					$salt=rand( 0, 99999 );
 					$md5_password = md5( $salt . $password );
-					$db->query( "UPDATE ".DB_PREFIX."user SET password='$md5_password', salt='$salt', activation_code='' WHERE user_id='$user_id'" );	
+					$db->query( "UPDATE ".DB_PREFIX."user SET password='$md5_password', salt='$salt', activation_code='' WHERE user_id='$user_id'" );
 				}
 
 				if( $enable_cookies ){
@@ -63,13 +63,13 @@ class Rain_User{
 				}
 
 				$user['check'] = $_SESSION['user']['check'] = BASE_DIR;
-				$user['level'] = get_msg( $GLOBALS['user_level'][ $user['status'] ] );
+				$user['level'] = get_msg( strtolower($GLOBALS['user_level'][ $user['status'] ]) );
 
 				// save user data
 				self::$user = $_SESSION['user'] = $user;
 
 				//update date and IP
-				$db->query( "UPDATE ".DB_PREFIX."user SET last_ip='".IP."', data_login=UNIX_TIMESTAMP() WHERE user_id='{$user['user_id']}'" );
+				$db->query( "UPDATE ".DB_PREFIX."user SET last_ip='".get_ip()."', data_login=UNIX_TIMESTAMP() WHERE user_id='{$user['user_id']}'" );
 
 				return LOGIN_DONE;
 			}
@@ -77,60 +77,59 @@ class Rain_User{
 
 				// if login is wrong PHP will sleep for $errorWait seconds
 				sleep( $errorWait );
-
-				unset( self::$user );
+				self::$user = null;
 				unset($_SESSION['user']);
 				setcookie ("login", "", time() - 3600);
 				setcookie ("password", "", time() - 3600);
-	
+
 				return LOGIN_ERROR;
 			}
 		}
 		else
 			return LOGIN_NOT_LOGGED;
 	}
-	
+
 	function logout(){
 		if( $user_id = get_user_id() )
                     $this->user_where_is_logout( $user_id );
-		unset(self::$user);
+		self::$user = null;
 		unset($_SESSION['user']);
 		setcookie ("login", "", time() - 3600);
 		setcookie ("password", "", time() - 3600);
 	}
-	
-	
+
+
 	// return 0 if not logged
 	function get_user_id(){
                 return isset(self::$user) ? self::$user['user_id'] : null;
 	}
-	
-	
+
+
 	function refresh_user_info(){
 		$db = DB::get_instance();
 		self::$user = $_SESSION['user'] = $this->get_user();
 		self::$user['check'] = $_SESSION['user']['check'] = BASE_DIR;
 		return self::$user;
 	}
-	
+
 	function get_user($user_id=null){
 		if( $user_id ){
 			$db = DB::get_instance();
 			$user = $db->get_row( "SELECT * FROM ".DB_PREFIX."user WHERE user_id = '{$user_id}'" );
-			$user['level'] = get_msg($GLOBALS['user_level'][$user['status']]);
+			$user['level'] = get_msg( strtolower($GLOBALS['user_level'][ $user['status'] ]) );
 			return $user;
 		}
 		else
 			return isset( self::$user ) ? self::$user : null;
 	}
-	
+
 
 	function is_admin( $user_id = NULL ){
 		return $this->get_user_field( "status", $user_id ) >= USER_ADMIN;
 	}
 
 
-	
+
 	/**
 	 * return true if the user is super admin
 	 * @param int $user_id By default is selected the logged user
@@ -138,9 +137,9 @@ class Rain_User{
 	function is_super_admin( $user_id = NULL ){
 		return $this->get_user_field( "status", $user_id ) >= USER_SUPER_ADMIN;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Select the field of the user
 	 * @param string $field Selected field
@@ -156,7 +155,7 @@ class Rain_User{
 	}
 
 
-	
+
 	/**
 	 * set the language on the selected user
 	 */
@@ -169,57 +168,55 @@ class Rain_User{
 	}
 
 
-	
+
 	/**
 	 * Set the User geolocation and page
 	 */
 	function user_where_is_init( $id, $link, $online_time = USER_ONLINE_TIME ){
 		$db = DB::get_instance();
 		$file 		= basename( $_SERVER['PHP_SELF'] );
-		$url 		= $_SERVER['REQUEST_URI']; 
+		$url 		= $_SERVER['REQUEST_URI'];
 		$where_is 	= isset( $_SESSION['where_is'] ) ? $_SESSION['where_is'] : null;
 		$sid 		= session_id();
 		$browser	= BROWSER . " " . BROWSER_VERSION;
 		$os			= BROWSER_OS;
-		$ip 		= IP;
-	
+		$ip 		= get_ip();
+
 		if( !$where_is ){
 			$time = TIME - HOUR;
 			$db->query( "DELETE FROM ".DB_PREFIX."user_where_is WHERE time < " . HOUR );
 		}
-	
-		$user_where_is_id = $where_is ? $_SESSION['where_is']['user_where_is_id'] : $db->get_field( "user_where_is_id", "SELECT user_where_is_id FROM ".DB_PREFIX."user_where_is WHERE sid='$sid'" );
-	
+
+		$user_where_is_id = $where_is ? $_SESSION['where_is']['user_where_is_id'] : $db->get_field( "SELECT user_where_is_id FROM ".DB_PREFIX."user_where_is WHERE sid='$sid'" );
+
 		if( $user_id = $this->get_user_id() ){
 			$guest_id = 0;
 			$name = $this->get_user_field( "name" );
 		}
 		else{
-			$guest_id = isset( $where_is['guest_id'] ) ? $where_is['guest_id'] : ( 1 + $db->get_field( "guest_id", "SELECT guest_id FROM ".DB_PREFIX."user_where_is ORDER BY guest_id DESC LIMIT 1;" ) );
+			$guest_id = isset( $where_is['guest_id'] ) ? $where_is['guest_id'] : ( 1 + $db->get_field( "SELECT guest_id FROM ".DB_PREFIX."user_where_is ORDER BY guest_id DESC LIMIT 1;" ) );
 			$name = _GUEST_ . " " . $guest_id;
-		}		
-	
+		}
+
 		if( $user_where_is_id )
 			$db->query( "UPDATE ".DB_PREFIX."user_where_is SET ip='$ip', user_id='$user_id', name='$name', url='$url', id='$id', file='$file', time='".TIME."', sid='$sid' WHERE user_where_is_id='$user_where_is_id'" );
 		else{
-	
+
 			if( !($location = ip_to_location( $ip, $type = 'array' )) )
 				$location = array( 'CountryCode'=>null, 'CountryName'=>null, 'RegionCode'=>null, 'RegionName'=>null, 'City'=>null, 'ZipPostalCode'=>null, 'Latitude'=>null, 'Longitude'=>null, 'TimezoneName'=>null, 'Gmtoffset'=>null );
-	
-			//replace_sql_injection( $location );
-	
-			$db->query( "INSERT INTO ".DB_PREFIX."user_where_is 
+
+			$db->query( "INSERT INTO ".DB_PREFIX."user_where_is
 						(ip,sid,user_id,guest_id,name,url,id,file,os,browser,time,time_first_click,country_code,country_name,region_code,region_name,city_name,zip,latitude,longitude,timezone_name,gmt_offset)
-						VALUES 
+						VALUES
 						('$ip','$sid','$user_id','$guest_id','$name','$url','$id','$file','$os','$browser', ".TIME.", ".TIME.", '{$location['CountryCode']}', '{$location['CountryName']}', '{$location['RegionCode']}', '{$location['RegionName']}','{$location['City']}', '{$location['ZipPostalCode']}', '{$location['Latitude']}', '{$location['Longitude']}', '{$location['TimezoneName']}', '{$location['Gmtoffset']}')" );
-						$user_where_is_id = $db->get_inserted_id();
+						$user_where_is_id = $db->get_insert_id();
 		}
-	
+
 		$_SESSION['where_is'] = array( 'user_where_is_id' => $user_where_is_id, 'id' => $id, 'guest_id'=>$guest_id, 'name'=>$name, 'time' => TIME, 'file' => $file, 'user_id' => $user_id, 'os' => $os, 'browser' => $browser );
 	}
 
-	
-	
+
+
 	/**
 	 * Refresh all the user info
 	 */
@@ -230,9 +227,9 @@ class Rain_User{
 			$_SESSION['where_is']['time'] = TIME;
 		}
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Get the userWhereIs info
 	 */
@@ -244,9 +241,9 @@ class Rain_User{
 							WHERE ( ".TIME." - time ) < $online_time
 							AND user_where_is_id = $user_where_is_id");
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Get the list of all user online
 	 */
@@ -260,18 +257,18 @@ class Rain_User{
 									. ( !$yourself ? " AND ".DB_PREFIX."user_where_is.sid != '".session_id()."'" : null )
 									);
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Get the info of the logged user
 	 */
 	function get_user_where_is( ){
 		return $where_is = isset( $_SESSION['where_is'] ) ? $_SESSION['where_is'] : null;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Delete the user where is info
 	 */
@@ -290,8 +287,9 @@ class Rain_User{
                     return $db->get_list(   "SELECT *
                                             FROM ".DB_PREFIX."usergroup AS g
                                             JOIN ".DB_PREFIX."usergroup_user AS gu ON g.group_id=gu.group_id
-                                            WHERE gu.user_id='$user_id'
-                                            ORDER BY name" );
+                                            WHERE gu.user_id=?
+                                            ORDER BY name",
+                                            array($group_id));
                 }
 	}
 
