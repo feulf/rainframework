@@ -105,7 +105,7 @@ class DB{
          * @param array $field
          * @return array of array
          */
-	function get_list( $query = null, $key = null, $value = null, $field=array() ){
+	function get_list( $query = null, $field = array(), $key = null, $value = null ){
             if( $result = $this->query($query,$field)->fetchALL($this->fetch_mode) ){
                 if( !$key )
                         return $result;
