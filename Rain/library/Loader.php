@@ -211,7 +211,7 @@ class Loader{
 			define( "LANG_ID", $lang_id );
 		}
                 else
-                    $this->_draw_page_not_found("language_not_found");
+                    $this->page_not_found = true;
         }
 
 

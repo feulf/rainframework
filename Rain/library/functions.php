@@ -732,7 +732,7 @@
 	// draw a message styled as SUCCESS, WARNING, ERROR or INFO. See .box in style.css for the style
 	function draw_msg( $msg, $type = SUCCESS, $close = false, $autoclose = 0 ){
 		add_script("jquery/jquery.min.js" );
-		add_style( "box.css", WEB_DIR . "css/" );
+		add_style( "box.css", CSS_DIR );
 		$box_id = rand(0,9999) . "_" . time();
 		if( $close )
 			$close = '<div class="close"><a onclick="$(\'#box_'.$box_id.'\').slideUp();">x</a></div>';

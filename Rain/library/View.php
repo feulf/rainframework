@@ -22,6 +22,7 @@ class View{
 	private static 	$tpl_dir = null,
                         $cache_dir = null,
                         $base_url = null,
+                        $library_dir = LIBRARY_DIR,
                         $view_class_dir = "View/",
                         $view_class = "Raintpl_View";
 
@@ -40,7 +41,7 @@ class View{
 	 * @param string $template_class The template class that loads the template engine
 	 */
 	function __construct(){
-                require_once self::$view_class_dir . self::$view_class . '.php';
+                require_once self::$library_dir . self::$view_class_dir . self::$view_class . '.php';
 		$this->view_obj = new self::$view_class( self::$tpl_dir, self::$cache_dir, self::$base_url );
 	}
 
@@ -66,8 +67,8 @@ class View{
 	 * Return true if the template is cached
 	 *
 	 */
-	function is_cached( $template, $expire_time = HOUR ){
-		return $this->view_obj->is_cached( $template, $expire_time );
+	function is_cached( $template, $expire_time = HOUR, $cache_id = null ){
+		return $this->view_obj->is_cached( $template, $expire_time, $cache_id );
 	}
 
 
@@ -79,7 +80,7 @@ class View{
 		if( is_array( $setting ) )
 			foreach( $setting as $key => $value )
 				$this->configure( $key, $value );
-		else if( property_exists( "View", $setting ) )
+		else if( property_exists( __CLASS__, $setting ) )
 			self::$$setting = $value;
 	}
 
@@ -89,4 +90,4 @@ class View{
 
 
 
-?>
+// -- end
