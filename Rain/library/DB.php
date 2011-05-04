@@ -281,6 +281,19 @@ class DB{
 	}
 
 
+	/**
+	 * Configure the settings
+	 *
+	 */
+	static function configure( $setting, $value ){
+		if( is_array( $setting ) )
+			foreach( $setting as $key => $value )
+				$this->configure( $key, $value );
+		else if( property_exists( __CLASS__, $setting ) )
+			self::$$setting = $value;
+	}
+
+
         private function __construct(){}
 
 }
