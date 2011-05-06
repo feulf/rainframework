@@ -15,9 +15,9 @@
 class DB{
 
         private $db,                // database configurations
-                $fetch_mode = null;
+                $fetch_mode,        // define the type of results
+                $statement;         // the PDO object variable
 
-        private $query_components = array();  // all the components to create a query, es $db->table('news')->limit(1); will set query_components[table]='news'
 
         private static  $obj_instance_list,
                         $nquery = 0;
@@ -57,14 +57,28 @@ class DB{
          */
         function query( $query=null,$field=array() ){
             try{
-                $statement = $this->link->prepare($query);
-                $statement->execute($field);
+                $this->statement = $this->link->prepare($query);
+                $this->statement->execute($field);
                 self::$nquery++;
-                return $statement;
+                return $this->statement;
             } catch ( PDOException $e ){
                     error_reporting( "Error!: " . $e->getMessage() . "<br/>", E_USER_ERROR );
             }
         }
+
+
+
+        /**
+         * Get the number of rows involved in the last query
+         *
+         * @param string $query
+         * @param array $field
+         * @return string
+         */
+        function row_count($query=null,$field=array()){
+            return $query ? $this->query($query,$field)->rowCount() : $this->statement->rowCount();
+        }
+
 
 
         /**
@@ -87,7 +101,7 @@ class DB{
          * @return array
          */
         function get_row($query=null,$field=array() ){
-            return $this->query($query,$field)->fetch($this->fetch_mode);
+            return $this->query($query,$field)->fetch($this->fetch_mode );
         }
 
 
@@ -105,7 +119,7 @@ class DB{
          * @param array $field
          * @return array of array
          */
-	function get_list( $query = null, $field = array(), $key = null, $value = null ){
+	function get_list( $query = null, $field=array(), $key = null, $value = null ){
             if( $result = $this->query($query,$field)->fetchALL($this->fetch_mode) ){
                 if( !$key )
                         return $result;
@@ -133,7 +147,7 @@ class DB{
 
         /**
          * Set the fetch mode
-         * PDO::FETCH_ASSOC for arrays, PDO::FETCH_CLASS for objects
+         * PDO::FETCH_ASSOC for arrays, PDO::FETCH_OBJ for objects
          */
         function set_fetch_mode( $fetch_mode = PDO::FETCH_ASSOC ){
             $this->fetch_mode = $fetch_mode;
@@ -163,13 +177,14 @@ class DB{
 	 * @param string $table the selected table
          * @param array $data the parameter must be an associative array (name=>value)
 	 */
-	function update( $table, $data, $where ){
+	function update( $table, $data, $where, $field = null ){
 		if( count( $data ) ){
 			$fields = "";
 			foreach( $data as $name => $value )
-				$fields .= $fields ? ",`$name`='$value'" : ",`$name`='$value'";
+				$fields .= $fields ? ",`$name`='$value'" : "`$name`='$value'";
 			$where = is_string( $where ) ? " WHERE $where" : null;
-			return $this->link->query("UPDATE $table SET $fields $where");
+                        $query = "UPDATE $table SET $fields $where";
+                        return $this->query( $query, $field );
 		}
 	}
 
@@ -273,13 +288,6 @@ class DB{
 
 	}
 
-	/**
-	 * Close mysql connection
-	 */
-	function disconnect( ){
-		unset( $this->link );
-	}
-
 
 	/**
 	 * Configure the settings
@@ -291,6 +299,14 @@ class DB{
 				$this->configure( $key, $value );
 		else if( property_exists( __CLASS__, $setting ) )
 			self::$$setting = $value;
+	}
+
+
+	/**
+	 * Close mysql connection
+	 */
+	function disconnect( ){
+		unset( $this->link );
 	}
 
 
