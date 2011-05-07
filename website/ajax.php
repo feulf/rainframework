@@ -13,7 +13,7 @@
         #--------------------------------
 	# Load the class
 	#--------------------------------
-	require_once "../$website/config/directory.php";
+	require_once "../$website/config/website.directory.php";
 
 
 
