@@ -51,7 +51,7 @@
 		}
 
 		function draw( $ajax = false, $return_string = false ){
-			$this->form_obj->draw( $ajax, $return_string );
+			return $this->form_obj->draw( $ajax, $return_string );
 		}
 
                 /**
