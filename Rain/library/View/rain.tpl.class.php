@@ -81,6 +81,16 @@ class RainTPL{
 		 *
 		 */
 		static $check_template_update = true;
+                
+
+		/**
+		 * Debug mode flag.
+		 * True: debug mode is used, syntax errors are displayed directly in template. Execution of script is not terminated.
+		 * False: exception is thrown on found error.
+		 *
+		 * @var bool
+		 */
+		static $debug = false;
 
 	// -------------------------
 
@@ -99,6 +109,8 @@ class RainTPL{
 		private $tpl = array(),		// variables to keep the template directories and info
 			$cache = false,		// static cache enabled / disabled
                         $cache_id = null;       // identify only one cache
+
+                private static $config_name_sum = null;   // takes all the config to create the md5 of the file
 
 	// -------------------------
 
@@ -137,9 +149,13 @@ class RainTPL{
 
 	function draw( $tpl_name, $return_string = false ){
 
-		// compile the template if necessary and set the template filepath
-		$this->check_template( $tpl_name );
-
+		try {
+			// compile the template if necessary and set the template filepath
+			$this->check_template( $tpl_name );
+		} catch (RainTpl_Exception $e) {
+			$output = $this->printDebug($e);
+			die($output);
+		}
 
 		// Cache is off and, return_string is false
                 // Rain just echo the template
@@ -217,8 +233,10 @@ class RainTPL{
 		if( is_array( $setting ) )
 			foreach( $setting as $key => $value )
 				self::configure( $key, $value );
-		else if( property_exists( __CLASS__, $setting ) )
+		else if( property_exists( __CLASS__, $setting ) ){
 			self::$$setting = $value;
+                        self::$config_name_sum .= $value; // take trace of all config
+                }
 	}
 
 
@@ -233,14 +251,14 @@ class RainTPL{
 			$tpl_basedir                        = strpos($tpl_name,"/") ? dirname($tpl_name) . '/' : null;						// template basedirectory
 			$tpl_dir                            = self::$tpl_dir . $tpl_basedir;								// template directory
 			$this->tpl['tpl_filename']          = $tpl_dir . $tpl_basename . '.' . self::$tpl_ext;	// template filename
-			$temp_compiled_filename             = self::$cache_dir . md5( $this->tpl['tpl_filename'] );
+			$temp_compiled_filename             = self::$cache_dir . $tpl_basename . "." . md5( $tpl_basedir . self::$config_name_sum );
 			$this->tpl['compiled_filename']     = $temp_compiled_filename . '.php';	// cache filename
 			$this->tpl['cache_filename']        = $temp_compiled_filename . '.s_' . $this->cache_id . '.php';	// static cache filename
 
 			// if the template doesn't exsist throw an error
 			if( self::$check_template_update && !file_exists( $this->tpl['tpl_filename'] ) ){
-				trigger_error( 'Template <b>'.$this->tpl['tpl_filename'].'</b> not found!' );
-				return '<div style="background:#f8f8ff;border:1px solid #aaaaff;padding:10px;">Template <b>'.$this->tpl['tpl_filename'].'</b> not found</div>';
+				$e = new RainTpl_NotFoundException( 'Template '. $tpl_basename .' not found!' );
+				throw $e->setTemplateFile($this->tpl['tpl_filename']);
 			}
 
 			// file doesn't exsist, or the template was updated, Rain will compile the template
@@ -259,7 +277,7 @@ class RainTPL{
 	*/
 	private function xml_reSubstitution($capture) {
     		return "<?php echo '<?xml ".stripslashes($capture[1])." ?>'; ?>";
-	}
+	} 
 
 	/**
 	 * Compile and write the compiled template file
@@ -277,11 +295,11 @@ class RainTPL{
 		$template_code = str_replace( array("<?","?>"), array("&lt;?","?&gt;"), $template_code );
 
 		//xml re-substitution
-		$template_code = preg_replace_callback ( "/##XML(.*?)XML##/s", array($this, 'xml_reSubstitution'), $template_code );
+		$template_code = preg_replace_callback ( "/##XML(.*?)XML##/s", array($this, 'xml_reSubstitution'), $template_code ); 
 
 		//compile template
 		$template_compiled = "<?php if(!class_exists('raintpl')){exit;}?>" . $this->compileTemplate( $template_code, $tpl_basedir );
-
+		
 
 		// fix the php-eating-newline-after-closing-tag-problem
 		$template_compiled = str_replace( "?>\n", "?>\n\n", $template_compiled );
@@ -291,7 +309,7 @@ class RainTPL{
 			mkdir( $cache_dir, 0755, true );
 
 		if( !is_writable( $cache_dir ) )
-			die( "Cache directory <b>$cache_dir</b> doesn't have write permission. Set write permission or set RAINTPL_CHECK_TEMPLATE_UPDATE to false. More details on <a target=_blank href=http://www.raintpl.com/Documentation/Documentation-for-PHP-developers/Configuration/>Configuration</a>");
+			throw new RainTpl_Exception ('Cache directory ' . $cache_dir . 'doesn\'t have write permission. Set write permission or set RAINTPL_CHECK_TEMPLATE_UPDATE to false. More details on http://www.raintpl.com/Documentation/Documentation-for-PHP-developers/Configuration/');
 
 		//write compiled file
 		file_put_contents( $compiled_filename, $template_compiled );
@@ -545,9 +563,10 @@ class RainTPL{
 			}
 		}
 
-		if( $open_if > 0 )
-			die( "Error! You need to close an {if} tag in <b>". $this->tpl['tpl_filename'] ." </b>template" );
-
+		if( $open_if > 0 ) {
+			$e = new RainTpl_SyntaxException('Error! You need to close an {if} tag in ' . $this->tpl['tpl_filename'] . ' template');
+			throw $e->setTemplateFile($this->tpl['tpl_filename']);
+		}
 		return $compiled_code;
 	}
 
@@ -828,19 +847,152 @@ class RainTPL{
 			while( !strpos($rows[$line],$code) )
 				$line++;
 
-			// draw the error line
-			$error = str_replace( array('<','>'), array( '&lt;','&gt;' ), array($code,$rows[$line]) );
-			$error = str_replace( $code, "<font color=red>$code</font>", $rows[$line] );
-
-			// debug the error and stop the execution of the script
-			die( "<div>RainTPL Sandbox Error in template <b>{$this->tpl['tpl_filename']}</b> at line $line : <i>$error</i></b>" );
+			// stop the execution of the script
+			$e = new RainTpl_SyntaxException('Unallowed syntax in ' . $this->tpl['tpl_filename'] . ' template');
+			throw $e->setTemplateFile($this->tpl['tpl_filename'])
+				->setTag($code)
+				->setTemplateLine($line);
 		}
 
 	}
 
+	/**
+	 * Prints debug info about exception or passes it further if debug is disabled.
+	 *
+	 * @param RainTpl_Exception $e
+	 * @return string
+	 */
+	private function printDebug(RainTpl_Exception $e){
+		if (!self::$debug) {
+			throw $e;
+		}
+		$output = sprintf('<h2>Exception: %s</h2><h3>%s</h3><p>template: %s</p>',
+			get_class($e),
+			$e->getMessage(),
+			$e->getTemplateFile()
+		);
+		if ($e instanceof RainTpl_SyntaxException) {
+			if (null != $e->getTemplateLine()) {
+				$output .= '<p>line: ' . $e->getTemplateLine() . '</p>';
+			}
+			if (null != $e->getTag()) {
+				$output .= '<p>in tag: ' . htmlspecialchars($e->getTag()) . '</p>';
+			}
+			if (null != $e->getTemplateLine() && null != $e->getTag()) {
+				$rows=explode("\n",  htmlspecialchars($this->tpl['source']));
+				$rows[$e->getTemplateLine()] = '<font color=red>' . $rows[$e->getTemplateLine()] . '</font>';
+				$output .= '<h3>template code</h3>' . implode('<br />', $rows) . '</pre>';
+			}
+		}
+		$output .= sprintf('<h3>trace</h3><p>In %s on line %d</p><pre>%s</pre>',
+			$e->getFile(), $e->getLine(),
+			nl2br(htmlspecialchars($e->getTraceAsString()))
+		);
+		return $output;
+	}
 }
 
 
+/**
+ * Basic Rain tpl exception.
+ */
+class RainTpl_Exception extends Exception{
+	/**
+	 * Path of template file with error.
+	 */
+	private $templateFile = '';
 
+	/**
+	 * Returns path of template file with error.
+	 *
+	 * @return string
+	 */
+	public function getTemplateFile()
+	{
+		return $this->templateFile;
+	}
+
+	/**
+	 * Sets path of template file with error.
+	 *
+	 * @param string $templateFile
+	 * @return RainTpl_Exception
+	 */
+	public function setTemplateFile($templateFile)
+	{
+		$this->templateFile = (string) $templateFile;
+		return $this;
+	}
+}
+
+/**
+ * Exception thrown when template file does not exists.
+ */
+class RainTpl_NotFoundException extends RainTpl_Exception{
+}
+
+/**
+ * Exception thrown when syntax error occurs.
+ */
+class RainTpl_SyntaxException extends RainTpl_Exception{
+	/**
+	 * Line in template file where error has occured.
+	 *
+	 * @var int | null
+	 */
+	private $templateLine = null;
+
+	/**
+	 * Tag which caused an error.
+	 *
+	 * @var string | null
+	 */
+	private $tag = null;
+
+	/**
+	 * Returns line in template file where error has occured
+	 * or null if line is not defined.
+	 *
+	 * @return int | null
+	 */
+	public function getTemplateLine()
+	{
+		return $this->templateLine;
+	}
+
+	/**
+	 * Sets  line in template file where error has occured.
+	 *
+	 * @param int $templateLine
+	 * @return RainTpl_SyntaxException
+	 */
+	public function setTemplateLine($templateLine)
+	{
+		$this->templateLine = (int) $templateLine;
+		return $this;
+	}
+
+	/**
+	 * Returns tag which caused an error.
+	 *
+	 * @return string
+	 */
+	public function getTag()
+	{
+		return $this->tag;
+	}
+
+	/**
+	 * Sets tag which caused an error.
+	 *
+	 * @param string $tag
+	 * @return RainTpl_SyntaxException
+	 */
+	public function setTag($tag)
+	{
+		$this->tag = (string) $tag;
+		return $this;
+	}
+}
 
 ?>
