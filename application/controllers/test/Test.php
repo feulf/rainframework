@@ -3,14 +3,14 @@
 	class Test_Controller extends Controller{
 
             
-                //filter before
+                //filter before, automatically called before the action
                 function filter_before(){
-                    echo "before";
+                    echo "filter before";
                 }
 
-                //filter after
+                //filter after, automatically called after the action
                 function filter_after(){
-                    echo "after";
+                    echo "and filter after";
                 }
             
 		function index(){
@@ -18,7 +18,7 @@
 			echo draw_msg( 'this is a test' );
 
 		}
-		
+
 		function ajax_index(){
 			$this->ajax_mode( true, true );
 			echo draw_msg( 'hei' );

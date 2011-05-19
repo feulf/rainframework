@@ -38,7 +38,7 @@ class Loader{
                   $load_style = false;
 
         protected $var,                   // variables assigned to the page layout
-                  $load_area = array();   // variables assigned to the page layout
+                  $load_area_array = array();   // variables assigned to the page layout
 
         // selected controller
         protected $selected_controller = null,
@@ -111,10 +111,10 @@ class Loader{
                 }
                 else{
                     // save the output into the load_area array
-                    if( !isset($this->load_area[$load_area]) )
-                        $this->load_area[$load_area] = array();
+                    if( !isset($this->load_area_array[$load_area]) )
+                        $this->load_area_array[$load_area] = array();
 
-                    $this->load_area[$load_area] = $html;
+                    $this->load_area_array[$load_area][] = $html;
                 }
 
 
@@ -291,7 +291,14 @@ class Loader{
 
                 // assign all variable
 		$tpl->assign( $this->var );
-                $tpl->assign( $this->load_area );
+                
+                
+                // - LOAD AREA ----
+                // wrap all the blocks in a load area
+                foreach( $this->load_area_array as $load_area_name => $blocks_array )
+                    $load_area[$load_area_name] = $this->_blocks_wrapper($blocks_array);
+                $tpl->assign( "load_area", $load_area );
+                // ----------------
 
 		// - HEAD ------
 		$head = get_javascript() . get_style();
@@ -380,7 +387,7 @@ class Loader{
         /**
          * Page was not found
          */
-        function _draw_page_not_found( $msg = "page_not_found" ){
+        protected function _draw_page_not_found( $msg = "page_not_found" ){
                 header("HTTP/1.0 404 Not Found");
                 $this->page_layout = $this->not_found_layout;
                 $this->assign( "message", get_msg($msg) );
@@ -392,14 +399,23 @@ class Loader{
 	/**
 	 * ajax call
 	 */
-	function _draw_ajax(){
+	protected function _draw_ajax(){
 		$html =  $this->load_style ? get_style() : null;
                 $html .= $this->load_javascript ? get_javascript() : null;
 		die( $html );
 	}
+        
+        
+        
+        protected function _blocks_wrapper( $block_array = array() ){
+            $html = null;
+            foreach( $block_array as $block_html )
+                $html .= $block_html;
+            return $html;
+        }
 
 
-        private function  __construct() {}
+        protected function  __construct() {}
 
 
 }

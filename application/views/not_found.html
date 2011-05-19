@@ -26,9 +26,7 @@
 	<div id="footer">
 		<div id="inner_footer">
 			<div class="left">{loop="menu"}{$counter?' | ':''}<a href="{$value.link}" {$value.selected?'class="selected"':null}>{$value.name}</a>{/loop}</div>
-			<div class="center">execution time: {$execution_time}<br/>
-								executed query: {$n_query}<br/>
-			</div>
+			<div class="center">execution time: {$execution_time}<br/>memory used: {$memory_used}<br/>queries: {$n_query}</div>
 			<div class="right">Copyright rain team</div>
 		</div>
 	</div>
