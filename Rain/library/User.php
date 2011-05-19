@@ -55,7 +55,7 @@ class User{
          * If $user_id
          */
 	static function get_user( $user_id = null ){
-            return self::$user_obj->get_user();
+            return self::$user_obj->get_user($user_id);
 	}
 
 	static function is_admin( $user_id = null ){
