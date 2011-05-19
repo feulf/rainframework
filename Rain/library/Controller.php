@@ -148,6 +148,20 @@ class Controller{
 		else if( property_exists( __CLASS__, $setting ) )
 			self::$$setting = $value;
 	}
+        
+        
+
+        /**
+         * Called before init the controller
+         */
+        function filter_before(){}
+
+
+
+        /**
+         * Called before init the controller
+         */
+        function filter_after(){}
 
 
 }

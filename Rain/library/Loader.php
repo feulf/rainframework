@@ -89,7 +89,16 @@ class Loader{
 
                 // get all the output from the controller
                 ob_start();
+
+                // call the method filter_before
+                call_user_func_array( array( $controller_obj->controller_obj, "filter_before" ), $params );
+
+                // call the selected action
                 call_user_func_array( array( $controller_obj->controller_obj, $action ), $params );
+                
+                //call the method filter_after
+                call_user_func_array( array( $controller_obj->controller_obj, "filter_after" ), $params );
+
                 $html = ob_get_contents();
                 ob_end_clean();
 

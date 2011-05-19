@@ -1,7 +1,7 @@
 <?php
 
 	class Content_Controller extends Controller{
-
+            
 		function index(){
 
 			//love easy
@@ -12,7 +12,6 @@
 			// Load view
 			$tpl = new View;
 			$tpl->assign( $content_row );
-                                
 			$tpl->draw('content/content');
 
 		}
