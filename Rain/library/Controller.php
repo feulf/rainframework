@@ -154,14 +154,14 @@ class Controller{
         /**
          * Called before init the controller
          */
-        function filter_before(){}
+        public function filter_before(){}
 
 
 
         /**
          * Called before init the controller
          */
-        function filter_after(){}
+        public function filter_after(){}
 
 
 }

@@ -63,6 +63,11 @@ class Loader{
         /**
          * Load the content selected by the URI and save the output in load_area.
          * Leave the parameters null if you want to load automatically the controllers
+         * 
+         * @param string $controller selected controller
+         * @param string $action selected action
+         * @param string $params array of the selected actions
+         * @param string $load_area selected load area where the controller is rendered
          */
         function load_controller( $controller = null, $action = null, $params = array(), $load_area = "center" ){
 
@@ -127,9 +132,13 @@ class Loader{
         }
 
 
-
         /**
          * Load the model
+         * 
+         * @param string $model selected model
+         * @param string $action selected action
+         * @param array $params parameters
+         * @param string $assign_to variable where you assign the result of the model
          */
         function load_model( $model, $action, $params, $assign_to = null ){
 
@@ -155,7 +164,7 @@ class Loader{
             if( is_array( $helper ) )
                 array_map( array($this,"load_helper"), $helper );
             else
-                require_once HELPER_DIR . $helper . ".php";
+                require_once LIBRARY_DIR . $helper . ".php";
         }
 
 
@@ -331,45 +340,6 @@ class Loader{
 
 
 
-        /**
-         * Get the selected controller dir
-         * @return string
-         */
-        function get_selected_controller_dir(){
-                return $this->selected_controller_dir;
-        }
-
-
-
-        /**
-         * Get the selected controller
-         * @return string
-         */
-        function get_selected_controller(){
-                return $this->selected_controller;
-        }
-
-
-
-        /**
-         * Get the selected controller
-         * @return string
-         */
-        function get_selected_action(){
-                return $this->selected_action;
-        }
-
-
-
-        /**
-         * Get the selected controller
-         * @return string
-         */
-        function get_selected_params(){
-                return $this->selected_params;
-        }
-
-
 
 	/**
 	 * Configure the settings
@@ -406,7 +376,9 @@ class Loader{
 	}
         
         
-        
+        /**
+         * wrap all blocks of an load area
+         */
         protected function _blocks_wrapper( $block_array = array() ){
             $html = null;
             foreach( $block_array as $block_html )
