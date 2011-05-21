@@ -222,6 +222,8 @@ class Loader{
 
         /**
          * Init the language
+         * 
+         * @param string $lang_id selected language
          */
         function init_language( $lang_id = "en" ){
 		if( file_exists( LANGUAGE_DIR . $lang_id . '/generic.php') ){
@@ -237,6 +239,8 @@ class Loader{
 
         /**
          * Init the theme
+         * 
+         * @param string $theme selected theme
          */
         function init_theme( $theme = null ){
 
@@ -269,6 +273,8 @@ class Loader{
 
         /**
          * Init the page layout
+         * 
+         * @param string $page_layout selected page layout
          */
         function init_page_layout( $page_layout ){
                 $this->page_layout = $page_layout;
@@ -293,6 +299,9 @@ class Loader{
 
 	/**
 	 * Draw the output
+         * 
+         * @param bool $return_string if true return a string else draw the page
+         * @return string
 	 */
 	function draw( $return_string = false ){
 
@@ -331,9 +340,13 @@ class Loader{
 	/**
 	 * This function can be called by the Controller.
 	 * It disable the loading of layout and optionally can enables/disables the loading of javascript and style
+         * 
+         * @param bool $load_javascript if true Rain load the javascript
+         * @param bool $load_style if true Rain load the stylesheet
+         * @param bool $ajax_mode if true it set the ajax mode
 	 */
 	function ajax_mode( $load_javascript = false, $load_style = false, $ajax_mode = true ){
-		$this->ajax_mode = true;
+		$this->ajax_mode = $ajax_mode;
 		$this->load_javascript = $load_javascript;
 		$this->load_style = $load_style;
 	}
