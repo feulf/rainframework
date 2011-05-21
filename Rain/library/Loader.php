@@ -351,11 +351,43 @@ class Loader{
 		$this->load_style = $load_style;
 	}
 
+        
+        /**
+         * Get the selected controller dir
+         * @return string
+         */
+        function get_selected_controller_dir(){
+                return $this->selected_controller_dir;
+        }
+
+
+
+        /**
+         * Get the selected controller
+         * @return string
+         */
+        function get_selected_controller(){
+                return $this->selected_controller;
+        }
+
+
+
+        /**
+         * Get the selected controller
+         * @return string
+         */
+        function get_selected_action(){
+                return $this->selected_action;
+        }
 
 
 
 	/**
-	 * Configure the settings
+	 * Configure the settings,
+         * settings are static variable to setup this class
+         * 
+         * @param string $setting setting name
+         * @param string $value value of the setting
 	 *
 	 */
 	static function configure( $setting, $value ){
@@ -369,6 +401,8 @@ class Loader{
 
         /**
          * Page was not found
+         * 
+         * @param string $msg, message for the page not found
          */
         protected function _draw_page_not_found( $msg = "page_not_found" ){
                 header("HTTP/1.0 404 Not Found");
