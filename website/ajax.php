@@ -17,8 +17,10 @@
 
 
 
-
 	#--------------------------------
 	# Load the bootstrap
 	#--------------------------------
         require_once "../$application/ajax.bootstrap.php";
+
+
+// -- end

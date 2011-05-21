@@ -23,4 +23,4 @@
         require_once "$application/bootstrap.php";
 
 
-?>
+// -- end

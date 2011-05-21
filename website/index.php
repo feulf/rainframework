@@ -17,11 +17,10 @@
 
 
 
-
 	#--------------------------------
 	# Load the bootstrap
 	#--------------------------------
         require_once "../$application/bootstrap.php";
 
 
-?>
+// -- end
