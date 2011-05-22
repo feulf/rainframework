@@ -27,7 +27,7 @@ class Loader{
         protected static $instance;   // class instance for singleton calls
 
         // controller settings
-        protected static $controller_extension = CONTROLLER_EXTENSION, $controller_class_name = CONTROLLER_CLASS_NAME;
+        protected static $controllers_dir = CONTROLLERS_DIR, $controller_extension = CONTROLLER_EXTENSION, $controller_class_name = CONTROLLER_CLASS_NAME;
 
         protected $page_layout = "index",             // default page layout
                   $not_found_layout = "not_found";    // default page layout not found
@@ -57,6 +57,20 @@ class Loader{
 
             return self::$instance;
         }
+        
+        
+        
+        function auto_load_controller(){
+                // load the Router library and get the URI
+                require_once LIBRARY_DIR . "Router.php";
+                $router = new Router;
+                $this->selected_controller_dir  = $controller_dir   = $router->get_controller_dir();
+                $this->selected_controller      = $controller       = $router->get_controller();
+                $this->selected_action          = $action           = $router->get_action();
+                $this->selected_params          = $params           = $router->get_params();
+                
+                $this->load_controller($controller, $action, $params );
+        }
 
 
 
@@ -71,63 +85,65 @@ class Loader{
          */
         function load_controller( $controller = null, $action = null, $params = array(), $load_area = "center" ){
 
-            // if is not selected the controller, get it automatically from the URI
-            if( !$controller ){
-                // load the Router library and get the URI
-                require_once LIBRARY_DIR . "Router.php";
-                $router = new Router;
-                $this->selected_controller_dir  = $controller_dir   = $router->get_controller_dir();
-                $this->selected_controller      = $controller       = $router->get_controller();
-                $this->selected_action          = $action           = $router->get_action();
-                $this->selected_params          = $params           = $router->get_params();
-                unset( $router );
-            }
 
-            // init the controller class
-            $controller_obj = new Controller;
-
-            // check if the controller can be loaded, and if the action can be executed
-            if( $controller_obj->load_controller( $controller, "controller_obj", self::$controller_extension, self::$controller_class_name ) && is_callable( array($controller_obj->controller_obj,$action) ) ){
-
-                timer_start("controller");
-                memory_usage_start("controller");
-
-                // get all the output from the controller
-                ob_start();
-
-                // call the method filter_before
-                call_user_func_array( array( $controller_obj->controller_obj, "filter_before" ), $params );
-
-                // call the selected action
-                call_user_func_array( array( $controller_obj->controller_obj, $action ), $params );
-                
-                //call the method filter_after
-                call_user_func_array( array( $controller_obj->controller_obj, "filter_after" ), $params );
-
-                $html = ob_get_contents();
-                ob_end_clean();
-
-                $this->loaded_controller[] = array( "controller" => $controller, "execution_time" => timer("controller"), "memory_used" => memory_usage("controller") );
-
-                // if it is in ajax mode print and stop the execution of the script
-                if( $this->ajax_mode ){
-                    echo $html;
-                    $this->_draw_ajax();
-                }
-                else{
-                    // save the output into the load_area array
-                    if( !isset($this->load_area_array[$load_area]) )
-                        $this->load_area_array[$load_area] = array();
-
-                    $this->load_area_array[$load_area][] = $html;
-                }
+            // transform the controller string to capitalized. e.g. user => User, news_list => News_List
+            $controller = implode( "_", array_map( "ucfirst", array_map( "strtolower", explode( "_", $controller ) ) ) );
 
 
-            }
-            elseif( $this->ajax_mode )
-                    die;
+            // include the file
+            if( file_exists( $controller_file = self::$controllers_dir . "$controller/$controller." . self::$controller_extension ) )
+                    require_once $controller_file;
             else
-                    $this->_draw_page_not_found("controller_not_found");
+                    return trigger_error( "CONTROLLER: FILE <b>{$controller_file}</b> NOT FOUND ", E_USER_WARNING );
+
+                    
+            // define the class name of the controller
+            $class = $controller . self::$controller_class_name;
+
+
+            // check if the controller class exists
+            if( class_exists($class) )
+                    $controller_obj = new $class( $this );
+            else
+                    return trigger_error( "CONTROLLER: CLASS <b>{$controller}</b> NOT FOUND ", E_USER_WARNING );
+
+            // start benchmark
+            timer_start("controller");
+            memory_usage_start("controller");
+
+            // start the output buffer
+            ob_start();
+
+            // call the method filter_before
+            call_user_func_array( array( $controller_obj, "filter_before" ), $params );
+
+            // call the selected action
+            call_user_func_array( array( $controller_obj, $action ), $params );
+
+            //call the method filter_after
+            call_user_func_array( array( $controller_obj, "filter_after" ), $params );
+
+            $html = ob_get_contents();
+            
+            // close the output buffer
+            ob_end_clean();
+
+
+            $this->loaded_controller[] = array( "controller" => $controller, "execution_time" => timer("controller"), "memory_used" => memory_usage("controller") );
+
+            // if it is in ajax mode print and stop the execution of the script
+            if( $this->ajax_mode ){
+                echo $html;
+                $this->_draw_ajax();
+            }
+            else{
+                // save the output into the load_area array
+                if( !isset($this->load_area_array[$load_area]) )
+                    $this->load_area_array[$load_area] = array();
+
+                $this->load_area_array[$load_area][] = $html;
+            }
+                    
 
         }
 

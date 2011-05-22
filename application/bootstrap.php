@@ -19,7 +19,7 @@
 	# init_route set the controller/action/params
 	# to load the controller
 	#--------------------------------
-        $loader->load_controller();
+        $loader->auto_load_controller();
 
 
 

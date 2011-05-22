@@ -18,7 +18,6 @@
         $loader->init_db();
         $loader->auth_user();
         $loader->init_session();
-        $loader->load_controller();
-        $loader->draw();
+        $loader->auto_load_controller();
 
 // -- end

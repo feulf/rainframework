@@ -23,11 +23,11 @@ class Controller{
 	 * load a controller and return the html
 	 *
 	 */
-	function load_controller( $controller, $object_name = null, $controller_extension = CONTROLLER_EXTENSION, $controller_class_name = CONTROLLER_CLASS_NAME ){
+	function load_controller( $controller, $action = null, $params = null, $load_area = null ){
 
-		if(!$object_name)
-			$object_name = $controller;
-
+                $loader = Loader::get_instance();
+                $loader->load_controller( $controller, $action, $params, $load_area );
+                
                 // transform the controller string to capitalized. e.g. user => User, news_list => News_List
                 $controller = implode( "_", array_map( "ucfirst", array_map( "strtolower", explode( "_", $controller ) ) ) );
 
