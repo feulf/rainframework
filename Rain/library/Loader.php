@@ -313,9 +313,11 @@ class Loader{
                 
                 // - LOAD AREA ----
                 // wrap all the blocks in a load area
-                foreach( $this->load_area_array as $load_area_name => $blocks_array )
-                    $load_area[$load_area_name] = $this->_blocks_wrapper($blocks_array);
-                $tpl->assign( "load_area", $load_area );
+                if( $this->load_area_array ){
+                    foreach( $this->load_area_array as $load_area_name => $blocks_array )
+                        $load_area[$load_area_name] = $this->_blocks_wrapper($blocks_array);
+                    $tpl->assign( "load_area", $load_area );
+                }
                 // ----------------
 
 		// - HEAD ------
