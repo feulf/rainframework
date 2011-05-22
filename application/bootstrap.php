@@ -29,11 +29,7 @@
 	# load the model and assign the result
 	# @params model, action, params, assign_to
 	#--------------------------------
-	$model = 'menu';
-	$action = 'load_menu';
-	$params = array( $loader->get_selected_controller() );
-	$assign_to = 'menu'; // the result will be assigned to template layout "menu"
-	$loader->load_model( $model, $action, $params, $assign_to );
+	$loader->load_menu();
 
 
 

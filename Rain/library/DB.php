@@ -197,7 +197,7 @@ class DB{
          * @param string $where the condition of the row to be deleted
 	 */
 	function delete( $table, $where ){
-		return $this->link->query("DELETE $table WHERE $where");
+		return $this->link->query("DELETE FROM $table WHERE $where");
 	}
 
 

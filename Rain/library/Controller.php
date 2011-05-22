@@ -14,7 +14,6 @@
  */
 class Controller{
 
-	static protected $loaded_controller, $loaded_model;
 	static protected $models_dir = MODELS_DIR, $library_dir = LIBRARY_DIR;
         static protected $controllers_dir = CONTROLLERS_DIR;
         static protected $controller_loaded = array();
@@ -25,31 +24,11 @@ class Controller{
 	 */
 	function load_controller( $controller, $action = null, $params = null, $load_area = null ){
 
+                // get the loader
                 $loader = Loader::get_instance();
                 $loader->load_controller( $controller, $action, $params, $load_area );
-                
-                // transform the controller string to capitalized. e.g. user => User, news_list => News_List
-                $controller = implode( "_", array_map( "ucfirst", array_map( "strtolower", explode( "_", $controller ) ) ) );
 
-		// include the file
-		if( file_exists( $controller_file = self::$controllers_dir . "$controller/$controller." . $controller_extension ) )
-			require_once $controller_file;
-		else{
-                     trigger_error( "CONTROLLER: FILE <b>{$controller_file}</b> NOT FOUND ", E_USER_WARNING );
-                     return false;
-                }
-
-		$class = $controller . $controller_class_name;
-
-		if( class_exists($class) )
-			$this->$object_name = new $class( $this );
-		else
-			return trigger_error( "CONTROLLER: CLASS <b>{$controller}</b> NOT FOUND ", E_USER_WARNING );
-
-                self::$controller_loaded[] = array( 'controller'=>$controller );
-
-                return true;
-	}
+        }
 
 
 
@@ -62,32 +41,14 @@ class Controller{
 	 */
 	function load_model($model,$object_name=null){
 
-                // load the model class
-                require_once LIBRARY_DIR . "Model.php";
+                if( !$object_name )
+                    $object_name = $model;
 
-		if(!$object_name)
-			$object_name = $model;
+                // get the loader
+                $loader = Loader::get_instance();
+                // assign the model to the object name, so now it's accessible from the controller
+                $this->$object_name = $loader->load_model( $model );
 
-                // transform the model string to capitalized. e.g. user => User, news_list => News_List
-                $model = implode( "_", array_map( "ucfirst", array_map( "strtolower", explode( "_", $model ) ) ) );
-
-
-		// include the file
-		if( file_exists($file = self::$models_dir . $model . ".php") )
-			require_once $file;
-		else{
-			trigger_error( "MODEL: FILE <b>{$file}</b> NOT FOUND ", E_USER_WARNING );
-			return false;
-		}
-
-		$class = $model . "_Model";
-		if( class_exists($class) )
-			$this->$object_name = new $class;
-		else{
-			trigger_error( "MODEL: CLASS <b>{$model}</b> NOT FOUND", E_USER_WARNING );
-			return false;
-		}
-		return true;
 	}
 
 

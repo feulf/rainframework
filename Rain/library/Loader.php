@@ -27,7 +27,10 @@ class Loader{
         protected static $instance;   // class instance for singleton calls
 
         // controller settings
-        protected static $controllers_dir = CONTROLLERS_DIR, $controller_extension = CONTROLLER_EXTENSION, $controller_class_name = CONTROLLER_CLASS_NAME;
+        protected static $controllers_dir = CONTROLLERS_DIR, 
+                         $controller_extension = CONTROLLER_EXTENSION,
+                         $controller_class_name = CONTROLLER_CLASS_NAME,
+                         $models_dir = MODELS_DIR;
 
         protected $page_layout = "index",             // default page layout
                   $not_found_layout = "not_found";    // default page layout not found
@@ -106,42 +109,47 @@ class Loader{
                     $controller_obj = new $class( $this );
             else
                     return trigger_error( "CONTROLLER: CLASS <b>{$controller}</b> NOT FOUND ", E_USER_WARNING );
+                    
 
-            // start benchmark
-            timer_start("controller");
-            memory_usage_start("controller");
+            if( $action ){
 
-            // start the output buffer
-            ob_start();
+                // start benchmark
+                timer_start("controller");
+                memory_usage_start("controller");
 
-            // call the method filter_before
-            call_user_func_array( array( $controller_obj, "filter_before" ), $params );
+                // start the output buffer
+                ob_start();
 
-            // call the selected action
-            call_user_func_array( array( $controller_obj, $action ), $params );
+                // call the method filter_before
+                call_user_func_array( array( $controller_obj, "filter_before" ), $params );
 
-            //call the method filter_after
-            call_user_func_array( array( $controller_obj, "filter_after" ), $params );
+                // call the selected action
+                call_user_func_array( array( $controller_obj, $action ), $params );
 
-            $html = ob_get_contents();
-            
-            // close the output buffer
-            ob_end_clean();
+                //call the method filter_after
+                call_user_func_array( array( $controller_obj, "filter_after" ), $params );
+
+                $html = ob_get_contents();
+
+                // close the output buffer
+                ob_end_clean();
 
 
-            $this->loaded_controller[] = array( "controller" => $controller, "execution_time" => timer("controller"), "memory_used" => memory_usage("controller") );
+                $this->loaded_controller[] = array( "controller" => $controller, "execution_time" => timer("controller"), "memory_used" => memory_usage("controller") );
 
-            // if it is in ajax mode print and stop the execution of the script
-            if( $this->ajax_mode ){
-                echo $html;
-                $this->_draw_ajax();
-            }
-            else{
-                // save the output into the load_area array
-                if( !isset($this->load_area_array[$load_area]) )
-                    $this->load_area_array[$load_area] = array();
+                // if it is in ajax mode print and stop the execution of the script
+                if( $this->ajax_mode ){
+                    echo $html;
+                    $this->_draw_ajax();
+                }
+                else{
+                    // save the output into the load_area array
+                    if( !isset($this->load_area_array[$load_area]) )
+                        $this->load_area_array[$load_area] = array();
 
-                $this->load_area_array[$load_area][] = $html;
+                    $this->load_area_array[$load_area][] = $html;
+                }
+
             }
                     
 
@@ -156,18 +164,41 @@ class Loader{
          * @param array $params parameters
          * @param string $assign_to variable where you assign the result of the model
          */
-        function load_model( $model, $action, $params, $assign_to = null ){
+        function load_model( $model ){
 
-                $controller_obj = new Controller;
-                if( $controller_obj->load_model( $model, "model_obj" ) ){
-                        if( is_callable( array($controller_obj->model_obj, $action) ))
-                            $return = call_user_func_array( array( $controller_obj->model_obj, $action ), $params );
-                        else{
-                            // model not found
-                        }
-                        $this->assign( $assign_to, $return );
-                }
+                // load the model class
+                require_once LIBRARY_DIR . "Model.php";
+                
+                // transform the model string to capitalized. e.g. user => User, news_list => News_List
+                $model = implode( "_", array_map( "ucfirst", array_map( "strtolower", explode( "_", $model ) ) ) );
 
+		// include the file
+		if( file_exists($file = self::$models_dir . $model . ".php") )
+			require_once $file;
+		else{
+			trigger_error( "MODEL: FILE <b>{$file}</b> NOT FOUND ", E_USER_WARNING );
+			return false;
+		}
+
+                // class name
+		$class = $model . "_Model";
+
+                // test if the class exists
+		if( class_exists($class) )
+			return new $class;
+		else{
+			trigger_error( "MODEL: CLASS <b>{$model}</b> NOT FOUND", E_USER_WARNING );
+			return false;
+		}
+
+        }
+        
+        
+        
+        function load_menu(){
+            $menu_obj = $this->load_model( "menu" );
+            $menu_list = $menu_obj->load_menu();
+            $this->assign( "menu", $menu_list );
         }
 
 
