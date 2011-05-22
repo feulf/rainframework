@@ -27,7 +27,10 @@ class Loader{
         protected static $instance;   // class instance for singleton calls
 
         // controller settings
-        protected static $controller_extension = CONTROLLER_EXTENSION, $controller_class_name = CONTROLLER_CLASS_NAME;
+        protected static $controllers_dir = CONTROLLERS_DIR, 
+                         $controller_extension = CONTROLLER_EXTENSION,
+                         $controller_class_name = CONTROLLER_CLASS_NAME,
+                         $models_dir = MODELS_DIR;
 
         protected $page_layout = "index",             // default page layout
                   $not_found_layout = "not_found";    // default page layout not found
@@ -57,17 +60,10 @@ class Loader{
 
             return self::$instance;
         }
-
-
-
-        /**
-         * Load the content selected by the URI and save the output in load_area.
-         * Leave the parameters null if you want to load automatically the controllers
-         */
-        function load_controller( $controller = null, $action = null, $params = array(), $load_area = "center" ){
-
-            // if is not selected the controller, get it automatically from the URI
-            if( !$controller ){
+        
+        
+        
+        function auto_load_controller(){
                 // load the Router library and get the URI
                 require_once LIBRARY_DIR . "Router.php";
                 $router = new Router;
@@ -75,32 +71,69 @@ class Loader{
                 $this->selected_controller      = $controller       = $router->get_controller();
                 $this->selected_action          = $action           = $router->get_action();
                 $this->selected_params          = $params           = $router->get_params();
-                unset( $router );
-            }
+                
+                $this->load_controller($controller, $action, $params );
+        }
 
-            // init the controller class
-            $controller_obj = new Controller;
 
-            // check if the controller can be loaded, and if the action can be executed
-            if( $controller_obj->load_controller( $controller, "controller_obj", self::$controller_extension, self::$controller_class_name ) && is_callable( array($controller_obj->controller_obj,$action) ) ){
 
+        /**
+         * Load the content selected by the URI and save the output in load_area.
+         * Leave the parameters null if you want to load automatically the controllers
+         * 
+         * @param string $controller selected controller
+         * @param string $action selected action
+         * @param string $params array of the selected actions
+         * @param string $load_area selected load area where the controller is rendered
+         */
+        function load_controller( $controller = null, $action = null, $params = array(), $load_area = "center" ){
+
+
+            // transform the controller string to capitalized. e.g. user => User, news_list => News_List
+            $controller = implode( "_", array_map( "ucfirst", array_map( "strtolower", explode( "_", $controller ) ) ) );
+
+
+            // include the file
+            if( file_exists( $controller_file = self::$controllers_dir . "$controller/$controller." . self::$controller_extension ) )
+                    require_once $controller_file;
+            else
+                    return trigger_error( "CONTROLLER: FILE <b>{$controller_file}</b> NOT FOUND ", E_USER_WARNING );
+
+                    
+            // define the class name of the controller
+            $class = $controller . self::$controller_class_name;
+
+
+            // check if the controller class exists
+            if( class_exists($class) )
+                    $controller_obj = new $class( $this );
+            else
+                    return trigger_error( "CONTROLLER: CLASS <b>{$controller}</b> NOT FOUND ", E_USER_WARNING );
+                    
+
+            if( $action ){
+
+                // start benchmark
                 timer_start("controller");
                 memory_usage_start("controller");
 
-                // get all the output from the controller
+                // start the output buffer
                 ob_start();
 
                 // call the method filter_before
-                call_user_func_array( array( $controller_obj->controller_obj, "filter_before" ), $params );
+                call_user_func_array( array( $controller_obj, "filter_before" ), $params );
 
                 // call the selected action
-                call_user_func_array( array( $controller_obj->controller_obj, $action ), $params );
-                
+                call_user_func_array( array( $controller_obj, $action ), $params );
+
                 //call the method filter_after
-                call_user_func_array( array( $controller_obj->controller_obj, "filter_after" ), $params );
+                call_user_func_array( array( $controller_obj, "filter_after" ), $params );
 
                 $html = ob_get_contents();
+
+                // close the output buffer
                 ob_end_clean();
+
 
                 $this->loaded_controller[] = array( "controller" => $controller, "execution_time" => timer("controller"), "memory_used" => memory_usage("controller") );
 
@@ -117,32 +150,55 @@ class Loader{
                     $this->load_area_array[$load_area][] = $html;
                 }
 
-
             }
-            elseif( $this->ajax_mode )
-                    die;
-            else
-                    $this->_draw_page_not_found("controller_not_found");
+                    
 
         }
 
 
-
         /**
          * Load the model
+         * 
+         * @param string $model selected model
+         * @param string $action selected action
+         * @param array $params parameters
+         * @param string $assign_to variable where you assign the result of the model
          */
-        function load_model( $model, $action, $params, $assign_to = null ){
+        function load_model( $model ){
 
-                $controller_obj = new Controller;
-                if( $controller_obj->load_model( $model, "model_obj" ) ){
-                        if( is_callable( array($controller_obj->model_obj, $action) ))
-                            $return = call_user_func_array( array( $controller_obj->model_obj, $action ), $params );
-                        else{
-                            // model not found
-                        }
-                        $this->assign( $assign_to, $return );
-                }
+                // load the model class
+                require_once LIBRARY_DIR . "Model.php";
+                
+                // transform the model string to capitalized. e.g. user => User, news_list => News_List
+                $model = implode( "_", array_map( "ucfirst", array_map( "strtolower", explode( "_", $model ) ) ) );
 
+		// include the file
+		if( file_exists($file = self::$models_dir . $model . ".php") )
+			require_once $file;
+		else{
+			trigger_error( "MODEL: FILE <b>{$file}</b> NOT FOUND ", E_USER_WARNING );
+			return false;
+		}
+
+                // class name
+		$class = $model . "_Model";
+
+                // test if the class exists
+		if( class_exists($class) )
+			return new $class;
+		else{
+			trigger_error( "MODEL: CLASS <b>{$model}</b> NOT FOUND", E_USER_WARNING );
+			return false;
+		}
+
+        }
+        
+        
+        
+        function load_menu(){
+            $menu_obj = $this->load_model( "menu" );
+            $menu_list = $menu_obj->load_menu();
+            $this->assign( "menu", $menu_list );
         }
 
 
@@ -155,7 +211,7 @@ class Loader{
             if( is_array( $helper ) )
                 array_map( array($this,"load_helper"), $helper );
             else
-                require_once HELPER_DIR . $helper . ".php";
+                require_once LIBRARY_DIR . $helper . ".php";
         }
 
 
@@ -213,6 +269,8 @@ class Loader{
 
         /**
          * Init the language
+         * 
+         * @param string $lang_id selected language
          */
         function init_language( $lang_id = "en" ){
 		if( file_exists( LANGUAGE_DIR . $lang_id . '/generic.php') ){
@@ -228,6 +286,8 @@ class Loader{
 
         /**
          * Init the theme
+         * 
+         * @param string $theme selected theme
          */
         function init_theme( $theme = null ){
 
@@ -260,6 +320,8 @@ class Loader{
 
         /**
          * Init the page layout
+         * 
+         * @param string $page_layout selected page layout
          */
         function init_page_layout( $page_layout ){
                 $this->page_layout = $page_layout;
@@ -284,6 +346,9 @@ class Loader{
 
 	/**
 	 * Draw the output
+         * 
+         * @param bool $return_string if true return a string else draw the page
+         * @return string
 	 */
 	function draw( $return_string = false ){
 
@@ -295,9 +360,11 @@ class Loader{
                 
                 // - LOAD AREA ----
                 // wrap all the blocks in a load area
-                foreach( $this->load_area_array as $load_area_name => $blocks_array )
-                    $load_area[$load_area_name] = $this->_blocks_wrapper($blocks_array);
-                $tpl->assign( "load_area", $load_area );
+                if( $this->load_area_array ){
+                    foreach( $this->load_area_array as $load_area_name => $blocks_array )
+                        $load_area[$load_area_name] = $this->_blocks_wrapper($blocks_array);
+                    $tpl->assign( "load_area", $load_area );
+                }
                 // ----------------
 
 		// - HEAD ------
@@ -322,15 +389,18 @@ class Loader{
 	/**
 	 * This function can be called by the Controller.
 	 * It disable the loading of layout and optionally can enables/disables the loading of javascript and style
+         * 
+         * @param bool $load_javascript if true Rain load the javascript
+         * @param bool $load_style if true Rain load the stylesheet
+         * @param bool $ajax_mode if true it set the ajax mode
 	 */
 	function ajax_mode( $load_javascript = false, $load_style = false, $ajax_mode = true ){
-		$this->ajax_mode = true;
+		$this->ajax_mode = $ajax_mode;
 		$this->load_javascript = $load_javascript;
 		$this->load_style = $load_style;
 	}
 
-
-
+        
         /**
          * Get the selected controller dir
          * @return string
@@ -361,18 +431,12 @@ class Loader{
 
 
 
-        /**
-         * Get the selected controller
-         * @return string
-         */
-        function get_selected_params(){
-                return $this->selected_params;
-        }
-
-
-
 	/**
-	 * Configure the settings
+	 * Configure the settings,
+         * settings are static variable to setup this class
+         * 
+         * @param string $setting setting name
+         * @param string $value value of the setting
 	 *
 	 */
 	static function configure( $setting, $value ){
@@ -386,6 +450,8 @@ class Loader{
 
         /**
          * Page was not found
+         * 
+         * @param string $msg, message for the page not found
          */
         protected function _draw_page_not_found( $msg = "page_not_found" ){
                 header("HTTP/1.0 404 Not Found");
@@ -406,7 +472,9 @@ class Loader{
 	}
         
         
-        
+        /**
+         * wrap all blocks of an load area
+         */
         protected function _blocks_wrapper( $block_array = array() ){
             $html = null;
             foreach( $block_array as $block_html )
