@@ -56,7 +56,7 @@
                 if( !$key )
                     return $filter ? filter_input_array( $GLOBALS['_GET_POST'], $filter ) : $GLOBALS['_GET_POST'];
 		if( isset($GLOBALS['_GET_POST'][$key] ) )
-			return $filter ? filter_input(INPUT_GET & INPUT_POST, $key, $filter ) : $GLOBALS['_GET_POST'][$key];
+			return $filter ? filter_var($GLOBALS['_GET_POST'][$key], $filter ) : $GLOBALS['_GET_POST'][$key];
 	}
 
 
