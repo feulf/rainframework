@@ -166,9 +166,14 @@
 				}
 			}
 		}
+ 
+                // add array of paramters : functons to trigger on ajax returns :
+                // "complete"=>"","success"=>"","fail"=>""
+		function draw( $ajax = false, $return_string = false,$triggers=null ){
 
-
-		function draw( $ajax = false, $return_string = false ){
+                        $fnComplete=isset($triggers["complete"])?$triggers["complete"]:"";
+                        $fnSuccess=isset($triggers["success"])?$triggers["success"]:"";
+                        $fnFail=isset($triggers["fail"])?$triggers["fail"]:"";
 
 			if( $ajax ){
 				// add ajax jquery script
@@ -184,7 +189,12 @@
 						"				$('#{$this->name}_loading').slideUp('slow', function(){" . "\n" . 
 						"					$('#{$this->name}').fadeIn('slow');" . "\n" . 
 						"					$('#{$this->name}_result').fadeIn('slow');" . "\n" . 
-						"				});" . "\n" . 
+                                                                                        $fnComplete.";   ".
+						"				},".
+       						"			error:function( data ){".$fnFail.";},". 
+       						"			success:function( data ){".$fnSuccess.";}". 
+                                                ");\n" . 
+                                                "                     ".
 						"			}" . "\n" . 
 						"		});" . "\n" . 
 						"	}";
