@@ -230,9 +230,8 @@
 							   "	} " . "\n";
 			}
 
-			// add javascript
-			$script = 	'$("#'.$this->name.'").validate({' . "\n" . ( $this->tiny_mce ?'submit: function(){ tinyMCE.triggerSave() },':null) . "\n" . $ajax . "\n" . $validation . "\n" . '	});';
-
+			// add javascript (and enable a reload of the form with jquery)
+			$script = 	'$("#'.$this->name.' button").live("click",function(){$("#'.$this->name.'").validate({' . "\n" . ( $this->tiny_mce ?'submit: function(){ tinyMCE.triggerSave() },':null) . "\n" . $ajax . "\n" . $validation . "\n" . '	})});';
 			// add the javascript
 			add_javascript( $script, $onLoad = true );
 
