@@ -3,8 +3,8 @@
 /**
  *  RainFramework
  *  -------------
- *	Realized by Federico Ulfo & maintained by the Rain Team
- *	Distributed under MIT license http://www.opensource.org/licenses/mit-license.php
+ *  Realized by Federico Ulfo & maintained by the Rain Team
+ *  Distributed under MIT license http://www.opensource.org/licenses/mit-license.php
  */
 
 
@@ -325,6 +325,9 @@ class Loader{
          */
         function init_page_layout( $page_layout ){
                 $this->page_layout = $page_layout;
+
+                // init the load area array
+                $this->_get_load_area();
         }
 
 
@@ -477,10 +480,39 @@ class Loader{
          */
         protected function _blocks_wrapper( $block_array = array() ){
             $html = null;
-            foreach( $block_array as $block_html )
-                $html .= $block_html;
+            if( $block_array )
+                foreach( $block_array as $block_html )
+                    $html .= $block_html;
             return $html;
         }
+        
+        /**
+         *  init the load_area.php file that define all the load area of the template page
+         */
+        protected function _get_load_area( ){
+
+                if( !file_exists( $src = CACHE_DIR . "load_area." . md5( THEME_DIR . $this->page_layout ) . ".php" ) || ( filemtime($src) != filemtime( THEME_DIR . $this->page_layout . ".html" ) ) ){
+
+                        $dir = explode( "/", CACHE_DIR . THEME_DIR );
+                        for( $i=0, $base=""; $i<count($dir);$i++ ){
+                                $base .= $dir[$i] . "/";
+                                if( !is_dir($base) )
+                                        mkdir( $base );
+                        }
+
+                        preg_match_all( '/\{\$load_area\.(.*?)\}/si', $file = file_get_contents( THEME_DIR . $this->page_layout . '.html' ), $match );
+                        $php = "<?php\n\$load_area=array(";
+                        for( $i = 0; $i < count( $match[1] ); $i++ )
+                                $php .= "'{$match[1][$i]}'=>'',";
+                        $php .= ");\n?>";
+
+                        file_put_contents( $src, $php );
+                }
+
+                require $src;
+                $this->load_area_array = $load_area;
+        }	
+
 
 
         protected function  __construct() {}

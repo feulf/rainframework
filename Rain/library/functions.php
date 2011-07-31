@@ -837,11 +837,13 @@
 
 	/**
 	 * Return the array with all geolocation info of user selected by IP
+     * ip = your IP
+     * assoc = true if you want the result as array
 	 */
 	define( "IPINFODB_KEY", "YOUR_KEY" );
-	function ip_to_location( $ip = IP ){
+	function ip_to_location( $ip = IP, $assoc = true ){
 		if( is_ip( $ip ) )
-			return json_decode( file_get_contents( "http://api.ipinfodb.com/v2/ip_query.php?key=".IPINFODB_KEY."&ip={$ip}&output=json&timezone=true" ) );
+			return json_decode( file_get_contents( "http://api.ipinfodb.com/v2/ip_query.php?key=".IPINFODB_KEY."&ip={$ip}&output=json&timezone=true" ), $assoc );
 	}
 
 
