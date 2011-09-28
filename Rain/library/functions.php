@@ -21,42 +21,50 @@
 
 
 
-	// disable register globals
-	if( ini_get( "register_globals" ) && isset( $_REQUEST ) ) foreach ($_REQUEST as $k => $v) unset($GLOBALS[$k]);
-
 	/**
 	 * Get GET input
+	 * @param string $key=key to parse
+	 * @param filter $filter By default null, you can set FILTER_SANITIZE_MAGIC_QUOTES to 
 	 */
-	function get( $key = null, $filter = FILTER_SANITIZE_MAGIC_QUOTES ){
-                if( !$key )
-                    return $filter ? filter_input_array( INPUT_GET, $filter ) : $_GET;
-                if( isset($_GET[$key]) )
-			return $filter ? filter_input(INPUT_GET, $key, $filter ) : $_GET[$key];
+	function get( $key = null ){
+		
+		if( $key === null )
+			return $_GET;
+		
+		if( isset($_GET[$key] ) )
+			return $_GET[$key];
+
 	}
+
 
 
 	/**
 	 * Get POST input
 	 */
-	function post( $key = null, $filter = FILTER_SANITIZE_MAGIC_QUOTES ){
-                if( !$key )
-                    return $filter ? filter_input_array( INPUT_POST, $filter ) : $_POST;
-		if( isset($_POST[$key]) )
-			return $filter ? filter_input(INPUT_POST, $key, $filter ) : $_POST[$key];
+	function post( $key = null ){
+		if( $key === null )
+			return $_POST;
+		
+		if( isset($_POST[$key] ) )
+			return $_POST[$key];
 	}
 
 
 
 	/**
-	 * Get GET_POST input
+	 * Get GET or POST input
 	 */
-	function get_post( $key = null, $filter = FILTER_SANITIZE_MAGIC_QUOTES ){
-                if( !isset($GLOBALS['_GET_POST'] ) )
-                    	$GLOBALS['_GET_POST'] = $_GET + $_POST;
-                if( !$key )
-                    return $filter ? filter_input_array( $GLOBALS['_GET_POST'], $filter ) : $GLOBALS['_GET_POST'];
+	function get_post( $key = null ){
+		
+		if( !isset($GLOBALS['_GET_POST'] ) )
+			$GLOBALS['_GET_POST'] = $_GET + $_POST;
+
+		if( $key === null )
+			return $GLOBALS['_GET_POST'];
+		
 		if( isset($GLOBALS['_GET_POST'][$key] ) )
-			return $filter ? filter_var($GLOBALS['_GET_POST'][$key], $filter ) : $GLOBALS['_GET_POST'][$key];
+			return $GLOBALS['_GET_POST'][$key];
+
 	}
 
 
@@ -64,9 +72,14 @@
 	/**
 	 * Get COOKIE input
 	 */
-	function cookie( $key = null, $filter = FILTER_SANITIZE_MAGIC_QUOTES ){
-		if( isset($_COOKIE[$key]) )
-			return $filter ? filter_input(INPUT_COOKIE, $key, $filter ) : $_COOKIE[$key];
+	function cookie( $key = null ){
+		
+		if( $key === null )
+			return $_COOKIE;
+		
+		if( isset($_COOKIE[$key] ) )
+			return $_COOKIE[$key];	
+		
 	}
 
 

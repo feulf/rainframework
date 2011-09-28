@@ -3,7 +3,12 @@
 	class Content_Controller extends Controller{
             
 		function index(){
-
+phpinfo();
+exit;
+			
+			$v = get_post();
+			dump( $v );
+			
 			//love easy
 			$this->load_model("content","content_obj");
 
