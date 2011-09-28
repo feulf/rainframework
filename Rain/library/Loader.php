@@ -170,8 +170,9 @@ class Loader{
                 require_once LIBRARY_DIR . "Model.php";
                 
                 // transform the model string to capitalized. e.g. user => User, news_list => News_List
-                $model = implode( "_", array_map( "ucfirst", array_map( "strtolower", explode( "_", $model ) ) ) );
-
+                $model = implode( "/", array_map( "ucfirst", array_map( "strtolower", explode( "/", $model ) ) ) );
+        	$model = implode( "_", array_map( "ucfirst",  explode( "_", $model )  ) );
+        	
 		// include the file
 		if( file_exists($file = self::$models_dir . $model . ".php") )
 			require_once $file;
@@ -181,7 +182,9 @@ class Loader{
 		}
 
                 // class name
-		$class = $model . "_Model";
+		$tModel = explode("/",$model);
+		$class=$tModel[count($tModel)-1];
+		$class.="_Model";
 
                 // test if the class exists
 		if( class_exists($class) )

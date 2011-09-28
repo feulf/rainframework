@@ -107,6 +107,7 @@
 
 		
 		
+		
 		//button can be a list or a string
 		function add_button( $button = null ){
 			$this->counter++;
@@ -115,14 +116,23 @@
 
 			if( is_array($button) ){
 				for($i=0,$html="";$i<count($button);$i++){
-					$class = isset( $button[$i]['class'] ) ? $button[$i]['class'] : "button";
-					$input_name = isset( $button[$i]['input_name'] ) ? 'name="'.$button[$i]['input_name'].'"' : null;
-					$html .= '<button '.$input_name.' class="'.$class.'">'.$button[$i]['button'].'</button> ';
+					//Define extra classes
+					$class = isset( $button[$i]['class'] ) ? "button ".$button[$i]['class'] : "button";
+					// Define some extra params (readonly ...)
+					$params = isset( $button[$i]['params'] ) ? $button[$i]['params'] : "";
+					// name of the input 
+					$input_name = isset( $button[$i]['name'] ) ? 'name="'.$button[$i]['name'].'"' : "";
+					// Value of the button (to manage multiple buttons on a same form)
+					$input_value = isset( $button[$i]['value'] ) ? 'value="'.$button[$i]['value'].'"' : "";
+					// Generate HTML Code : 
+					$html .= '<button '.$input_name.' '.$input_value.' '.$params.' class="'.$class.'  ">'.$button[$i]['button'].'</button>';
+						
 				}
 				$this->html .= str_replace( array('{$button}','{$counter}'), array( $html,$this->counter%2), $this->layout['buttons'] );
 			}
-			else
-				$this->html .= str_replace( array('{$button}','{$counter}'), array('<button class="button">'.$button.'</button>',$this->counter%2), $this->layout['buttons'] );
+			else {
+				$this->html .= str_replace( array('{$button}','{$counter}'), array('<button class="button">'.$button.'</button>',$this->counter%2), $this->layout['buttons'] );	
+			}
 		}
 
 
@@ -156,9 +166,14 @@
 				}
 			}
 		}
+ 
+                // add array of paramters : functons to trigger on ajax returns :
+                // "complete"=>"","success"=>"","fail"=>""
+		function draw( $ajax = false, $return_string = false,$triggers=null ){
 
-
-		function draw( $ajax = false, $return_string = false ){
+                        $fnComplete=isset($triggers["complete"])?$triggers["complete"]:"";
+                        $fnSuccess=isset($triggers["success"])?$triggers["success"]:"";
+                        $fnFail=isset($triggers["fail"])?$triggers["fail"]:"";
 
 			if( $ajax ){
 				// add ajax jquery script
@@ -174,7 +189,12 @@
 						"				$('#{$this->name}_loading').slideUp('slow', function(){" . "\n" . 
 						"					$('#{$this->name}').fadeIn('slow');" . "\n" . 
 						"					$('#{$this->name}_result').fadeIn('slow');" . "\n" . 
-						"				});" . "\n" . 
+                                                                                        $fnComplete.";   ".
+						"				},".
+       						"			error:function( data ){".$fnFail.";},". 
+       						"			success:function( data ){".$fnSuccess.";}". 
+                                                ");\n" . 
+                                                "                     ".
 						"			}" . "\n" . 
 						"		});" . "\n" . 
 						"	}";
@@ -210,9 +230,8 @@
 							   "	} " . "\n";
 			}
 
-			// add javascript
-			$script = 	'$("#'.$this->name.'").validate({' . "\n" . ( $this->tiny_mce ?'submit: function(){ tinyMCE.triggerSave() },':null) . "\n" . $ajax . "\n" . $validation . "\n" . '	});';
-
+			// add javascript (and enable a reload of the form with jquery)
+			$script = 	'$("#'.$this->name.' button").live("click",function(){$("#'.$this->name.'").validate({' . "\n" . ( $this->tiny_mce ?'submit: function(){ tinyMCE.triggerSave() },':null) . "\n" . $ajax . "\n" . $validation . "\n" . '	})});';
 			// add the javascript
 			add_javascript( $script, $onLoad = true );
 
