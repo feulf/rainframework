@@ -178,26 +178,32 @@
 			if( $ajax ){
 				// add ajax jquery script
 				add_script( "jquery/jquery.form.js" );
-				$ajax = "	debug:true," . "\n" .
-						"	submitHandler: function(form){" . "\n" . 
-						"		$('#{$this->name}_loading').fadeIn('slow')" . "\n" . 
-						"		$('#{$this->name}').hide()" . "\n" . 
-						"		$('#{$this->name}_result').html('').hide()" . "\n" . 
-						"		$(form).ajaxSubmit({" . "\n" . 
-						"			target: '#{$this->name}_result'," . "\n" . 
-						"			complete:function( data ){" . "\n" . 
-						"				$('#{$this->name}_loading').slideUp('slow', function(){" . "\n" . 
-						"					$('#{$this->name}').fadeIn('slow');" . "\n" . 
-						"					$('#{$this->name}_result').fadeIn('slow');" . "\n" . 
-                                                                                        $fnComplete.";   ".
-						"				},".
-       						"			error:function( data ){".$fnFail.";},". 
-       						"			success:function( data ){".$fnSuccess.";}". 
-                                                ");\n" . 
-                                                "                     ".
-						"			}" . "\n" . 
-						"		});" . "\n" . 
-						"	}";
+				$ajax = 
+
+"	debug:true,
+	submitHandler: function(form)
+	{
+		$('#{$this->name}_loading').fadeIn('slow')
+		$('#{$this->name}').hide();
+		$('#{$this->name}_result').html('').hide();
+		$(form).ajaxSubmit({
+								target: '#{$this->name}_result',
+								complete:function( data ){
+									$('#{$this->name}_loading').slideUp('slow', function(){
+										$('#{$this->name}').fadeIn('slow');
+										$('#{$this->name}_result').fadeIn('slow');
+										$fnComplete
+									});
+								},
+								error:function( data ){
+									$fnFail
+								},
+								success:function( data ){
+									$fnSuccess
+								}
+							});
+	}
+";
 			}
 			
 			$validation = null;
@@ -338,6 +344,7 @@
 		function _word( $name, $value, $param){
 
 			add_script( "jquery.tinymce.js", LIBRARY_DIR . "Form/plugins/tiny_mce/" );
+
 			$mode = isset( $param['mode'] ) && $param['mode'] == 'simple' ? 'simple' : 'advanced';
 			$css = isset( $param['css'] ) ? ',content_css:"' . $param['css'] . '"' : null;
 			
@@ -380,19 +387,18 @@
 				valid_elements: "*[*]"' . $css;
 
 			add_javascript( '$("textarea.mce_'.$name.'").tinymce({
-									script_url : "' . URL . APPLICATION_LIBRARY_DIR . 'Form/plugins/tiny_mce/tiny_mce.js",
-									theme: "advanced",
-									language: "'.LANG_ID.'",
-									mode: "exact",
-									elements: "'.$name.'",
-									force_br_newlines: true,
-									tab_focus: ":prev,:next",
-									convert_fonts_to_spans: false,
-									onchange_callback: function(editor) {
-										tinyMCE.triggerSave();
-										$("#" + editor.id).valid();
-									},
-									'.$tinymce_param.'
+								theme: "advanced",
+								language: "'.LANG_ID.'",
+								mode: "exact",
+								elements: "'.$name.'",
+								force_br_newlines: true,
+								tab_focus: ":prev,:next",
+								convert_fonts_to_spans: false,
+								onchange_callback: function(editor) {
+									tinyMCE.triggerSave();
+									$("#" + editor.id).valid();
+								},
+								'.$tinymce_param.'
 								})
 								', $onload = true );
 

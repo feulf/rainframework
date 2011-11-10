@@ -5,14 +5,14 @@
 	#--------------------------------
 	# Base application directory
 	#--------------------------------
-	$app	 = "application";
+	$app	 = "app";
 
 
 
     #--------------------------------
 	# Load the class
 	#--------------------------------
-	require_once "web/config/directory.php";
+	require_once "config/directory.php";
 
 
 

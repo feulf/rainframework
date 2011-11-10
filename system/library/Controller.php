@@ -59,7 +59,6 @@ class Controller{
 	 */
 	function load_library( $library, $object_name = null ){
 
-
 		if( !$object_name )
 			$object_name = $library;
 
