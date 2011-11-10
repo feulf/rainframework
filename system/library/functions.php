@@ -21,50 +21,44 @@
 
 
 
+	// disable register globals
+	if( ini_get( "register_globals" ) && isset( $_REQUEST ) ) foreach ($_REQUEST as $k => $v) unset($GLOBALS[$k]);
+
 	/**
 	 * Get GET input
-	 * @param string $key=key to parse
-	 * @param filter $filter By default null, you can set FILTER_SANITIZE_MAGIC_QUOTES to 
 	 */
-	function get( $key = null ){
-		
-		if( $key === null )
-			return $_GET;
-		
-		if( isset($_GET[$key] ) )
-			return $_GET[$key];
-
+	function get( $key = null, $filter = FILTER_SANITIZE_MAGIC_QUOTES ){
+		if( !$key )
+			return $filter ? filter_input_array( INPUT_GET, $filter ) : $_GET;
+		if( isset($_GET[$key]) )
+		return $filter ? filter_input(INPUT_GET, $key, $filter ) : $_GET[$key];
 	}
-
 
 
 	/**
 	 * Get POST input
 	 */
-	function post( $key = null ){
-		if( $key === null )
-			return $_POST;
-		
-		if( isset($_POST[$key] ) )
-			return $_POST[$key];
+	function post( $key = null, $filter = FILTER_SANITIZE_MAGIC_QUOTES ){
+		if( !$key )
+			return $filter ? filter_input_array( INPUT_POST, $filter ) : $_POST;
+		if( isset($_POST[$key]) )
+			return $filter ? filter_input(INPUT_POST, $key, $filter ) : $_POST[$key];
 	}
 
 
 
 	/**
-	 * Get GET or POST input
+	 * Get GET_POST input
 	 */
-	function get_post( $key = null ){
-		
+	function get_post( $key = null, $filter = FILTER_SANITIZE_MAGIC_QUOTES ){
+
 		if( !isset($GLOBALS['_GET_POST'] ) )
 			$GLOBALS['_GET_POST'] = $_GET + $_POST;
+		if( !$key )
+			return $filter ? filter_input_array( $GLOBALS['_GET_POST'], $filter ) : $GLOBALS['_GET_POST'];
 
-		if( $key === null )
-			return $GLOBALS['_GET_POST'];
-		
 		if( isset($GLOBALS['_GET_POST'][$key] ) )
-			return $GLOBALS['_GET_POST'][$key];
-
+			return $filter ? filter_var($GLOBALS['_GET_POST'][$key], $filter ) : $GLOBALS['_GET_POST'][$key];
 	}
 
 
@@ -72,14 +66,9 @@
 	/**
 	 * Get COOKIE input
 	 */
-	function cookie( $key = null ){
-		
-		if( $key === null )
-			return $_COOKIE;
-		
-		if( isset($_COOKIE[$key] ) )
-			return $_COOKIE[$key];	
-		
+	function cookie( $key = null, $filter = FILTER_SANITIZE_MAGIC_QUOTES ){
+		if( isset($_COOKIE[$key]) )
+			return $filter ? filter_input(INPUT_COOKIE, $key, $filter ) : $_COOKIE[$key];
 	}
 
 
@@ -105,7 +94,7 @@
 	 * Save the memory used at this point
 	 */
 	function memory_usage_start( $memName = "execution_time" ){
-            return $GLOBALS['memoryCounter'][$memName] = memory_get_usage();
+		return $GLOBALS['memoryCounter'][$memName] = memory_get_usage();
 	}
 
 
@@ -114,8 +103,8 @@
 	 * Get the memory used
 	 */
 	function memory_usage( $memName = "execution_time", $byte_format = true ){
-            $totMem = memory_get_usage() - $GLOBALS['memoryCounter'][ $memName ];
-            return $byte_format ? byte_format($totMem) : $totMem;
+		$totMem = memory_get_usage() - $GLOBALS['memoryCounter'][ $memName ];
+		return $byte_format ? byte_format($totMem) : $totMem;
 	}
 
 
@@ -130,16 +119,16 @@
 	 */
 	function timer_start( $timeName = "execution_time" ){
 		$stimer = explode( ' ', microtime( ) );
-                $GLOBALS['timeCounter'][$timeName] = $stimer[ 1 ] + $stimer[ 0 ];
+		$GLOBALS['timeCounter'][$timeName] = $stimer[ 1 ] + $stimer[ 0 ];
 	}
 
 	/**
 	 * Get the time passed
 	 */
 	function timer( $timeName = "execution_time", $precision = 6 ){
-	       $etimer = explode( ' ', microtime( ) );
-	       $timeElapsed = $etimer[ 1 ] + $etimer[ 0 ] - $GLOBALS['timeCounter'][ $timeName ];
-	       return substr( $timeElapsed, 0, $precision );
+	   $etimer = explode( ' ', microtime( ) );
+	   $timeElapsed = $etimer[ 1 ] + $etimer[ 0 ] - $GLOBALS['timeCounter'][ $timeName ];
+	   return substr( $timeElapsed, 0, $precision );
 	}
 
 	/**
@@ -176,6 +165,7 @@
 			return ceil($diff/DAY) . " " . get_msg('days_ago') . " " . strftime( TIME_FORMAT, $time );
 		else
 			return strftime( $format, $time );
+
 	}
 
 
@@ -214,8 +204,6 @@
 //					 STRING FUNCTIONS
 //
 //-------------------------------------------------------------
-
-
 
 	/**
 	 * Cut html
@@ -319,13 +307,13 @@
 	 * Return a random string
 	 */
 	function rand_str($length = 5, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'){
-	    $chars_length = (strlen($chars) - 1);
-	    $string = $chars{rand(0, $chars_length)};
-	    for ($i = 1; $i < $length; $i = strlen($string)){
-	        $r = $chars{rand(0, $chars_length)};
-	        if ($r != $string{$i - 1}) $string .=  $r;
-	    }
-	    return $string;
+		$chars_length = (strlen($chars) - 1);
+		$string = $chars{rand(0, $chars_length)};
+		for ($i = 1; $i < $length; $i = strlen($string)){
+			$r = $chars{rand(0, $chars_length)};
+			if ($r != $string{$i - 1}) $string .=  $r;
+		}
+		return $string;
 	}
 
 
@@ -338,14 +326,14 @@
 
 	/**
 	 * Convert byte to more readable format, like "1 KB" instead of "1024".
-	 * cut_zero, remove the 0 after comma ex:  10,00 => 10      14,30 => 14,3
+	 * cut_zero, remove the 0 after comma ex:  10,00 => 10	  14,30 => 14,3
 	 */
 	function byte_format( $size ){
 		if( $size > 0 ){
-		    $unim = array("B","KB","MB","GB","TB","PB");
-		    for( $i=0; $size >= 1024; $i++ )
-		        $size = $size / 1024;
-		    return number_format($size,$i?2:0,DEC_POINT,THOUSANDS_SEP)." ".$unim[$i];
+			$unim = array("B","KB","MB","GB","TB","PB");
+			for( $i=0; $size >= 1024; $i++ )
+				$size = $size / 1024;
+			return number_format($size,$i?2:0, DEC_POINT, THOUSANDS_SEP )." ".$unim[$i];
 		}
 	}
 
@@ -380,7 +368,7 @@
 	 */
 	function email_send( $to, $subject, $body, $from = null, $from_name = null, $attachment = null, $embed_images = false ){
 
-            // TO DO: use the email class
+			// TO DO: use the email class
 
 	}
 
@@ -487,14 +475,15 @@
 
 	/**
 	 * Upload one file selected with $file. Use it when you pass only one file with a form.
-	 * The file is saved into UPS_DIR, the name created as "md5(time()) . file_extension"
+	 * The file is saved into UPLOADS_DIR, the name created as "md5(time()) . file_extension"
 	 * it return the filename
 	 *
 	 * @return string uploaded filename
 	 */
 	function upload_file($file){
 		if( $_FILES[$file]["tmp_name"] ){
-			move_uploaded_file( $_FILES[$file]["tmp_name"], UPS_DIR . ( $filename = md5(time()).".".( strtolower( file_ext($_FILES[$file]['name'] ) ) ) ) );
+			$upload_filepath = UPLOADS_DIR . ( $filename = md5(time()).".".( strtolower( file_ext($_FILES[$file]['name'] ) ) ) );
+			move_uploaded_file( $_FILES[$file]["tmp_name"], $upload_filepath );
 			return $filename;
 		}
 	}
@@ -504,7 +493,7 @@
 	 * Upload an image file and create a thumbnail
 	 *
 	 * @param string $file
-	 * @param string $upload_dir
+	 * @param string $UPLOADS_DIR
 	 * @param string $thumb_prefix Prefisso della thumbnail
 	 * @param int $max_width
 	 * @param int $max_height
@@ -513,9 +502,13 @@
 	 */
 	function upload_image( $file, $thumb_prefix = null, $max_width = 128, $max_height = 128, $square = false ){
 		if( $filename = upload_file( $file ) ){
-			//se voglio creare la thumb e $square=true, tento di creare la thumbnails
-			if( $thumb_prefix && !image_resize( UPS_DIR . $filename,  UPS_DIR . $thumb_prefix . $filename, $max_width, $max_height, $square ) ){
-				unlink( UPS_DIR . $filename );
+			
+			image_resize( UPLOADS_DIR . $filename,  UPLOADS_DIR . $thumb_prefix . $filename, $max_width, $max_height, $square );
+			return $filename;
+			
+			//try to create the thumbnail
+			if( $thumb_prefix && !image_resize( UPLOADS_DIR . $filename,  UPLOADS_DIR . $thumb_prefix . $filename, $max_width, $max_height, $square ) ){
+				unlink( UPLOADS_DIR . $filename );
 				return false;
 			}
 			return $filename;
@@ -744,8 +737,8 @@
 
 	// draw a message styled as SUCCESS, WARNING, ERROR or INFO. See .box in style.css for the style
 	function draw_msg( $msg, $type = SUCCESS, $close = false, $autoclose = 0 ){
-		add_script("jquery/jquery.min.js" );
-		add_style( "box.css", CSS_DIR );
+		add_script("jquery.min.js", JQUERY_DIR, JQUERY_URL );
+		add_style( "box.css", CSS_DIR, CSS_URL );
 		$box_id = rand(0,9999) . "_" . time();
 		if( $close )
 			$close = '<div class="close"><a onclick="$(\'#box_'.$box_id.'\').slideUp();">x</a></div>';
@@ -778,13 +771,13 @@
 
 
 	//add style sheet
-	function add_style( $style_file, $dir = CSS_DIR ){
-		$GLOBALS['style'][$dir . $style_file] = URL . $dir . $style_file;
+	function add_style( $file, $dir, $url ){
+		$GLOBALS['style'][$dir . $file] = $url . $file;
 	}
 
 	//add javascript file
-	function add_script( $script_file, $dir = JAVASCRIPT_DIR ){
-		$GLOBALS['script'][$dir . $script_file] = URL . $dir . $script_file;
+	function add_script( $file, $dir, $url ){
+		$GLOBALS['script'][$dir . $file] = $url . $file;
 	}
 
 	//add javascript code
@@ -798,12 +791,24 @@
 	/**
 	 * get javascript
 	 */
-	function get_javascript( $compress = false ){
-                global $script, $javascript, $javascript_onload;
+	function get_javascript( $compression = false ){
+		global $script, $javascript, $javascript_onload;
 		$html = "";
-		if( $script )
-			foreach( $script as $s )
-				$html .= '<script src="'.$s.'" type="text/javascript"></script>' . "\n";
+		if( $script ){
+			
+			if( $compression ){
+				$js_file = "";
+				foreach( $script as $file => $url)
+					$js_file .= "$url,";
+				$html = '<script src="/js.php?'.$js_file.'" type="text/javascript"></script>' . "\n";
+				
+			}
+			else{
+				foreach( $script as $s )
+					$html .= '<script src="'.$s.'" type="text/javascript"></script>' . "\n";
+			}
+
+		}
 		if( $javascript_onload ) $javascript .=  "\n" . "$(function(){" . "\n" . "	$javascript_onload" . "\n" . "});" . "\n";
 		if( $javascript ) $html .= "<script type=\"text/javascript\">" . "\n" .$javascript . "\n" . "</script>";
 		return $html;
@@ -812,13 +817,27 @@
 	/**
 	 * get the style
 	 */
-	function get_style(){
+	function get_style( $compression = false ){
 		global $style;
 		$html = "";
-		if( $style )
-			foreach( $style as $s )
-				$html .= '	<link rel="stylesheet" href="'.$s.'" type="text/css" />' . "\n";
+		
+		if( $style ){
+
+			if( $compression ){
+				$css_file = "";
+				foreach( $style as $file => $url)
+					$css_file .= "$url,";
+				$html = '	<link rel="stylesheet" href="/css.php?'.$css_file.'" type="text/css" />' . "\n";
+			}
+			else{
+				foreach( $style as $file => $url)
+					$html .= '	<link rel="stylesheet" href="'.$url.'" type="text/css" />' . "\n";
+			}
+
+		}
+
 		return $html;
+
 	}
 
 
@@ -828,14 +847,14 @@
 //
 //-------------------------------------------------------------
 
-        function get_ip(){
-            if( !defined("IP") ){
-                $ip = getenv( "HTTP_X_FORWARDED_FOR" ) ? getenv( "HTTP_X_FORWARDED_FOR" ) : getenv( "REMOTE_ADDR" );
-                if( !preg_match("^([1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}^", $ip ) ) $ip = null;
-                define( "IP", $ip );
-            }
-            return IP;
-        }
+	function get_ip(){
+		if( !defined("IP") ){
+			$ip = getenv( "HTTP_X_FORWARDED_FOR" ) ? getenv( "HTTP_X_FORWARDED_FOR" ) : getenv( "REMOTE_ADDR" );
+			if( !preg_match("^([1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}^", $ip ) ) $ip = null;
+			define( "IP", $ip );
+		}
+		return IP;
+	}
 
 
 
@@ -843,44 +862,46 @@
 	 * Return true if $ip is a valid ip
 	 */
 	function is_ip($ip){
-	    return preg_match("^([1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}^", $ip );
+		return preg_match("^([1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}^", $ip );
 	}
 
 
 
 	/**
 	 * Return the array with all geolocation info of user selected by IP
-     * ip = your IP
-     * assoc = true if you want the result as array
+	 * ip = your IP
+	 * assoc = true if you want the result as array
 	 */
-	define( "IPINFODB_KEY", "YOUR_KEY" );
+	if( !defined("IPINFODB_KEY" ) )
+		define( "IPINFODB_KEY", "YOUR_KEY" );
 	function ip_to_location( $ip = IP, $assoc = true ){
-		if( is_ip( $ip ) )
-			return json_decode( file_get_contents( "http://api.ipinfodb.com/v2/ip_query.php?key=".IPINFODB_KEY."&ip={$ip}&output=json&timezone=true" ), $assoc );
+		// if ip is correct and it can access to the URL it will get the array with all the user localization info
+		if( is_ip( $ip ) && file_exists( $url = "http://api.ipinfodb.com/v2/ip_query.php?key=".IPINFODB_KEY."&ip={$ip}&output=json&timezone=true" ) && file_get_contents( $url ) )
+				return json_decode( $json, $assoc );
 	}
 
 
-        /**
-         * Return the browser information of the logged user
-         */
-        function get_browser_info(){
+	/**
+	 * Return the browser information of the logged user
+	 */
+	function get_browser_info(){
 
-            if( !isset( $GLOBALS['rain_browser_info'] ) ){
-                $known = array('msie', 'firefox', 'safari', 'webkit', 'opera', 'netscape', 'konqueror', 'gecko');
-                preg_match( '#(' . join('|', $known) . ')[/ ]+([0-9]+(?:\.[0-9]+)?)#', strtolower($_SERVER['HTTP_USER_AGENT']), $br );
-                preg_match_all( '#\((.*?);#', $_SERVER['HTTP_USER_AGENT'], $os );
+		if( !isset( $GLOBALS['rain_browser_info'] ) ){
+			$known = array('msie', 'firefox', 'safari', 'webkit', 'opera', 'netscape', 'konqueror', 'gecko');
+			preg_match( '#(' . join('|', $known) . ')[/ ]+([0-9]+(?:\.[0-9]+)?)#', strtolower($_SERVER['HTTP_USER_AGENT']), $br );
+			preg_match_all( '#\((.*?);#', $_SERVER['HTTP_USER_AGENT'], $os );
 
-                global $rain_browser_info;
-                $rain_browser_info['lang_id'] = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
-                $rain_browser_info['browser'] = isset( $br[1][1] ) ? $br[1][1] : null;
-                $rain_browser_info['version'] = isset( $br[2][1] ) ? $br[2][1] : null;
-                $rain_browser_info['os'] = $od[1][0];
+			global $rain_browser_info;
+			$rain_browser_info['lang_id'] = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
+			$rain_browser_info['browser'] = isset( $br[1][1] ) ? $br[1][1] : null;
+			$rain_browser_info['version'] = isset( $br[2][1] ) ? $br[2][1] : null;
+			$rain_browser_info['os'] = $od[1][0];
 
-            }
-            return $GLOBALS['rain_browser_info'];
+		}
+		return $GLOBALS['rain_browser_info'];
 
 
-        }
+	}
 
 
 
