@@ -63,10 +63,6 @@ class Controller{
 		if( !$object_name )
 			$object_name = $library;
 
-		// transform the library string to capitalized. e.g. user => User, news_list => News_List
-		$library = implode( "_", array_map( "strtolower", explode( "_", $library ) ) );
-
-
 		if( file_exists($file = self::$library_dir . $library . ".php") )
 			require_once $file;
 		else{
