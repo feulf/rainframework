@@ -89,15 +89,15 @@ class Loader{
         function load_controller( $controller = null, $action = null, $params = array(), $load_area = "center" ){
 
 
-            // transform the controller string to capitalized. e.g. user => User, news_list => News_List
-            $controller = implode( "_", array_map( "ucfirst", array_map( "strtolower", explode( "_", $controller ) ) ) );
+            // transform the controller string to capitalized. e.g. user => user, news_list => news_list
+            $controller = implode( "_", array_map( "strtolower", explode( "_", $controller ) ) );
 
 
             // include the file
             if( file_exists( $controller_file = self::$controllers_dir . "$controller/$controller." . self::$controller_extension ) )
-                    require_once $controller_file;
+				require_once $controller_file;
             else
-                    return trigger_error( "CONTROLLER: FILE <b>{$controller_file}</b> NOT FOUND ", E_USER_WARNING );
+				return trigger_error( "CONTROLLER: FILE <b>{$controller_file}</b> NOT FOUND ", E_USER_WARNING );
 
                     
             // define the class name of the controller
@@ -106,9 +106,9 @@ class Loader{
 
             // check if the controller class exists
             if( class_exists($class) )
-                    $controller_obj = new $class( $this );
+				$controller_obj = new $class( $this );
             else
-                    return trigger_error( "CONTROLLER: CLASS <b>{$controller}</b> NOT FOUND ", E_USER_WARNING );
+				return trigger_error( "CONTROLLER: CLASS <b>{$controller}</b> NOT FOUND ", E_USER_WARNING );
                     
 
             if( $action ){
@@ -166,33 +166,30 @@ class Loader{
          */
         function load_model( $model ){
 
-                // load the model class
-                require_once LIBRARY_DIR . "Model.php";
+			// load the model class
+			require_once LIBRARY_DIR . "Model.php";
                 
-                // transform the model string to capitalized. e.g. user => User, news_list => News_List
-                $model = implode( "/", array_map( "ucfirst", array_map( "strtolower", explode( "/", $model ) ) ) );
-        	$model = implode( "_", array_map( "ucfirst",  explode( "_", $model )  ) );
+			// transform the model string to capitalized. e.g. user => User, news_list => News_List
+			$model = implode( "_", array_map( "ucfirst",  explode( "_", $model )  ) );
         	
-		// include the file
-		if( file_exists($file = self::$models_dir . $model . ".php") )
-			require_once $file;
-		else{
-			trigger_error( "MODEL: FILE <b>{$file}</b> NOT FOUND ", E_USER_WARNING );
-			return false;
-		}
+			// include the file
+			if( file_exists($file = self::$models_dir . $model . ".php") )
+				require_once $file;
+			else{
+				trigger_error( "MODEL: FILE <b>{$file}</b> NOT FOUND ", E_USER_WARNING );
+				return false;
+			}
 
-                // class name
-		$tModel = explode("/",$model);
-		$class=$tModel[count($tModel)-1];
-		$class.="_Model";
+			// class name
+			$class = $model . "_Model";
 
-                // test if the class exists
-		if( class_exists($class) )
-			return new $class;
-		else{
-			trigger_error( "MODEL: CLASS <b>{$model}</b> NOT FOUND", E_USER_WARNING );
-			return false;
-		}
+			// test if the class exists
+			if( class_exists($class) )
+				return new $class;
+			else{
+				trigger_error( "MODEL: CLASS <b>{$model}</b> NOT FOUND", E_USER_WARNING );
+				return false;
+			}
 
         }
         

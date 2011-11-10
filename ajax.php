@@ -5,22 +5,21 @@
 	#--------------------------------
 	# Base application directory
 	#--------------------------------
-        $application = "application";
-        $website     = "website";
+	$app	 = "application";
 
 
 
-        #--------------------------------
+    #--------------------------------
 	# Load the class
 	#--------------------------------
-	require_once "$website/config/directory.php";
+	require_once "web/config/directory.php";
 
 
 
 	#--------------------------------
 	# Load the bootstrap
 	#--------------------------------
-        require_once "$application/ajax.bootstrap.php";
+    require_once "$app/ajax.bootstrap.php";
 
 
 // -- end
