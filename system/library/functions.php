@@ -737,8 +737,8 @@
 
 	// draw a message styled as SUCCESS, WARNING, ERROR or INFO. See .box in style.css for the style
 	function draw_msg( $msg, $type = SUCCESS, $close = false, $autoclose = 0 ){
-		add_script("jquery.min.js", JQUERY_DIR, JQUERY_URL );
-		add_style( "box.css", CSS_DIR, CSS_URL );
+		add_script("jquery.min.js", JQUERY_DIR );
+		add_style( "box.css", CSS_DIR );
 		$box_id = rand(0,9999) . "_" . time();
 		if( $close )
 			$close = '<div class="close"><a onclick="$(\'#box_'.$box_id.'\').slideUp();">x</a></div>';
@@ -771,12 +771,16 @@
 
 
 	//add style sheet
-	function add_style( $file, $dir, $url ){
+	function add_style( $file, $dir = CSS_DIR, $url = null ){
+		if( !$url )
+			$url = URL . $dir;
 		$GLOBALS['style'][$dir . $file] = $url . $file;
 	}
 
 	//add javascript file
-	function add_script( $file, $dir, $url ){
+	function add_script( $file, $dir = JAVASCRIPT_DIR, $url = null ){
+		if( !$url )
+			$url = URL . $dir;
 		$GLOBALS['script'][$dir . $file] = $url . $file;
 	}
 
