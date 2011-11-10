@@ -15,8 +15,8 @@
 class Controller{
 
 	static protected $models_dir = MODELS_DIR, $library_dir = LIBRARY_DIR;
-        static protected $controllers_dir = CONTROLLERS_DIR;
-        static protected $controller_loaded = array();
+	static protected $controllers_dir = CONTROLLERS_DIR;
+	static protected $controller_loaded = array();
 
 	/**
 	 * load a controller and return the html
@@ -24,11 +24,11 @@ class Controller{
 	 */
 	function load_controller( $controller, $action = null, $params = null, $load_area = null ){
 
-                // get the loader
-                $loader = Loader::get_instance();
-                $loader->load_controller( $controller, $action, $params, $load_area );
+		// get the loader
+		$loader = Loader::get_instance();
+		$loader->load_controller( $controller, $action, $params, $load_area );
 
-        }
+	}
 
 
 
@@ -41,13 +41,14 @@ class Controller{
 	 */
 	function load_model($model,$object_name=null){
 
-                if( !$object_name )
-                    $object_name = $model;
+		if( !$object_name )
+			$object_name = $model;
 
-                // get the loader
-                $loader = Loader::get_instance();
-                // assign the model to the object name, so now it's accessible from the controller
-                $this->$object_name = $loader->load_model( $model );
+		// get the loader
+		$loader = Loader::get_instance();
+		
+		// assign the model to the object name, so now it's accessible from the controller
+		$this->$object_name = $loader->load_model( $model );
 
 	}
 
@@ -60,10 +61,10 @@ class Controller{
 
 
 		if( !$object_name )
-                    $object_name = $library;
+			$object_name = $library;
 
-                // transform the library string to capitalized. e.g. user => User, news_list => News_List
-                $library = implode( "_", array_map( "ucfirst", array_map( "strtolower", explode( "_", $library ) ) ) );
+		// transform the library string to capitalized. e.g. user => User, news_list => News_List
+		$library = implode( "_", array_map( "strtolower", explode( "_", $library ) ) );
 
 
 		if( file_exists($file = self::$library_dir . $library . ".php") )
@@ -92,8 +93,8 @@ class Controller{
 	 *
 	 */
 	function ajax_mode( $load_javascript = false, $load_style = false, $load_layout = false){
-                $loader = Loader::get_instance();
-                $loader->ajax_mode( $load_javascript, $load_style, $load_layout );
+		$loader = Loader::get_instance();
+		$loader->ajax_mode( $load_javascript, $load_style, $load_layout );
 	}
 
 
@@ -112,17 +113,17 @@ class Controller{
         
         
 
-        /**
-         * Called before init the controller
-         */
-        public function filter_before(){}
+	/**
+	 * Called before init the controller
+	 */
+	public function filter_before(){}
 
 
 
-        /**
-         * Called before init the controller
-         */
-        public function filter_after(){}
+	/**
+	 * Called before init the controller
+	 */
+	public function filter_after(){}
 
 
 }
