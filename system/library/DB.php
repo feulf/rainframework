@@ -120,18 +120,18 @@ class DB{
          * @return array of array
          */
 	function get_list( $query = null, $field=array(), $key = null, $value = null ){
-            if( $result = $this->query($query,$field)->fetchALL($this->fetch_mode) ){
-                if( !$key )
-                        return $result;
-                elseif( !$value )
-                        foreach( $result as $row )
-                                $rows[ $row[$key] ] = $row;
-                else
-                        foreach( $result as $row )
-                                $rows[ $row[$key] ] = $row[$value];
-
-                return isset($rows)?$rows:null;
-            }
+		$rows = array();
+		if( $result = $this->query($query,$field)->fetchALL($this->fetch_mode) ){
+			if( !$key )
+				return $result;
+			elseif( !$value )
+				foreach( $result as $row )
+					$rows[ $row[$key] ] = $row;
+			else
+				foreach( $result as $row )
+					$rows[ $row[$key] ] = $row[$value];
+		}
+		return $rows;
 	}
 
 
