@@ -59,7 +59,7 @@ class DB{
 		 * @param array $field
 		 * @return string
 		 */
-		static function getField($query=null,$field=array()){
+		static function get_field($query=null,$field=array()){
 			return self::query($query,$field)->fetchColumn(0);
 		}
 
@@ -71,7 +71,7 @@ class DB{
 		 * @param array $field
 		 * @return array
 		 */
-		static function getRow($query=null,$field=array() ){
+		static function get_row($query=null,$field=array() ){
 			return self::query($query,$field)->fetch(self::$fetch_mode );
 		}
 
@@ -90,7 +90,7 @@ class DB{
 		 * @param array $field
 		 * @return array of array
 		 */
-		static function getAll( $query = null, $field=array(), $key = null, $value = null ){
+		static function get_all( $query = null, $field=array(), $key = null, $value = null ){
 			$rows = array();
 			if( $result = self::query($query,$field)->fetchALL(self::$fetch_mode) ){
 				if( !$key )
@@ -110,7 +110,7 @@ class DB{
 		/**
 		 * Get the last inserted id of an insert query
 		 */
-		static function getLastId( ){
+		static function get_last_id( ){
 			return self::$link->lastInsertId();
 		}
 
@@ -120,7 +120,7 @@ class DB{
 		 * Set the fetch mode
 		 * PDO::FETCH_ASSOC for arrays, PDO::FETCH_OBJ for objects
 		 */
-		static function setFetchMode( $fetch_mode = PDO::FETCH_ASSOC ){
+		static function set_fetch_mode( $fetch_mode = PDO::FETCH_ASSOC ){
 			self::$fetch_mode = $fetch_mode;
 		}
 
@@ -202,7 +202,7 @@ class DB{
 		/**
 		 * Return the number of executed query
 		 */
-		static function getExecutedQuery( ){
+		static function get_executed_query( ){
 			return self::$nquery;
 		}
 
