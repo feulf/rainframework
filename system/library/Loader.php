@@ -230,6 +230,7 @@ class Loader{
          */
         function init_db(){
             require_once LIBRARY_DIR . "DB.php";
+			db::init();
         }
 
 

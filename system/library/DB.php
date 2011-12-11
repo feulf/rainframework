@@ -18,7 +18,19 @@ class DB{
 						 $fetch_mode = PDO::FETCH_ASSOC,	// define the type of results
 						 $statement,						// the PDO object variable
 						 $nquery = 0,
-						 $link;
+						 $link,
+						 $config_dir = CONFIG_DIR,
+						 $config_file = "db.php";
+
+		
+		static function init(){
+			// load the variables
+			require self::$config_dir . self::$config_file;
+
+			// connect
+			self::setup( "$server:host=$hostname;dbname=$database", $username, $password );
+		}
+
 
 		/**
 		 * Execute a query
