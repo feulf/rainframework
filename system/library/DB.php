@@ -22,7 +22,12 @@ class DB{
 						 $config_dir = CONFIG_DIR,
 						 $config_file = "db.php";
 
-		
+
+		/**
+		 * Init the database connection
+		 * 
+		 * 
+		 */
 		static function init(){
 			// load the variables
 			require self::$config_dir . self::$config_file;
@@ -92,9 +97,9 @@ class DB{
 		/**
 		 * Get a list of rows. Example:
 		 *
-		 * $db->get_list("SELECT * FROM user")  => array(array('id'=>23,'name'=>'tim'),array('id'=>43,'name'=>'max') ... )
-		 * $db->get_list("SELECT * FROM user","id")  => array(23=>array('id'=>23,'name'=>'tim'),42=>array('id'=>43,'name'=>'max') ... )
-		 * $db->get_list("SELECT * FROM user","id","name")  => array(23=>'tim'),42=>'max' ...)
+		 * db::get_all("SELECT * FROM user")  => array(array('id'=>23,'name'=>'tim'),array('id'=>43,'name'=>'max') ... )
+		 * db::get_all("SELECT * FROM user","id")  => array(23=>array('id'=>23,'name'=>'tim'),42=>array('id'=>43,'name'=>'max') ... )
+		 * db::get_all("SELECT * FROM user","id","name")  => array(23=>'tim'),42=>'max' ...)
 		 *
 		 * @param string $query
 		 * @param string $key
@@ -244,6 +249,14 @@ class DB{
 
 
 		/**
+		 * Close mysql connection
+		 */
+		static function disconnect( ){
+			unset( self::$link );
+		}
+
+
+		/**
 		 * Configure the settings
 		 *
 		 */
@@ -254,15 +267,6 @@ class DB{
 			else if( property_exists( __CLASS__, $setting ) )
 				self::$$setting = $value;
 		}
-
-
-		/**
-		 * Close mysql connection
-		 */
-		static function disconnect( ){
-			unset( self::$link );
-		}
-
 
 }
 
