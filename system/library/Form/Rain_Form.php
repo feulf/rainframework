@@ -137,7 +137,7 @@
 
 
 		// accepted validation method
-		//required,remote,minlenght,maxlength,rangelength,min,max,range,email,url,date,dateISO,dateDE,number,numberDE,digits, creditcard,accept,equalTo
+		//required,remote,minlength,maxlength,rangelength,min,max,range,email,url,date,dateISO,dateDE,number,numberDE,digits, creditcard,accept,equalTo
 		function add_validation( $name, $validation, $message = null ){
 
 			if( $validation ){
@@ -150,7 +150,7 @@
 					$validation = $array[0];
 					$value = isset( $array[1] ) ? $array[1] : true;
 					
-					if( !in_array( $validation, explode( ',', 'required,remote,minlenght,maxlength,rangelength,min,max,range,email,url,date,dateISO,dateDE,number,numberDE,digits,creditcard,accept,equalTo') ) )
+					if( !in_array( $validation, explode( ',', 'required,remote,minlength,maxlength,rangelength,min,max,range,email,url,date,dateISO,dateDE,number,numberDE,digits,creditcard,accept,equalTo') ) )
 						echo "Validation method not found: $validation<br>";
 
 					$message = $message ? $message : str_replace( '{$value}', $value, get_msg( $validation ) );
@@ -255,7 +255,7 @@
 			if( is_array( $param ) )
 				foreach( $param as $attr => $val )
 					$attributes .= $attr == 'disabled' ? ' disabled' : " $attr=\"$val\"";
-			return "<input type=\"$type\" name=\"$name\" value=\"$value\" class=\"text\"/>";
+			return "<input type=\"$type\" name=\"$name\" value=\"$value\" class=\"text\" $attributes />";
 		}
 
 
@@ -271,7 +271,7 @@
 			if( is_array( $param ) )
 				foreach( $param as $attr => $val )
 					$attributes .= $attr == 'MAX_FILE_SIZE' ? $this->addHidden( 'MAX_FILE_SIZE', $val ) : " $attr=\"$val\"";
-			return "<input type=\"file\" name=\"$name\" value=\"$value\" class=\"text\"/>";
+			return "<input type=\"file\" name=\"$name\" value=\"$value\" class=\"text\" $attributes />";
 		}
 
 
