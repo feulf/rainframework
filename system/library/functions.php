@@ -529,7 +529,17 @@
 	/**
 	 * Create thumb from image
 	 */
+	/**
+	 * Create thumb from image
+	 */
 	function image_resize( $source, $dest, $maxx = 100, $maxy = 100, $square = false, $quality = 70 ){
+
+        // increase the memory limit for resizing the image
+
+        if( $memory_limit = get_setting('memory_limit') ){
+            $old_memory_limit = ini_get('memory_limit');
+            ini_set('memory_limit', $memory_limit );
+        }
 
 		switch( $ext = file_eXT( $source ) ){
 			case 'jpg':
@@ -590,6 +600,10 @@
 
 		imagedestroy( $source_img );
 		imagedestroy( $dest_img );
+
+        if( !$memory_limit )
+            ini_set( 'memory_limit', $old_memory_limit );
+
 	}
 
 
