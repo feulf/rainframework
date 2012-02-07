@@ -2,7 +2,7 @@
 
 	// check that we are using rain framework
 	define( "RAIN", true );
-        define( "RAINFRAMEWORK_VERSION", "Rain Framework 2.2" );
+        define( "RAINFRAMEWORK_VERSION", "Rain Framework 2.4.5" );
 
 
 
