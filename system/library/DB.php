@@ -148,13 +148,12 @@ class DB{
 		 * @param array data The parameter must be an associative array (name=>value)
 		 */
 		static function insert( $table, $data ){
-			if( count( $data ) ){
-				$fields = $values = "";
-					foreach( $data as $name => $value ){
-						$fields .= $fields ? ",`$name`" : "`$name`";
-						$values .= $values ? ",`$value`" : "`$value`";
-					}
-				return self::$link->query( "INSERT INTO $table ($fields) VALUES ($values)" );
+			if( $n = count( $data ) ){
+                $fields     = implode( ',', array_keys( $data ) );
+                $values     = implode( ',', array_fill( 0, $n, '?' ) );
+                $prepared   = array_values( $data );
+
+				return self::query( "INSERT INTO $table ($fields) VALUES ($values)", $prepared );
 			}
 		}
 
@@ -166,13 +165,19 @@ class DB{
 			 * @param array $data the parameter must be an associative array (name=>value)
 		 */
 		static function update( $table, $data, $where, $field = null ){
+            if( !$where ){
+                die( 'You have to set the parameter $where in order to use db::update()' );
+            }
+
 			if( count( $data ) ){
-				$fields = "";
-				foreach( $data as $name => $value )
-					$fields .= $fields ? ",`$name`='$value'" : "`$name`='$value'";
-				$where = is_string( $where ) ? " WHERE $where" : null;
-							$query = "UPDATE $table SET $fields $where";
-							return self::query( $query, $field );
+                foreach( $data as $field => $value ){   // create the fields
+                    $fields[] = $field . '=?';
+                }
+                $prepared = array_values( $data );
+                $fields_query = implode( ',', $fields );
+                $where = " WHERE $where";
+
+                return self::query( "UPDATE $table SET $fields_query $where", $prepared );
 			}
 		}
 
@@ -184,7 +189,11 @@ class DB{
 		 * @param string $where the condition of the row to be deleted
 		 */
 		static function delete( $table, $where ){
-			return self::$link->query("DELETE FROM $table WHERE $where");
+            if( !$where ){
+                die( 'You have to set the parameter $where in order to use db::delete()' );
+            }
+            $where = $where;
+			return self::query("DELETE FROM $table WHERE $where");
 		}
 
 
