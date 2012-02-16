@@ -894,7 +894,7 @@
 		define( "IPINFODB_KEY", "YOUR_KEY" );
 	function ip_to_location( $ip = IP, $assoc = true ){
 		// if ip is correct and it can access to the URL it will get the array with all the user localization info
-		if( is_ip( $ip ) && file_exists( $url = "http://api.ipinfodb.com/v2/ip_query.php?key=".IPINFODB_KEY."&ip={$ip}&output=json&timezone=true" ) && file_get_contents( $url ) )
+		if( is_ip( $ip ) && file_exists( $url = "http://api.ipinfodb.com/v2/ip_query.php?key=".IPINFODB_KEY."&ip={$ip}&output=json&timezone=true" ) && ($json = file_get_contents( $url ) ) )
 				return json_decode( $json, $assoc );
 	}
 
