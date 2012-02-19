@@ -48,18 +48,22 @@
 
 	// errors name
 	$error_levels = array(
-	    E_USER_NOTICE => 'User Notice',
-	    E_USER_WARNING => 'User Warning',
-	    E_USER_ERROR => 'User Error',
-	    E_COMPILE_WARNING => 'Compile warning',
-	    E_COMPILE_ERROR => 'Compile Error',
-	    E_CORE_WARNING => 'Core Warning',
-	    E_CORE_ERROR => 'Core Error',
-	    E_NOTICE => 'Notice',
-	    E_WARNING => 'Warning',
-	    E_ERROR => 'Error',
-	    E_STRICT => 'Strict'
-	);
+                            E_ERROR => 'Error',
+                            E_WARNING => 'Warning',
+                            E_PARSE => 'Warning',
+                            E_NOTICE => 'Notice',
+                            E_CORE_ERROR => 'Core Error',
+                            E_CORE_WARNING => 'Core Warning',
+                            E_COMPILE_ERROR => 'Compile Error',
+							E_COMPILE_WARNING => 'Compile warning',
+                            E_USER_ERROR => 'User Error',
+                            E_USER_WARNING => 'User Warning',
+                            E_USER_NOTICE => 'User Notice',
+							E_STRICT => 'Strict',
+							E_RECOVERABLE_ERROR => 'Cachable fatal error',
+							E_DEPRECATED => 'Deprecated',
+							E_USER_DEPRECATED => 'User deprecated',
+						);
 
 
 	/**
