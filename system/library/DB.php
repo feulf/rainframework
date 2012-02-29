@@ -15,6 +15,7 @@
 class DB{
 
 		static protected $db,								// database configurations
+                         $selected_database = "dev",
 						 $fetch_mode = PDO::FETCH_ASSOC,	// define the type of results
 						 $statement,						// the PDO object variable
 						 $nquery = 0,
@@ -25,16 +26,36 @@ class DB{
 
 		/**
 		 * Init the database connection
-		 * 
-		 * 
+		 * @param string $name identify which access information to load
+		 *
 		 */
-		static function init(){
-			// load the variables
-			require self::$config_dir . self::$config_file;
+		static function init( $name = "dev" ){
+
+            if( !self::$db ){
+                // load the variables
+                require_once self::$config_dir . self::$config_file;
+                self::$db = $db;
+            }
+
+            // db account info
+            $driver         = self::$db[$name]['driver'];
+            $hostname       = self::$db[$name]['hostname'];
+            $database       = self::$db[$name]['database'];
+            $username       = self::$db[$name]['username'];
+            $password       = self::$db[$name]['password'];
 
 			// connect
-			self::setup( "$server:host=$hostname;dbname=$database", $username, $password );
+            self::_setup( $name, "$driver:host=$hostname;dbname=$database", $username, $password );
 		}
+
+
+        /**
+         * Select another database
+         * @param type $name
+         */
+        public function select_database( $name ) {
+            self::$link = &self::$db[$name]['link'];
+        }
 
 
 		/**
@@ -159,6 +180,7 @@ class DB{
 
 
 
+
 		/**
 		 * Update
 		 * @param string $table the selected table
@@ -193,7 +215,7 @@ class DB{
                 die( 'You have to set the parameter $where in order to use db::delete()' );
             }
             $where = $where;
-			return self::query("DELETE FROM $table WHERE $where");
+			return self::$link->query("DELETE FROM $table WHERE $where");
 		}
 
 
@@ -246,10 +268,11 @@ class DB{
 		/**
 		 * Connect to the database
 		 */
-		static function setup( $string, $username, $password ){
+		static function _setup( $name, $string, $username, $password ){
 			try{
 				self::$link = new PDO( $string, $username, $password );
 				self::$link->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+                self::$db[$name]['link'] = self::$link;
 			} catch (PDOException $e) {
 				die( "Error!: " . $e->getMessage() . "<br/>" );
 			}
