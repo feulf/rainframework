@@ -23,13 +23,16 @@ class DB{
 						 $config_dir = CONFIG_DIR,
 						 $config_file = "db.php";
 
+        // default name for connection
+        const           DEFAULT_CONNECTION_NAME = "dev";
+
 
 		/**
-		 * Init the database connection
+		 * Init the database connection. Call this function only once for database instance.
 		 * @param string $name identify which access information to load
 		 *
 		 */
-		static function init( $name = "dev" ){
+		static function init( $name = self::DEFAULT_CONNECTION_NAME ){
 
             if( !self::$db ){
                 // load the variables
@@ -37,15 +40,43 @@ class DB{
                 self::$db = $db;
             }
 
+
             // db account info
             $driver         = self::$db[$name]['driver'];
             $hostname       = self::$db[$name]['hostname'];
             $database       = self::$db[$name]['database'];
             $username       = self::$db[$name]['username'];
             $password       = self::$db[$name]['password'];
+            $pdo_options    = array();
+
+            if ( !in_array($driver, PDO::getAvailableDrivers() ) ) {
+                die("Error!: could not find a <a href=\"http://php.net/pdo.drivers.php\" target=\"_blank\">" . $driver . "</a> driver<br/>");
+            }
+
+            switch( $driver ){
+                case 'mysql':
+                    $string = "mysql:host=$hostname;dbname=$database";
+                    $pdo_options = array( PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8" );
+                    break;
+                case 'pgsql':
+                    $string = "pqsql:host=$hostname;dbname=$database";
+                    break;
+                case 'sqlite':
+                    $string = "sqlite:$database_path";
+                    break;
+                case 'oracle':
+                    $string = "OCI:";
+                    break;
+                case 'odbc':
+                    // $database path
+                    $string = "odbc:Driver={Microsoft Access Driver (*.mdb)};Dbq=$database;Uid=$username";
+                    break;
+                default:
+                    die( "Error!: Driver $driver not recognized in DB class" );
+            }
 
 			// connect
-            self::_setup( $name, "$driver:host=$hostname;dbname=$database", $username, $password );
+            self::setup( $string, $username, $password, $name, $pdo_options );
 		}
 
 
@@ -54,6 +85,10 @@ class DB{
          * @param type $name
          */
         public function select_database( $name ) {
+
+            if( empty( self::$db[$name] ) )
+                self::init( $name );
+
             self::$link = &self::$db[$name]['link'];
         }
 
@@ -268,8 +303,9 @@ class DB{
 		/**
 		 * Connect to the database
 		 */
-		static function _setup( $name, $string, $username, $password ){
-			try{
+		static function setup( $string, $username, $password, $name = self::DEFAULT_CONNECTION_NAME, $pdo_options = array() ){
+
+            try{
 				self::$link = new PDO( $string, $username, $password );
 				self::$link->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                 self::$db[$name]['link'] = self::$link;
