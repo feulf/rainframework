@@ -43,18 +43,17 @@ class Rain_User{
 		//check if there's login and pw, or salt_pw
 		if( $login AND ($password OR $salt_and_pw) ){
 
-			$db = DB::get_instance();
 			if( !$salt_and_pw )
-				$salt_and_pw = md5( $db->get_field( "SELECT salt FROM ".DB_PREFIX."user WHERE email = '{$login}'" ) . $password );
+				$salt_and_pw = md5( DB::get_field( "SELECT salt FROM ".DB_PREFIX."user WHERE email = '{$login}'" ) . $password );
 
-			if( $user = $db->get_row( "SELECT * FROM ".DB_PREFIX."user WHERE email = '$login' AND password = '$salt_and_pw'" ) ){
+			if( $user = DB::get_row( "SELECT * FROM ".DB_PREFIX."user WHERE email = '$login' AND password = '$salt_and_pw'" ) ){
 
 				// create new salt and password
 				if( $password ){
 					$user_id = $user['user_id'];
 					$salt=rand( 0, 99999 );
 					$md5_password = md5( $salt . $password );
-					$db->query( "UPDATE ".DB_PREFIX."user SET password='$md5_password', salt='$salt', activation_code='' WHERE user_id='$user_id'" );
+					DB::query( "UPDATE ".DB_PREFIX."user SET password='$md5_password', salt='$salt', activation_code='' WHERE user_id='$user_id'" );
 				}
 
 				if( $enable_cookies ){
@@ -69,7 +68,7 @@ class Rain_User{
 				self::$user = $_SESSION['user'] = $user;
 
 				//update date and IP
-				$db->query( "UPDATE ".DB_PREFIX."user SET last_ip='".get_ip()."', data_login=UNIX_TIMESTAMP() WHERE user_id='{$user['user_id']}'" );
+				DB::query( "UPDATE ".DB_PREFIX."user SET last_ip='".get_ip()."', data_login=UNIX_TIMESTAMP() WHERE user_id='{$user['user_id']}'" );
 
 				return LOGIN_DONE;
 			}
@@ -106,7 +105,6 @@ class Rain_User{
 
 
 	function refresh_user_info(){
-		$db = DB::get_instance();
 		self::$user = $_SESSION['user'] = $this->get_user();
 		self::$user['check'] = $_SESSION['user']['check'] = BASE_DIR;
 		return self::$user;
@@ -114,8 +112,7 @@ class Rain_User{
 
 	function get_user($user_id=null){
 		if( $user_id ){
-			$db = DB::get_instance();
-			$user = $db->get_row( "SELECT * FROM ".DB_PREFIX."user WHERE user_id = '{$user_id}'" );
+			$user = DB::get_row( "SELECT * FROM ".DB_PREFIX."user WHERE user_id = '{$user_id}'" );
 			$user['level'] = get_msg( strtolower($GLOBALS['user_level'][ $user['status'] ]) );
 			return $user;
 		}
@@ -161,8 +158,7 @@ class Rain_User{
 	 */
 	function set_user_lang( $lang_id ){
 		if( $user_id=$this->get_user_id() ){
-			$db = DB::get_instance();
-			$db->query( "UPDATE ".DB_PREFIX."user SET lang_id='{$lang_id}' WHERE user_id={$user_id}" );
+			DB::query( "UPDATE ".DB_PREFIX."user SET lang_id='{$lang_id}' WHERE user_id={$user_id}" );
 			$_SESSION['user']['lang_id']=$lang_id;
 		}
 	}
@@ -173,7 +169,6 @@ class Rain_User{
 	 * Set the User geolocation and page
 	 */
 	function user_where_is_init( $id, $link, $online_time = USER_ONLINE_TIME ){
-		$db = DB::get_instance();
 		$file 		= basename( $_SERVER['PHP_SELF'] );
 		$url 		= $_SERVER['REQUEST_URI'];
 		$where_is 	= isset( $_SESSION['where_is'] ) ? $_SESSION['where_is'] : null;
@@ -184,32 +179,32 @@ class Rain_User{
 
 		if( !$where_is ){
 			$time = TIME - HOUR;
-			$db->query( "DELETE FROM ".DB_PREFIX."user_where_is WHERE time < " . HOUR );
+			DB::query( "DELETE FROM ".DB_PREFIX."user_where_is WHERE time < " . HOUR );
 		}
 
-		$user_where_is_id = $where_is ? $_SESSION['where_is']['user_where_is_id'] : $db->get_field( "SELECT user_where_is_id FROM ".DB_PREFIX."user_where_is WHERE sid='$sid'" );
+		$user_where_is_id = $where_is ? $_SESSION['where_is']['user_where_is_id'] : DB::get_field( "SELECT user_where_is_id FROM ".DB_PREFIX."user_where_is WHERE sid='$sid'" );
 
 		if( $user_id = $this->get_user_id() ){
 			$guest_id = 0;
 			$name = $this->get_user_field( "name" );
 		}
 		else{
-			$guest_id = isset( $where_is['guest_id'] ) ? $where_is['guest_id'] : ( 1 + $db->get_field( "SELECT guest_id FROM ".DB_PREFIX."user_where_is ORDER BY guest_id DESC LIMIT 1;" ) );
+			$guest_id = isset( $where_is['guest_id'] ) ? $where_is['guest_id'] : ( 1 + DB::get_field( "SELECT guest_id FROM ".DB_PREFIX."user_where_is ORDER BY guest_id DESC LIMIT 1;" ) );
 			$name = _GUEST_ . " " . $guest_id;
 		}
 
 		if( $user_where_is_id )
-			$db->query( "UPDATE ".DB_PREFIX."user_where_is SET ip='$ip', user_id='$user_id', name='$name', url='$url', id='$id', file='$file', time='".TIME."', sid='$sid' WHERE user_where_is_id='$user_where_is_id'" );
+			DB::query( "UPDATE ".DB_PREFIX."user_where_is SET ip='$ip', user_id='$user_id', name='$name', url='$url', id='$id', file='$file', time='".TIME."', sid='$sid' WHERE user_where_is_id='$user_where_is_id'" );
 		else{
 
 			if( !($location = ip_to_location( $ip, $type = 'array' )) )
 				$location = array( 'CountryCode'=>null, 'CountryName'=>null, 'RegionCode'=>null, 'RegionName'=>null, 'City'=>null, 'ZipPostalCode'=>null, 'Latitude'=>null, 'Longitude'=>null, 'TimezoneName'=>null, 'Gmtoffset'=>null );
 
-			$db->query( "INSERT INTO ".DB_PREFIX."user_where_is
+			DB::query( "INSERT INTO ".DB_PREFIX."user_where_is
 						(ip,sid,user_id,guest_id,name,url,id,file,os,browser,time,time_first_click,country_code,country_name,region_code,region_name,city_name,zip,latitude,longitude,timezone_name,gmt_offset)
 						VALUES
 						('$ip','$sid','$user_id','$guest_id','$name','$url','$id','$file','$os','$browser', ".TIME.", ".TIME.", '{$location['CountryCode']}', '{$location['CountryName']}', '{$location['RegionCode']}', '{$location['RegionName']}','{$location['City']}', '{$location['ZipPostalCode']}', '{$location['Latitude']}', '{$location['Longitude']}', '{$location['TimezoneName']}', '{$location['Gmtoffset']}')" );
-						$user_where_is_id = $db->get_insert_id();
+						$user_where_is_id = DB::get_insert_id();
 		}
 
 		$_SESSION['where_is'] = array( 'user_where_is_id' => $user_where_is_id, 'id' => $id, 'guest_id'=>$guest_id, 'name'=>$name, 'time' => TIME, 'file' => $file, 'user_id' => $user_id, 'os' => $os, 'browser' => $browser );
@@ -221,9 +216,8 @@ class Rain_User{
 	 * Refresh all the user info
 	 */
 	function user_where_is_refresh(){
-		$db = DB::get_instance();
 		if( isset( $_SESSION['where_is'] ) ){
-			$db->query( "UPDATE ".DB_PREFIX."user_where_is SET time='".TIME."' WHERE user_where_is_id='{$_SESSION['where_is']['user_where_is_id']}'" );
+			DB::query( "UPDATE ".DB_PREFIX."user_where_is SET time='".TIME."' WHERE user_where_is_id='{$_SESSION['where_is']['user_where_is_id']}'" );
 			$_SESSION['where_is']['time'] = TIME;
 		}
 	}
@@ -234,8 +228,7 @@ class Rain_User{
 	 * Get the userWhereIs info
 	 */
 	function get_user_where_is_user( $user_where_is_id, $online_time = USER_ONLINE_TIME ){
-		$db = DB::get_instance();
-		return $db->get_row( "SELECT ".DB_PREFIX."user.*, ".DB_PREFIX."user_where_is.*
+		return DB::get_row( "SELECT ".DB_PREFIX."user.*, ".DB_PREFIX."user_where_is.*
 							FROM ".DB_PREFIX."user_where_is
 							LEFT JOIN ".DB_PREFIX."user ON ".DB_PREFIX."user_where_is.user_id = ".DB_PREFIX."user.user_id
 							WHERE ( ".TIME." - time ) < $online_time
@@ -248,8 +241,7 @@ class Rain_User{
 	 * Get the list of all user online
 	 */
 	function get_user_where_is_list( $id = null, $yourself = true, $online_time = USER_ONLINE_TIME ){
-		$db = DB::get_instance();
-		return $db->get_list( 	"SELECT ".DB_PREFIX."user.*, ".DB_PREFIX."user_where_is.*, IF (".DB_PREFIX."user.user_id > 0, ".DB_PREFIX."user.name, ".DB_PREFIX."user_where_is.name ) AS name
+		return DB::get_list( 	"SELECT ".DB_PREFIX."user.*, ".DB_PREFIX."user_where_is.*, IF (".DB_PREFIX."user.user_id > 0, ".DB_PREFIX."user.name, ".DB_PREFIX."user_where_is.name ) AS name
 									FROM ".DB_PREFIX."user_where_is
 									LEFT JOIN ".DB_PREFIX."user ON ".DB_PREFIX."user_where_is.user_id = ".DB_PREFIX."user.user_id
 									WHERE ( ".TIME." - time ) < $online_time
@@ -273,8 +265,7 @@ class Rain_User{
 	 * Delete the user where is info
 	 */
 	function user_where_is_logout( $user_id ){
-		$db = DB::get_instance();
-		$db->query( "DELETE FROM ".DB_PREFIX."user_where_is WHERE user_id='$user_id'" );
+		DB::query( "DELETE FROM ".DB_PREFIX."user_where_is WHERE user_id='$user_id'" );
 		unset( $_SESSION['where_is'] );
 	}
 
@@ -283,8 +274,7 @@ class Rain_User{
 	 */
 	function get_user_group_list(){
                 if( $user_id = $this->get_user_id() ){
-                    $db = DB::get_instance();
-                    return $db->get_list(   "SELECT *
+                    return DB::get_list(   "SELECT *
                                             FROM ".DB_PREFIX."usergroup AS g
                                             JOIN ".DB_PREFIX."usergroup_user AS gu ON g.group_id=gu.group_id
                                             WHERE gu.user_id=?
