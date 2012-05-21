@@ -593,7 +593,7 @@
 		imageCopyResampled( $dest_img, $source_img, 0, 0, 0, 0, $new_width, $new_height, $width, $height );
 
 		switch( $ext ){
-			case 'png': imagepng( $dest_img, $dest, $quality ); break;
+			case 'png': imagepng( $dest_img, $dest, ceil($quality/10) ); break;
 			case 'gif': imagegif( $dest_img, $dest, $quality ); break;
 			default:	imagejpeg( $dest_img, $dest, $quality );
 		}
