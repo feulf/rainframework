@@ -28,15 +28,23 @@
 
 	// get user IP
 	$IP = getenv( "HTTP_X_FORWARDED_FOR" ) ? getenv( "HTTP_X_FORWARDED_FOR" ) : getenv( "REMOTE_ADDR" ); if( !preg_match("^([1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}^", $IP ) ) $IP = null;
-	// browser calculation
-	$known = array('msie', 'firefox', 'safari', 'webkit', 'opera', 'netscape', 'konqueror', 'gecko'); preg_match( '#(' . join('|', $known) . ')[/ ]+([0-9]+(?:\.[0-9]+)?)#', strtolower($_SERVER['HTTP_USER_AGENT']), $br ); preg_match_all( '#\((.*?);#', $_SERVER['HTTP_USER_AGENT'], $os ); if( isset( $br[1][1] ) )	$browser = $br[1][1]; else $browser = null;  if( isset( $br[2][1] ) ) $version = $br[2][1]; else $version = null;
 
 	define( "IP", $IP );
+	define( "USER_ONLINE_TIME", 150 );	// user is considered online before 3 minutes of inactivity
+
+
+	// Browser Info
 	define( "BROWSER_LANG_ID", substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) );
+
+	$known = array('msie', 'firefox', 'safari', 'webkit', 'opera', 'netscape', 'konqueror', 'gecko'); 
+	preg_match( '#(' . join('|', $known) . ')[/ ]+([0-9]+(?:\.[0-9]+)?)#', strtolower($_SERVER['HTTP_USER_AGENT']), $br );
+	preg_match_all( '#\((.*?);#', $_SERVER['HTTP_USER_AGENT'], $os );
+	if( isset( $br[1][1] ) ) $browser = $br[1][1]; else $browser = null;
+	if( isset( $br[2][1] ) ) $version = $br[2][1]; else $version = null;
+	if( isset( $os[1][0] ) ) $broser_os = $os[1][0]; else $browser_os = null;
 	define( "BROWSER", $browser );
 	define( "BROWSER_VERSION", $version );
-	define( "BROWSER_OS", $os[1][0] );
-	define( "USER_ONLINE_TIME", 150 );	// user is considered online before 3 minutes of inactivity
+	define( "BROWSER_OS", $browser_os );
 
 
 
