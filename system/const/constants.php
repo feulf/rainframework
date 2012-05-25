@@ -41,7 +41,7 @@
 	preg_match_all( '#\((.*?);#', $_SERVER['HTTP_USER_AGENT'], $os );
 	if( isset( $br[1][1] ) ) $browser = $br[1][1]; else $browser = null;
 	if( isset( $br[2][1] ) ) $version = $br[2][1]; else $version = null;
-	if( isset( $os[1][0] ) ) $broser_os = $os[1][0]; else $browser_os = null;
+	if( isset( $os[1][0] ) ) $browser_os = $os[1][0]; else $browser_os = null;
 	define( "BROWSER", $browser );
 	define( "BROWSER_VERSION", $version );
 	define( "BROWSER_OS", $browser_os );
