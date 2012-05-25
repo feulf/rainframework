@@ -15,7 +15,7 @@
 
 	define( "CONTROLLER_EXTENSION", 	"php" );
 	define( "CONTROLLER_CLASS_NAME", 	"_Controller" );
-	define( "AJAX_CONTROLLER_EXTENSION", 	"Ajax.php" );
+	define( "AJAX_CONTROLLER_EXTENSION", 	"ajax.php" );
 	define( "AJAX_CONTROLLER_CLASS_NAME", 	"_Ajax_Controller" );
 
 
