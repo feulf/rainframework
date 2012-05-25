@@ -90,7 +90,7 @@ class Loader{
 
 
             // transform the controller string to capitalized. e.g. user => user, news_list => news_list
-            $controller = implode( "_", array_map( "strtolower", explode( "_", $controller ) ) );
+            $controller = strtolower( $controller );
 
 
             // include the file
