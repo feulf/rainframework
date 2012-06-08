@@ -75,7 +75,7 @@ class User{
 	}
 
 	static function user_where_is_init( $id, $link, $online_time = USER_ONLINE_TIME ){
-            return self::$user_obj->user_where_id_init( $id, $link, $online_time );
+            return self::$user_obj->user_where_is_init( $id, $link, $online_time );
 	}
 
 	static function user_where_is_refresh(){

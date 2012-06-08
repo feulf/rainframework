@@ -89,7 +89,7 @@ class Rain_User{
 	}
 
 	function logout(){
-		if( $user_id = get_user_id() )
+		if( $user_id = $this->get_user_id() )
                     $this->user_where_is_logout( $user_id );
 		self::$user = null;
 		unset($_SESSION['user']);
@@ -204,7 +204,7 @@ class Rain_User{
 						(ip,sid,user_id,guest_id,name,url,id,file,os,browser,time,time_first_click,country_code,country_name,region_code,region_name,city_name,zip,latitude,longitude,timezone_name,gmt_offset)
 						VALUES
 						('$ip','$sid','$user_id','$guest_id','$name','$url','$id','$file','$os','$browser', ".TIME.", ".TIME.", '{$location['CountryCode']}', '{$location['CountryName']}', '{$location['RegionCode']}', '{$location['RegionName']}','{$location['City']}', '{$location['ZipPostalCode']}', '{$location['Latitude']}', '{$location['Longitude']}', '{$location['TimezoneName']}', '{$location['Gmtoffset']}')" );
-						$user_where_is_id = DB::get_insert_id();
+						$user_where_is_id = DB::get_last_id();
 		}
 
 		$_SESSION['where_is'] = array( 'user_where_is_id' => $user_where_is_id, 'id' => $id, 'guest_id'=>$guest_id, 'name'=>$name, 'time' => TIME, 'file' => $file, 'user_id' => $user_id, 'os' => $os, 'browser' => $browser );
