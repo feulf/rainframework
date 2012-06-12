@@ -24,14 +24,15 @@
 
 	// Rain folders
 	define( "LIBRARY_DIR",              "system/library/" );
-    define( "LANGUAGE_DIR",             "system/language/" );
-    define( "CONSTANTS_DIR",            "system/const/" );
+        define( "LANGUAGE_DIR",             "system/language/" );
+        define( "CONSTANTS_DIR",            "system/const/" );
 	define( "LOG_DIR",                  "system/log/" );
 
     // website folders
 	define( "UPLOADS_DIR",              "web/uploads/" );
 	define( "JAVASCRIPT_DIR",           "web/js/" );
 	define( "CSS_DIR",                  "web/css/" );
+	define( "IMAGES_DIR",               "web/img/" );
 	define( "JQUERY_DIR",               "web/js/jquery" );
 
 	

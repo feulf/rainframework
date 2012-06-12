@@ -91,7 +91,7 @@ class Loader{
 
             // transform the controller string to capitalized. e.g. user => user, news_list => news_list
             $controller = strtolower( $controller );
-
+            $controller_file = self::$controllers_dir . "$controller/$controller." . self::$controller_extension;
 
             // include the file
             if( file_exists( $controller_file = self::$controllers_dir . "$controller/$controller." . self::$controller_extension ) )
@@ -102,6 +102,7 @@ class Loader{
                     
             // define the class name of the controller
             $class = $controller . self::$controller_class_name;
+
 
 
             // check if the controller class exists
@@ -226,6 +227,7 @@ class Loader{
          */
         function init_settings( $config_dir = CONFIG_DIR, $settings_file = "settings.php" ){
                 require_once $config_dir . $settings_file;
+                require_once CONFIG_DIR . "url.php";
         }
 
 

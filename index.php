@@ -5,11 +5,11 @@
 	#--------------------------------
 	# Base application directory
 	#--------------------------------
-    $app = "app";
+        $app = "app";
 
 
 
-    #--------------------------------
+        #--------------------------------
 	# Load the class
 	#--------------------------------
 	require_once "config/directory.php";
@@ -19,7 +19,7 @@
 	#--------------------------------
 	# Load the bootstrap
 	#--------------------------------
-    require_once "$app/bootstrap.php";
+        require_once "$app/bootstrap.php";
 
 
 // -- end

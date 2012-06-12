@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<title><?php echo $title;?></title>
-	<link rel="stylesheet" href="http://localhost/github/rainframework/app/views/css/style.css" type="text/css" />
+	<link rel="stylesheet" href="http://localhost/rainframework/app/views/css/style.css" type="text/css" />
 	
 	<!-- Style & Script -->
 	<?php echo $head;?>
@@ -13,7 +13,7 @@
 <body>
 	
 	<div id="header" class="doc">
-		<div id="menu"><div><img src="http://localhost/github/rainframework/app/views/img/logo_mini.gif"><?php $counter1=-1; if( isset($menu) && is_array($menu) && sizeof($menu) ) foreach( $menu as $key1 => $value1 ){ $counter1++; ?><a href="http://localhost/github/rainframework/<?php echo $value1["link"];?>" <?php echo $value1["selected"]?'class="selected"':null;?>><?php echo $value1["name"];?></a><?php } ?></div>
+		<div id="menu"><div><img src="http://localhost/rainframework/app/views/img/logo_mini.gif"><?php $counter1=-1; if( isset($menu) && is_array($menu) && sizeof($menu) ) foreach( $menu as $key1 => $value1 ){ $counter1++; ?><a href="http://localhost/rainframework/<?php echo $value1["link"];?>" <?php echo $value1["selected"]?'class="selected"':null;?>><?php echo $value1["name"];?></a><?php } ?></div>
 	</div>
 
 	<div id="section" class="doc">
@@ -27,7 +27,7 @@
 
 	<div id="footer">
 		<div id="inner_footer">
-			<div class="left"><?php $counter1=-1; if( isset($menu) && is_array($menu) && sizeof($menu) ) foreach( $menu as $key1 => $value1 ){ $counter1++; ?><?php echo $counter1?' | ':'';?><a href="http://localhost/github/rainframework/<?php echo $value1["link"];?>" <?php echo $value1["selected"]?'class="selected"':null;?>><?php echo $value1["name"];?></a><?php } ?></div>
+			<div class="left"><?php $counter1=-1; if( isset($menu) && is_array($menu) && sizeof($menu) ) foreach( $menu as $key1 => $value1 ){ $counter1++; ?><?php echo $counter1?' | ':'';?><a href="http://localhost/rainframework/<?php echo $value1["link"];?>" <?php echo $value1["selected"]?'class="selected"':null;?>><?php echo $value1["name"];?></a><?php } ?></div>
                         <div class="center">execution time: <?php echo $execution_time;?><br/>memory used: <?php echo $memory_used;?><br/>queries: <?php echo $n_query;?></div>
 			<div class="right">Copyright rain team</div>
 		</div>
