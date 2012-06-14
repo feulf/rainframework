@@ -33,7 +33,7 @@
 	define( "JAVASCRIPT_DIR",           "web/js/" );
 	define( "CSS_DIR",                  "web/css/" );
 	define( "IMAGES_DIR",               "web/img/" );
-	define( "JQUERY_DIR",               "web/js/jquery" );
+	define( "JQUERY_DIR",               "web/js/jquery/" );
 
 	
 	// web application folders
