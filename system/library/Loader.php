@@ -275,18 +275,34 @@ class Loader{
 
 
 
-        /**
-         * Init the language
-         * 
-         * @param string $lang_id selected language
-         */
-        function init_language( $lang_id = "en" ){
-		if( file_exists( LANGUAGE_DIR . $lang_id . '/generic.php') ){
-			require_once LANGUAGE_DIR . $lang_id . '/generic.php';
-			define( "LANG_ID", $lang_id );
-		}
-                else
-                    $this->page_not_found = true;
+        function init_language() {
+
+            $installed_language = get_installed_language();
+            $installed_language = array_flip( $installed_language );
+            
+            // get the language
+            if (get('set_lang_id'))
+                $lang_id = get('set_lang_id');
+            elseif (isset($_SESSION['lang_id']))
+                $lang_id = $_SESSION['lang_id'];
+            else
+                $lang_id = get_setting('lang_id');
+
+            // language not found, load the default language
+            if (!isset($installed_language[$lang_id])) {
+                $default_language = array_pop($installed_language);
+                $lang_id = $default_language['lang_id'];
+            }
+
+            // set the language in session
+            $_SESSION['lang_id'] = $lang_id;
+
+            // define the constant
+            define("LANG_ID", $lang_id);
+
+            // load the dictionaries
+            load_lang('generic');
+            
         }
 
 

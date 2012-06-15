@@ -748,6 +748,10 @@
 	function load_lang( $file ){
 		require_once LANGUAGE_DIR . get_lang() . "/" . $file . ".php";
 	}
+    
+        function get_installed_language(){
+            return dir_list(LANGUAGE_DIR);
+        }
 
 	// draw a message styled as SUCCESS, WARNING, ERROR or INFO. See .box in style.css for the style
 	function draw_msg( $msg, $type = SUCCESS, $close = false, $autoclose = 0 ){
