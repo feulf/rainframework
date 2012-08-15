@@ -50,8 +50,8 @@
 			$this->form_obj->add_validation( $name, $validation, $message );
 		}
 
-		function draw( $ajax = false, $return_string = false ){
-			return $this->form_obj->draw( $ajax, $return_string );
+		function draw( $ajax = false, $return_string = false , $triggers = null){
+			return $this->form_obj->draw( $ajax, $return_string , $triggers);
 		}
 
 		/**
