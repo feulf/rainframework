@@ -1,0 +1,12 @@
+if you find bugs or i forgot anything write post in www.rainframework.com forum.
+
+after Installation you need to delete "//" in
+
+#app/bootstrap.php 
+#app/ajax.bootstrap.php
+
+befor $loader->$loader->auth_user()
+
+and enjoy this framework
+
+Check www.raincms.org Please to.
