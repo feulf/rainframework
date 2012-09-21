@@ -926,5 +926,21 @@
 	}
 
 
+        
+    //-------------------------------------------------------------
+    //
+    //                    URL FUNCTIONS
+    //
+    //-------------------------------------------------------------
+
+    // alias for redirect
+    function reindex( $url ){
+        redirect( $url );
+    }
+    
+    function redirect( $url ){
+        header( "location: $url" );
+    }
+
 
 // -- end
