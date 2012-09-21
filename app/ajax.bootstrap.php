@@ -15,8 +15,9 @@
 
         $loader->init_settings();
         $loader->init_language('en');
-        //$loader->init_db();
+        $loader->init_db();
         $loader->auth_user();
+        //$loader->auth_user();
         $loader->init_session();
         $loader->auto_load_controller();
 
