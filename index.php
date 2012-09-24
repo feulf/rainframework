@@ -14,5 +14,3 @@ require_once "config/directory.php";
 # Load the bootstrap
 #--------------------------------
 require_once "$app/bootstrap.php";
-
-// -- end
