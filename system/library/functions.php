@@ -526,85 +526,88 @@
 
 
 
-	/**
-	 * Create thumb from image
-	 */
-	/**
-	 * Create thumb from image
-	 */
-	function image_resize( $source, $dest, $maxx = 100, $maxy = 100, $square = false, $quality = 70 ){
+        /**
+        * resize
+        */
+        function image_resize($source, $dest, $new_width, $new_height, $quality) {
 
-        // increase the memory limit for resizing the image
+            if( $memory_limit = get_setting('memory_limit') ){
+                $old_memory_limit = ini_get('memory_limit');
+                ini_set('memory_limit', $memory_limit );
+            }
 
-        if( $memory_limit = get_setting('memory_limit') ){
-            $old_memory_limit = ini_get('memory_limit');
-            ini_set('memory_limit', $memory_limit );
+
+            // increase the memory limit for resizing the image
+            switch ($ext = file_ext($source)) {
+                case 'jpg':
+                case 'jpeg': $source_img = imagecreatefromjpeg($source);
+                    break;
+                case 'png': $source_img = imagecreatefrompng($source);
+                    break;
+                case 'gif': $source_img = imagecreatefromgif($source);
+                    break;
+                default:
+                    return false;
+            }
+
+            list($width, $height) = getimagesize($source);
+
+            // create a new true color image
+            $dest_img = imagecreatetruecolor($new_width, $new_height);
+
+            imagealphablending($dest_img, false);
+
+            $origin_x = $origin_y = 0;
+
+            $dest_canvas_color = 'ffffff';
+            $dest_img_color_R = hexdec(substr($dest_canvas_color, 0, 2));
+            $dest_img_color_G = hexdec(substr($dest_canvas_color, 2, 2));
+            $dest_img_color_B = hexdec(substr($dest_canvas_color, 2, 2));
+
+            // Create a new transparent color for image
+            $color = imagecolorallocatealpha($dest_img, $dest_img_color_R, $dest_img_color_G, $dest_img_color_B, 127);
+
+            // Completely fill the background of the new image with allocated color.
+            imagefill($dest_img, 0, 0, $color);
+
+            // Restore transparency blending
+            imagesavealpha($dest_img, true);
+
+            $src_x = $src_y = 0;
+            $src_w = $width;
+            $src_h = $height;
+
+
+            $cmp_x = $width / $new_width;
+            $cmp_y = $height / $new_height;
+
+            // calculate x or y coordinate and width or height of source
+            if ($cmp_x > $cmp_y) {
+                $src_w = round($width / $cmp_x * $cmp_y);
+                $src_x = round(($width - ($width / $cmp_x * $cmp_y)) / 2);
+            } else if ($cmp_y > $cmp_x) {
+                $src_h = round($height / $cmp_y * $cmp_x);
+                $src_y = round(($height - ($height / $cmp_y * $cmp_x)) / 2);
+            }
+
+            imagecopyresampled($dest_img, $source_img, $origin_x, $origin_y, $src_x, $src_y, $new_width, $new_height, $src_w, $src_h);
+
+            switch ($ext) {
+                case 'png': imagepng($dest_img, $dest, ceil($quality / 10));
+                    break;
+                case 'gif': imagegif($dest_img, $dest, $quality);
+                    break;
+                default: imagejpeg($dest_img, $dest, $quality);
+            }
+
+            imagedestroy($source_img);
+            imagedestroy($dest_img);
+
+            if( !$memory_limit )
+                ini_set( 'memory_limit', $old_memory_limit );
+
+            return true;
         }
-
-		switch( $ext = file_eXT( $source ) ){
-			case 'jpg':
-			case 'jpeg':	$source_img = imagecreatefromjpeg( $source );	break;
-			case 'png':		$source_img = imagecreatefrompng( $source );	break;
-			case 'gif':		$source_img = imagecreatefromgif( $source );	break;
-			default:		return false;
-		}
-
-		list($width, $height) = getimagesize( $source );
-		if( $square ){
-			$new_width = $new_height = $maxx;
-			if( $width > $height ) {
-				$x = ceil( ( $width - $height ) / 2 );
-				$width = $height;
-			} else{
-				$y = ceil( ( $height - $width ) / 2 );
-				$height = $width;
-			}
-		}
-		else{
-			if( $maxx != 0 && $maxy != 0 ){
-				if( $maxx < $width or $maxy < $height ){
-					$percent1 = $width / $maxx;
-					$percent2 = $height / $maxy;
-					$percent = max($percent1,$percent2);
-					$new_height = round($height/$percent);
-					$new_width = round($width/$percent);
-				}
-			}
-			elseif( $maxx == 0 && $maxy != 0 ){
-				if( $height > $maxy ){
-					$new_height = $maxy;
-					$new_width = $width * ( $maxy / $height );
-				}
-			}
-			else{
-				if( $width > $maxx ){
-					$new_width = $maxx;
-					$new_height = $height * ( $maxx / $width );
-				}
-			}
-		}
-
-		if( !isset($new_width) or !$new_width )
-			$new_width = $width;
-		if( !isset($new_height) or !$new_height )
-			$new_height = $height;
-
-		$dest_img = ImageCreateTrueColor($new_width, $new_height);
-		imageCopyResampled( $dest_img, $source_img, 0, 0, 0, 0, $new_width, $new_height, $width, $height );
-
-		switch( $ext ){
-			case 'png': imagepng( $dest_img, $dest, ceil($quality/10) ); break;
-			case 'gif': imagegif( $dest_img, $dest, $quality ); break;
-			default:	imagejpeg( $dest_img, $dest, $quality );
-		}
-
-		imagedestroy( $source_img );
-		imagedestroy( $dest_img );
-
-        if( !$memory_limit )
-            ini_set( 'memory_limit', $old_memory_limit );
-
-	}
 
 
 
