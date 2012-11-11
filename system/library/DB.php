@@ -306,7 +306,7 @@ class DB{
 		static function setup( $string, $username, $password, $name = self::DEFAULT_CONNECTION_NAME, $pdo_options = array() ){
 
             try{
-				self::$link = new PDO( $string, $username, $password );
+				self::$link = new PDO( $string, $username, $password, $pdo_options );
 				self::$link->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                 self::$db[$name]['link'] = self::$link;
 			} catch (PDOException $e) {
