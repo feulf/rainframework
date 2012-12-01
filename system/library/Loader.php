@@ -40,7 +40,7 @@ class Loader{
                   $load_javascript = false,
                   $load_style = false;
 
-        protected $var,                   // variables assigned to the page layout
+        protected $var = array(),                   // variables assigned to the page layout
                   $load_area_array = array();   // variables assigned to the page layout
 
         // selected controller
