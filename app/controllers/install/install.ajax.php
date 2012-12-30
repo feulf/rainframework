@@ -31,7 +31,8 @@ class install_ajax_Controller extends Controller {
             "name"      => post("adminname"),
             "salt"      => "$salt",
             "password"  => "$md5_password",
-            "email"     => post("adminemail", FILTER_SANITIZE_EMAIL)
+            "email"     => post("adminemail", FILTER_SANITIZE_EMAIL),
+            "status"    => 3
         ));
         
         DB::query("DROP TABLE IF EXISTS ".DB_PREFIX."user_where_is");
@@ -41,7 +42,7 @@ class install_ajax_Controller extends Controller {
             guest_id int(11) NOT NULL,
             ip varchar(20) NOT NULL default '127.0.0.1',
             name varchar(90) NOT NULL,
-            sid int(11) NOT NULL,
+            sid varchar(32) NOT NULL,
             url varchar(255) NOT NULL,
             id int(11) NOT NULL,
             file varchar(255) NOT NULL,
@@ -83,7 +84,7 @@ class install_ajax_Controller extends Controller {
         DB::query("CREATE TABLE ".DB_PREFIX."user_localization(
             user_localization_id int(11) NOT NULL AUTO_INCREMENT,
             ip varchar(20) NOT NULL DEFAULT '127.0.0.1',
-            sid int(11) NOT NULL,
+            sid varchar(32) NOT NULL,
             user_id int(11) NOT NULL,
             guest_id int(11) NOT NULL,
             name varchar(90) NOT NULL,
