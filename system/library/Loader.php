@@ -235,8 +235,12 @@ class Loader{
         /**
          * Init the database class
          */
-        function init_db($name = DB::DEFAULT_CONNECTION_NAME){
+        function init_db($name = null){
             require_once LIBRARY_DIR . "DB.php";
+			
+			if(!$name)
+				$name = DB::DEFAULT_CONNECTION_NAME;
+				
 			db::init($name);
         }
 
