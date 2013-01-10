@@ -1,4 +1,4 @@
-<?
+<?php
 $db=array(
 	// development database (default)
 	'dev'=>array(
