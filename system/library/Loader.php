@@ -283,27 +283,40 @@ class Loader{
 
             $installed_language = get_installed_language();
             $installed_language = array_flip( $installed_language );
-            
-            // get the language
-            if (get('set_lang_id'))
-                $lang_id = get('set_lang_id');
-            elseif (isset($_SESSION['lang_id']))
-                $lang_id = $_SESSION['lang_id'];
-            else
-                $lang_id = get_setting('lang_id');
 
-            // language not found, load the default language
-            if (!isset($installed_language[$lang_id])) {
-                $default_language = array_pop($installed_language);
-                $lang_id = $default_language['lang_id'];
-            }
+			$priority_lang = array();
+            
+            // get the languages
+			$requested_lang = get('set_lang_id');
+            if ($requested_lang)// the first in the priority list is the GET query like ?set_lang_id=en
+                $priority_lang[] = $requested_lang;
+            
+			if (isset($_SESSION['lang_id']))// the second on the priority list is the previously established
+				$priority_lang[] = $_SESSION['lang_id'];
+
+
+			if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) { // the third is the sent by the browser
+				foreach (explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']) as $part) {
+					$priority_lang[] = strtolower(substr($part, 0, 2));
+				}
+			}
+
+			$priority_lang[] = get_setting('lang_id');// the fourth is the system
+
+            $priority_lang = array_unique( $priority_lang );
+
+            // through the list of langs ​​to see which is the best to use
+			while ((list(,$lang) = each($priority_lang)) && !defined("LANG_ID")) {
+				if(isset($installed_language[ $lang ]))
+					define("LANG_ID", $lang);
+			}
+
+			if(!defined("LANG_ID"))// whether the languages ​​listed is not available
+				throw new Exception("Can not find the language file");
 
             // set the language in session
-            $_SESSION['lang_id'] = $lang_id;
-
-            // define the constant
-            define("LANG_ID", $lang_id);
-
+            $_SESSION['lang_id'] = LANG_ID;
+       
             // load the dictionaries
             load_lang('generic');
             
