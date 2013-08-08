@@ -3,12 +3,11 @@
 	// locale
 	define( "LOCALE", "es_MX.utf-8,es_MX,esp,Espa&ntilde;ol" );		//define locale language
 
-  $days = array("Lunes","Martes","Mi&eacute;rcoles","Jueves","Viernes","S&aacute;bado","Domingo");//needed to use %l option for date()
-  $abbrDays = array("Lun","Mar","Mi&eacute;","Jue","Vie","S&aacute;b","Dom");//needed to use %D option for date()
-  
+  $days = array("Domingo","Lunes","Martes","Mi&eacute;rcoles","Jueves","Viernes","S&aacute;bado");//needed to use %l option for date()
+  $abbrDays = array("Dom","Lun","Mar","Mi&eacute;","Jue","Vie","S&aacute;b");//needed to use %D option for date()
 	//Time
 	define( "DATE_FORMAT"		, "%d %b %Y" );
-	define( "DATE_TIME_FORMAT"	, $abbrDays[ date("%w") ] . " - %I:%M %p" );//array notation to simulate %D
+	define( "DATE_TIME_FORMAT"	, $abbrDays[ date("w") ] . " - %I:%M %p" );//array notation to simulate %D
 	define( "TIME_FORMAT"		, "%I:%M %p" );
 	define( "MONTH_FORMAT"		, "%d %b" );
 	
